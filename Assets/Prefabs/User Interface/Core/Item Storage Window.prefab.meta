@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 67ebf1be6cae8f749b40082ba1d83722
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Prefabs/User Interface/Core/Item Storage Window.prefab
+  uploadId: 438879

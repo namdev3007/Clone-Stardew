@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 328519633b6e8f04db7d8d411986de20
+timeCreated: 1525608108
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Item/Actions/ItemAction_WaterCan.cs
+  uploadId: 438879

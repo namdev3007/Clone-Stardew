@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: b2bab7623b334bb488e4b507b437b97e
+timeCreated: 1515328589
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Combat/Data/DamageInfo.cs
+  uploadId: 438879

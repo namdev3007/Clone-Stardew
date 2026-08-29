@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 165c94fa2a2d5eb46b3e4c95758034ed
+timeCreated: 1526818500
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Variables/Scenes/Scene New Game.asset
+  uploadId: 438879

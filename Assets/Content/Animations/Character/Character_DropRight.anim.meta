@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 617b9ef7a0214ee4babbba423da858b5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Content/Animations/Character/Character_DropRight.anim
+  uploadId: 438879

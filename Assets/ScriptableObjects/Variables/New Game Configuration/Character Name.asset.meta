@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7b2bb3c8407dcf54fa99ff70c459558f
+timeCreated: 1527262720
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Variables/New Game Configuration/Character
+    Name.asset
+  uploadId: 438879

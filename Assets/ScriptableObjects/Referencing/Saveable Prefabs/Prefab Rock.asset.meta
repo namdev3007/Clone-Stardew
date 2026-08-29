@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: ae0541e2229eef44087d4c86dd61422f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Referencing/Saveable Prefabs/Prefab
+    Rock.asset
+  uploadId: 438879

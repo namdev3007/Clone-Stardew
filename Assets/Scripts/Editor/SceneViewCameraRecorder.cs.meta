@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: a2d5bb2605aa50147a4ea61392e1faa6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Editor/SceneViewCameraRecorder.cs
+  uploadId: 438879

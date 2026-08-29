@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: befd09f67d8579d4299a29f017f0868e
+timeCreated: 1526723201
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Locations/Farm_House_Indoor.asset
+  uploadId: 438879

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3526e2bdfd6a9d24a8dd087c55c27b79
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/TileMap/Smart Tiles/SOURCE.txt
+  uploadId: 438879

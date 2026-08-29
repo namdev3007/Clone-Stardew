@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 2d4c10fb2ea89c34f9270b510b569769
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Referencing/Scriptable References/Icon
+    Layer.asset
+  uploadId: 438879

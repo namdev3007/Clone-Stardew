@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 14a52f2859179044aafb9822e6a287dc
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Saving/About saving.txt
+  uploadId: 438879

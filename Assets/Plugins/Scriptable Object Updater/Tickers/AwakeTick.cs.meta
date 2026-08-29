@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: db0988e1619fa1f48827f54e45f341b6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Scriptable Object Updater/Tickers/AwakeTick.cs
+  uploadId: 438879

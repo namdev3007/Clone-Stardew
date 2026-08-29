@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 80b2b926850b3e241bcec6330f6d9cbe
+timeCreated: 1526043232
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Events/Input/OnNumericKey.asset
+  uploadId: 438879

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: fbf0540af970ba042a1c2efec10c5e04
+timeCreated: 1526719883
+licenseType: Store
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scenes/Levels/InDoors/Level_FarmHouse.unity
+  uploadId: 438879

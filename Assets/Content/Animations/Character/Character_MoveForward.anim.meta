@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a77a0ad3e56f33f4682b76bd224d223a
+timeCreated: 1525250470
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Content/Animations/Character/Character_MoveForward.anim
+  uploadId: 438879

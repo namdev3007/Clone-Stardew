@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 7f8bf33056b3cbd43b4213fd7b758703
+timeCreated: 1526953528
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Action/Actions/ActionNewGame.cs
+  uploadId: 438879

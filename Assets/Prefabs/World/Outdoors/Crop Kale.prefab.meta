@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b96187951630adb4197825b8109334d3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Prefabs/World/Outdoors/Crop Kale.prefab
+  uploadId: 438879

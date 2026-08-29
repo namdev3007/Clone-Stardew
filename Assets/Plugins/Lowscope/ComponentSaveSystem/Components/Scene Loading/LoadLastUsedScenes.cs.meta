@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 1b9bcac79f1300042972321ebe248a04
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: -5000
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ComponentSaveSystem/Components/Scene
+    Loading/LoadLastUsedScenes.cs
+  uploadId: 438879

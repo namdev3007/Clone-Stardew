@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b225f9be77e9d4f419c8019339876305
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 24100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Audio Mixer.mixer
+  uploadId: 438879

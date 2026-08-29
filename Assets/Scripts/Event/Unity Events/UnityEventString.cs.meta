@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 559e366e531db4d4faa2d92d15c5b77e
+timeCreated: 1526031033
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Event/Unity Events/UnityEventString.cs
+  uploadId: 438879

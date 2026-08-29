@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bc05f03b8ef3055408c684ae9e6b49f8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ComponentSaveSystem/Components/SaveScreenshot.cs
+  uploadId: 438879

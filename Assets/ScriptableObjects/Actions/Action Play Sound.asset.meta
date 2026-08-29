@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 6c006646fc0ea334591cf90265bb4400
+timeCreated: 1527073288
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Actions/Action Play Sound.asset
+  uploadId: 438879

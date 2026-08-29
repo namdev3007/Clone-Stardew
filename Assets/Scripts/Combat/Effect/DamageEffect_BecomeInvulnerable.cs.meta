@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ad069ce2d97aeba4f96b8e15e4845f9f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Combat/Effect/DamageEffect_BecomeInvulnerable.cs
+  uploadId: 438879

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 076903f927ab5ee4491cc1a439a1baae
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Content/Animations/Character/Character_DropBackwards.anim
+  uploadId: 438879

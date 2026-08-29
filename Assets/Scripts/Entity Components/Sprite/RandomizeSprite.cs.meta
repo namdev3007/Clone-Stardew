@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: af85c102bcb398743a02e3b8c4369403
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Entity Components/Sprite/RandomizeSprite.cs
+  uploadId: 438879

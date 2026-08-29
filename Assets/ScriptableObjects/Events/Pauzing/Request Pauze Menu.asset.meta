@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 38f5ddd4a810d3b4c91548cfd13e7975
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Events/Pauzing/Request Pauze Menu.asset
+  uploadId: 438879

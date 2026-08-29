@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ca7940c0711ec69429cde735690277d0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scenes/Levels/InDoors/Level_CaveSettings.lighting
+  uploadId: 438879

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: fe3a23df2f591e24193e2ea9152f6db1
+timeCreated: 1525249504
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Content/Animations/Character/Character_MoveRight.anim
+  uploadId: 438879

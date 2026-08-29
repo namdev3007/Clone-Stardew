@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: a40871b611b3dea44a0711609ee043cd
+timeCreated: 1526819354
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Main Menu/SaveSlotManager.cs
+  uploadId: 438879

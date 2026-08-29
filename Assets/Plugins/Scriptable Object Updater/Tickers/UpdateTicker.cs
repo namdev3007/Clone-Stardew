@@ -1,0 +1,13 @@
+﻿using UnityEngine;
+
+namespace Plugins.Scriptable_Object_Updater.Tickers
+{
+    [AddComponentMenu("")]
+    public class UpdateTicker : Ticker
+    {
+        private void Update()
+        {
+            DispatchTick();
+        }
+    }
+}

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d1cd76ad2f77e2e44b03d83d030b026a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ComponentSaveSystem/Components/SaveVisibility.cs
+  uploadId: 438879

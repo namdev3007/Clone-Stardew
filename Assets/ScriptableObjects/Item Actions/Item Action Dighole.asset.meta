@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 1dd4fc782c9c62544bfd2a3d9944d3ee
+timeCreated: 1525608442
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Item Actions/Item Action Dighole.asset
+  uploadId: 438879

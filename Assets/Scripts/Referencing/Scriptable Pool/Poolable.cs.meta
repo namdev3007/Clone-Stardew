@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1a35ce3231561cc4d9cdcf881d42f54d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Referencing/Scriptable Pool/Poolable.cs
+  uploadId: 438879

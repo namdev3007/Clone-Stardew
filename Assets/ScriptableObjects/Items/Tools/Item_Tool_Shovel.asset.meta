@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b6c7bc5235a3e174bb24477617cbadf0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+  uploadId: 438879

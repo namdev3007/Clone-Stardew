@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8fb964415689d5745a91d4ba7652ee9a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Camera/ConfinementAutoAssigner.cs
+  uploadId: 438879

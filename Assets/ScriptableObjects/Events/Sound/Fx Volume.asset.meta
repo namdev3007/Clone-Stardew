@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 019b31f96940c6e429dd3664ad2a4289
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Events/Sound/Fx Volume.asset
+  uploadId: 438879

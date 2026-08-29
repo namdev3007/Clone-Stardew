@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b8841627b3eb5404ea89282b98927788
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Items/Crops/Item_Kale.asset
+  uploadId: 438879

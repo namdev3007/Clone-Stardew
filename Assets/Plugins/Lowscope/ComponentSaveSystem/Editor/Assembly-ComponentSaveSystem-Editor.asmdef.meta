@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f5b9fafbe92cfd84eae013365cdb444b
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ComponentSaveSystem/Editor/Assembly-ComponentSaveSystem-Editor.asmdef
+  uploadId: 438879

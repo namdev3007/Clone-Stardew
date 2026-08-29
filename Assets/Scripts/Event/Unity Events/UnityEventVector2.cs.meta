@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: ddc4618b44aac894da2eefcdad3dd687
+timeCreated: 1526042263
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Event/Unity Events/UnityEventVector2.cs
+  uploadId: 438879

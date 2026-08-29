@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 0609b821d5b42d34a85634cd470674c3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Referencing/Scriptable Pools/Weather
+    Rain Drop Pool.asset
+  uploadId: 438879

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7b39e3060b003504abd66795f6ef8703
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159191
+  packageName: Component Save System
+  packageVersion: v1.26
+  assetPath: Assets/Plugins/WebGL/Readme.txt
+  uploadId: 566794

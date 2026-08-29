@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c9c42afa3fdc9544e9bad854b2172fad
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Events/Sound/Music Volume.asset
+  uploadId: 438879

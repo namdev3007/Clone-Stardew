@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 82ce2c1789987544ea8693aea4c2c74f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Action/Actions/ActionOpenScene.cs
+  uploadId: 438879

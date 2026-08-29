@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: ca8851d991412d94ca477a8ae8795b12
+timeCreated: 1526042263
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Event/Listeners/Vector2Listener.cs
+  uploadId: 438879

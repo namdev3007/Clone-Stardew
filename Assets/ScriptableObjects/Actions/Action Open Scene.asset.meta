@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 91c5f899149ef9f49a7ea8fb9ba3e147
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Actions/Action Open Scene.asset
+  uploadId: 438879

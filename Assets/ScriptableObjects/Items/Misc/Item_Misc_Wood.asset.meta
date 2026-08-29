@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 12c96ed66301c6441bf6043b8dfa3bba
+timeCreated: 1527770460
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Items/Misc/Item_Misc_Wood.asset
+  uploadId: 438879

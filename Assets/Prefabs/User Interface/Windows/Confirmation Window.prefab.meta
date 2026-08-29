@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e971388e6414fe24ba70867c684f42bd
+timeCreated: 1526895858
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Prefabs/User Interface/Windows/Confirmation Window.prefab
+  uploadId: 438879

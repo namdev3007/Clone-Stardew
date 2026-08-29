@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f2cb11652bb5f71418653a97c1efbb38
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Prefabs/World/Enemies/Monster_Blob.prefab
+  uploadId: 438879

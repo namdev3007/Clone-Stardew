@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e3225ecdc0c9f9e45931fa3a4fb5b576
+timeCreated: 1527331534
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Variables/New Game Configuration/Starting
+    Legs.asset
+  uploadId: 438879

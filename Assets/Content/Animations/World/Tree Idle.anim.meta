@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 20cf5795feaa6a041a1930912b960a05
+timeCreated: 1527756468
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Content/Animations/World/Tree Idle.anim
+  uploadId: 438879

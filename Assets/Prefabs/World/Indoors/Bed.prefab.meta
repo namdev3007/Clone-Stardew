@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f382225c82be27845846a4fe5dda387b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Prefabs/World/Indoors/Bed.prefab
+  uploadId: 438879

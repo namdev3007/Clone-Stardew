@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 82086347ac667a14a9a77f7987a3ba4b
+timeCreated: 1526742964
+licenseType: Store
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scenes/Core.unity
+  uploadId: 438879

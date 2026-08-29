@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 9afb1de77457ed849aaf744f7eb527fe
+timeCreated: 1525790956
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Character/Generator/SliceConfiguration_Shirt.asset
+  uploadId: 438879

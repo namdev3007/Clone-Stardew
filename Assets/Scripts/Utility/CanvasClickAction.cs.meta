@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 845fa06f4aba9774cb367e8e5d78c40a
+timeCreated: 1525956323
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Utility/CanvasClickAction.cs
+  uploadId: 438879

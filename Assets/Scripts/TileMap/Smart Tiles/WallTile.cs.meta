@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 06187fbc98fe6c24eb6faf6d17a682b6
+timeCreated: 1485183275
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/TileMap/Smart Tiles/WallTile.cs
+  uploadId: 438879

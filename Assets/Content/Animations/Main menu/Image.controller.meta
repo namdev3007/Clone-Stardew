@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 8e9baaaecc91b8b4c82e9d6c3bdf2101
+timeCreated: 1527026396
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Content/Animations/Main menu/Image.controller
+  uploadId: 438879

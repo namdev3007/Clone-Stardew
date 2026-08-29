@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7cc525aa4c3cead47befbc91e7d1a031
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Scriptable Object Updater/InitializeableAssetContainer.cs
+  uploadId: 438879

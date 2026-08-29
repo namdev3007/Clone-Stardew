@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 1a20d40dd3e004641bc43a589af5fabe
+timeCreated: 1527461768
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ComponentSaveSystem/Editor/SaveableInspector.cs
+  uploadId: 438879

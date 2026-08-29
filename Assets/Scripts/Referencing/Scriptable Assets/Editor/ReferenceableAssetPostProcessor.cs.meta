@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 5c2ed09362277834390219955bfc5c0a
+timeCreated: 1526295036
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Referencing/Scriptable Assets/Editor/ReferenceableAssetPostProcessor.cs
+  uploadId: 438879

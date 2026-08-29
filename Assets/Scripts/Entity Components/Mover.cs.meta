@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 0ba66bdf1f05ef0428898f19bfb9c3f2
+timeCreated: 1525251492
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Entity Components/Mover.cs
+  uploadId: 438879

@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 76ed73a542e825f4a86338e9846afbc8
+timeCreated: 1484321486
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/TileMap/Smart Tiles/RailTile.cs
+  uploadId: 438879

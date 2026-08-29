@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 369a37731102a814dae5eda0e38b30b4
+timeCreated: 1527198867
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Character/Base/Body_Head0.asset
+  uploadId: 438879

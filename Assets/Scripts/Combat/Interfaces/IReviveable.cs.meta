@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: c26e1aa4ce8694246940ba14f85afa02
+timeCreated: 1518444386
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Combat/Interfaces/IReviveable.cs
+  uploadId: 438879

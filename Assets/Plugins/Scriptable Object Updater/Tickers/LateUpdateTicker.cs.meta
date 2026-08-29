@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4bf68f1fc5cc81c409c62572f097af66
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Scriptable Object Updater/Tickers/LateUpdateTicker.cs
+  uploadId: 438879

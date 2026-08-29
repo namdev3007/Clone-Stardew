@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 6671fa74a7541ae4689235597fd95cbb
+timeCreated: 1527757576
+licenseType: Store
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Combat/Listeners/OnDamageListener.cs
+  uploadId: 438879

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: c151c3de9f13e3049bf63b767d2048cc
+timeCreated: 1527232285
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Character/Eyes/Eyes.asset
+  uploadId: 438879

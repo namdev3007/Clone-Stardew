@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 25ebe1c0ab2f7b5459331ea0e3e59cd4
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ComponentSaveSystem/Components/Scriptableobjects/SaveIdentifierVariable.cs
+  uploadId: 438879

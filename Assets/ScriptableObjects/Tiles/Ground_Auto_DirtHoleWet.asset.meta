@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 9c152b313bcd5d042baca17433e129a2
+timeCreated: 1525093415
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Tiles/Ground_Auto_DirtHoleWet.asset
+  uploadId: 438879

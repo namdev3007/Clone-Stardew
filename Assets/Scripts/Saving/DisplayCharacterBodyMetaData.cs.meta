@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f76c3cb3f0a184e45ab583638f84e12d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Scripts/Saving/DisplayCharacterBodyMetaData.cs
+  uploadId: 438879

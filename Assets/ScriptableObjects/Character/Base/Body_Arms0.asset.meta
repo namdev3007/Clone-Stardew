@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a23195ba8b92db943a0193267a9d73cb
+timeCreated: 1527198867
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Character/Base/Body_Arms0.asset
+  uploadId: 438879

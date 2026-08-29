@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f4dcd708ecdd6f241bda34a16099138c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/Plugins/Lowscope/ValidateHierarchy/ValidateHierarchy.cs
+  uploadId: 438879

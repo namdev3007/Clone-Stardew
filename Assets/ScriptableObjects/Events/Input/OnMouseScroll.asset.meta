@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e320163fb2b738a4eb76096670d473ae
+timeCreated: 1526043567
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 121080
+  packageName: RPG Farming Kit
+  packageVersion: 1.04
+  assetPath: Assets/Upload/ScriptableObjects/Events/Input/OnMouseScroll.asset
+  uploadId: 438879
