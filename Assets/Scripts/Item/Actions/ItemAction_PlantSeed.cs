@@ -5,6 +5,7 @@ using Referencing.Scriptable_Reference;
 using System.Collections;
 using UnityEngine;
 using World;
+using World.Objects;
 
 namespace Item.Actions
 {
@@ -17,7 +18,44 @@ namespace Item.Actions
         [SerializeField]
         private ScriptableReference gridManagerReference;
 
+        [SerializeField]
+        private CropDefinition cropDefinition;
+
         private GridManager gridManager;
+
+        public int ShowcaseStageCount => cropDefinition != null && cropDefinition.GrowthSprites != null
+            ? cropDefinition.GrowthSprites.Length
+            : 0;
+        public bool UsesPerennialFootprint => cropDefinition != null && cropDefinition.IsPerennialTree;
+
+        public bool CheatPlantShowcase(GridManager targetGridManager, Vector3Int location, int stageIndex)
+        {
+            if (targetGridManager == null || cropDefinition == null || plantablePrefab == null)
+                return false;
+
+            if (!targetGridManager.CheatBeginShowcasePlanting(location, cropDefinition, out bool fertilized))
+                return false;
+
+            GameObject cropObject = plantablePrefab.Retrieve<GameObject>(scene: targetGridManager.gameObject.scene);
+            if (cropObject == null)
+            {
+                targetGridManager.CancelPlanting(location);
+                return false;
+            }
+
+            cropObject.transform.position = targetGridManager.GetWorldLocation(location);
+            Crop crop = cropObject.GetComponent<Crop>();
+            if (crop == null)
+            {
+                targetGridManager.CancelPlanting(location);
+                cropObject.SetActive(false);
+                return false;
+            }
+
+            bool harvestableDemo = stageIndex == ShowcaseStageCount - 1;
+            crop.ConfigureShowcase(cropDefinition, stageIndex, harvestableDemo);
+            return true;
+        }
 
         public override IEnumerator ItemUseAction(Inventory.Inventory userInventory, int itemIndex)
         {
@@ -30,7 +68,7 @@ namespace Item.Actions
                 gridManager = gridManagerReference.Reference.GetComponent<GridManager>();
             }
 
-            if (PlantAction(userInventory))
+            if (getItem != null && getItem.Amount > 0 && PlantAction(userInventory))
             {
                 getItem.Amount -= 1;
 
@@ -50,23 +88,26 @@ namespace Item.Actions
             GridSelector gridSelector = userInventory.GetComponent<GridSelector>();
             Vector3Int selectionLocation = gridSelector.GetGridSelectionPosition();
 
-            Vector3 loc = gridSelector.GetGridWorldSelectionPosition();
-
-            RaycastHit2D[] findObjects = Physics2D.BoxCastAll(loc, gridManager.Grid.cellSize * 0.5f, 0, Vector2.zero, 50);
-
-            // In case there is already a crop on this location, return.
-            for (int i = 0; i < findObjects.Length; i++)
+            if (cropDefinition != null && gridManager.TryBeginPlanting(selectionLocation, cropDefinition, out bool fertilized))
             {
-                if (findObjects[i].transform.CompareTag("Crop"))
-                    return false;
-            }
-
-            if (gridManager.HasDirtHole(selectionLocation))
-            {
-                // Spawn the seed on the same level as the hole
                 var targetScene = gridManager.gameObject.scene;
                 GameObject gameObject = plantablePrefab.Retrieve<GameObject>(scene: targetScene);
+                if (gameObject == null)
+                {
+                    gridManager.CancelPlanting(selectionLocation);
+                    return false;
+                }
+
                 gameObject.transform.position = gridManager.GetWorldLocation(selectionLocation);
+                Crop crop = gameObject.GetComponent<Crop>();
+                if (crop == null)
+                {
+                    gridManager.CancelPlanting(selectionLocation);
+                    gameObject.SetActive(false);
+                    return false;
+                }
+
+                crop.Configure(cropDefinition, fertilized);
                 return true;
             }
             else
@@ -77,14 +118,7 @@ namespace Item.Actions
 
         public override bool ItemUseCondition(Inventory.Inventory userInventory, int itemIndex)
         {
-            bool hasEnoughItems = userInventory.GetItem(itemIndex)?.Amount <= 0;
-
-            if (!hasEnoughItems)
-            {
-                userInventory.RemoveItem(itemIndex);
-            }
-
-            return hasEnoughItems;
+            return userInventory.GetItem(itemIndex)?.Amount > 0;
         }
     }
 }

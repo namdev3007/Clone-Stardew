@@ -1,5 +1,8 @@
 using Entity_Components;
+using Entity_Components.Character;
 using Entity_Components.Interfaces;
+using Entity_Components.Player;
+using Item.Actions;
 using Item.Inventory.Interfaces;
 using Plugins.Lowscope.ComponentSaveSystem.Interfaces;
 using Referencing;
@@ -7,6 +10,7 @@ using Referencing.Scriptable_Assets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using World.Objects;
 
 namespace Item.Inventory
 {
@@ -207,6 +211,7 @@ namespace Item.Inventory
             }
 
             GetItem(slotIndex)?.Data?.Action?.ItemActiveAction(this, slotIndex);
+            RefreshHeldItem();
         }
 
         public void SwitchItem(int direction)
@@ -222,6 +227,25 @@ namespace Item.Inventory
             {
                 dispatcher.DispatchSelectItem(slotIndex, false);
             }
+        }
+
+        private void RefreshHeldItem()
+        {
+            InventoryItem selected = GetItem(selectedSlotIndex);
+            ItemData data = selected?.Data;
+            UnityEngine.Sprite heldSprite = data != null && ShouldDisplayHeld(data) ? data.Icon : null;
+
+            FullBodyPlayerSpriteAnimator[] animators = GetComponentsInChildren<FullBodyPlayerSpriteAnimator>(true);
+            for (int i = 0; i < animators.Length; i++)
+                animators[i].SetHeldItem(heldSprite);
+        }
+
+        private static bool ShouldDisplayHeld(ItemData data)
+        {
+            ItemAction itemAction = data.Action;
+            return !(itemAction is ItemAction_DigHole) &&
+                   !(itemAction is ItemAction_WaterCan) &&
+                   !(itemAction is ItemAction_Attack);
         }
 
         public InventoryItem GetItem(ItemData item, out int index)
@@ -255,65 +279,72 @@ namespace Item.Inventory
 
         public void MoveItem(int slotIndexOne, int slotIndexTwo, Inventory targetInventory = null)
         {
+            Inventory destinationInventory = targetInventory != null ? targetInventory : this;
+            if (destinationInventory == this && slotIndexOne == slotIndexTwo)
+                return;
+
             InventoryItem itemOne = GetItem(slotIndexOne);
-            InventoryItem itemTwo = (targetInventory == null) ? GetItem(slotIndexTwo) : targetInventory.GetItem(slotIndexTwo);
+            InventoryItem itemTwo = destinationInventory.GetItem(slotIndexTwo);
 
             bool itemOneValid = itemOne != null;
             bool itemTwoValid = itemTwo != null;
 
+            if (!itemOneValid)
+                return;
+
             // Item stacking
-            if (itemOneValid && itemTwoValid)
+            if (itemTwoValid && itemOne.Data == itemTwo.Data && itemTwo.Data.CanStack)
             {
-                if (itemTwo != null)
-                {
-                    if (itemTwo.Data.CanStack)
-                    {
-                        if (itemTwo.Data == itemOne.Data)
-                        {
-                            RemoveItem(slotIndexOne, true);
+                items.Remove(slotIndexOne);
+                DispatchRemovedSlot(slotIndexOne);
 
-                            itemTwo.Amount += itemOne.Amount;
-                            ReloadItemSlot(slotIndexTwo);
-                        }
-                    }
+                itemTwo.Amount += itemOne.Amount;
+                destinationInventory.DispatchLoadedSlot(slotIndexTwo, itemTwo);
 
-                    return;
-                }
+                RefreshHeldItemIfSelected(slotIndexOne);
+                destinationInventory.RefreshHeldItemIfSelected(slotIndexTwo);
+                return;
             }
 
-            if (itemOneValid)
-            {
-                RemoveItem(slotIndexOne, true);
-            }
+            // Move the existing InventoryItem instances instead of recreating
+            // them. This swaps occupied slots and preserves tool energy/durability.
+            items.Remove(slotIndexOne);
+            destinationInventory.items.Remove(slotIndexTwo);
+            DispatchRemovedSlot(slotIndexOne);
+            destinationInventory.DispatchRemovedSlot(slotIndexTwo);
+
+            destinationInventory.items[slotIndexTwo] = itemOne;
+            destinationInventory.DispatchLoadedSlot(slotIndexTwo, itemOne);
 
             if (itemTwoValid)
             {
-                if (targetInventory == null)
-                {
-                    RemoveItem(slotIndexTwo, true);
-                }
-                else
-                {
-                    targetInventory.RemoveItem(slotIndexTwo, true);
-                }
+                items[slotIndexOne] = itemTwo;
+                DispatchLoadedSlot(slotIndexOne, itemTwo);
             }
 
-            if (itemOneValid)
-            {
-                if (targetInventory == null)
-                {
-                    AddItem(itemOne.Data, itemOne.Amount, slotIndexTwo, false);
-                }
-                else
-                {
-                    targetInventory.AddItem(itemOne.Data, itemOne.Amount, slotIndexTwo, false);
-                }
-            }
+            foreach (var dispatcher in eventDispatchers.Values)
+                dispatcher.DispatchMoveItem(slotIndexOne, slotIndexTwo);
 
-            if (itemTwoValid)
-            {
-                AddItem(itemTwo.Data, itemTwo.Amount, slotIndexOne, false);
-            }
+            RefreshHeldItemIfSelected(slotIndexOne);
+            destinationInventory.RefreshHeldItemIfSelected(slotIndexTwo);
+        }
+
+        private void DispatchRemovedSlot(int slotIndex)
+        {
+            foreach (var dispatcher in eventDispatchers.Values)
+                dispatcher.DispatchRemoveItem(slotIndex);
+        }
+
+        private void DispatchLoadedSlot(int slotIndex, InventoryItem item)
+        {
+            foreach (var dispatcher in eventDispatchers.Values)
+                dispatcher.DispatchItemLoad(slotIndex, item.Data, item.Data.CanStack ? item.Amount : 0);
+        }
+
+        private void RefreshHeldItemIfSelected(int slotIndex)
+        {
+            if (slotIndex == selectedSlotIndex)
+                RefreshHeldItem();
         }
 
         public InventoryItem GetItem(int index)
@@ -375,6 +406,9 @@ namespace Item.Inventory
             if (isMovementFrozen)
                 return;
 
+            if (TryHarvestSelectedCrop())
+                return;
+
             IEnumerator itemActionIEnumerator = GetItem(slotIndex)?.Data?.Action?.ItemUseAction(this, slotIndex);
 
             if (itemActionIEnumerator != null)
@@ -391,6 +425,38 @@ namespace Item.Inventory
                     dispatcher.DispatchUseItem(slotIndex, getItem.Data, getItem.Amount);
                 }
             }
+        }
+
+        private bool TryHarvestSelectedCrop()
+        {
+            GridSelector selector = GetComponent<GridSelector>();
+            Crop crop = selector?.GetGridManager()?.GetCrop(selector.GetGridSelectionPosition());
+            if (crop == null || !crop.IsReadyToHarvest)
+                return false;
+
+            StartCoroutine(HarvestSelectedCrop(crop, selector));
+            return true;
+        }
+
+        private IEnumerator HarvestSelectedCrop(Crop crop, GridSelector selector)
+        {
+            Aimer aimer = GetComponent<Aimer>();
+            Mover mover = GetComponent<Mover>();
+            aimer?.SetAimDirection(selector.GetMouseLookDirection());
+            mover?.FreezeMovement(true);
+            selector.SetFrozen(true);
+
+            FullBodyPlayerSpriteAnimator[] animators = GetComponentsInChildren<FullBodyPlayerSpriteAnimator>();
+            for (int i = 0; i < animators.Length; i++)
+                animators[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Harvest, 1f);
+
+            yield return new WaitForSeconds(0.25f);
+            if (crop != null)
+                crop.Harvest();
+            yield return new WaitForSeconds(0.25f);
+
+            mover?.FreezeMovement(false);
+            selector.SetFrozen(false);
         }
 
         /// <summary>
@@ -416,6 +482,9 @@ namespace Item.Inventory
                     dispatcher.DispatchRemoveItem(slotIndex);
                 }
             }
+
+            if (slotIndex == selectedSlotIndex)
+                RefreshHeldItem();
         }
 
         public void ReloadAllItemSlots()
@@ -493,6 +562,9 @@ namespace Item.Inventory
                         dispatcher.DispatchItemLoad(slotIndex, data, (data.CanStack) ? amount : 0);
                     }
 
+                    if (slotIndex == selectedSlotIndex)
+                        RefreshHeldItem();
+
                     return true;
                 }
             }
@@ -534,6 +606,9 @@ namespace Item.Inventory
                 dispatcher.DispatchRemoveItem(slotIndex);
             }
 
+            if (slotIndex == selectedSlotIndex)
+                RefreshHeldItem();
+
         }
 
         #region Interface Implementations
@@ -564,6 +639,7 @@ namespace Item.Inventory
         public struct InventorySaveData
         {
             public bool obtainedStartingItems;
+            public int timedCropSystemVersion;
             public InventoryItemSave[] savedItems;
         }
 
@@ -574,6 +650,7 @@ namespace Item.Inventory
             inventorySaveData = new InventorySaveData()
             {
                 obtainedStartingItems = obtainedStartingItems,
+                timedCropSystemVersion = 1,
                 savedItems = new InventoryItemSave[items.Count + invisibleItems.Count]
             };
 
@@ -628,7 +705,7 @@ namespace Item.Inventory
                 // These tools are managed by StartingItems_Player. Skipping them here
                 // removes the old pickaxe/scythe/sword from existing saves and lets
                 // the current three-tool set be inserted in its configured order.
-                if (IsManagedStarterTool(getSave.guidString))
+                if (IsManagedStarterTool(getSave.guidString) || IsLegacyKaleSeed(getSave.guidString))
                 {
                     continue;
                 }
@@ -642,7 +719,8 @@ namespace Item.Inventory
                     // TODO: Create cleaner way to modify additional data in items.
                     if (getItemData.HasEnergy)
                     {
-                        GetItem(getSave.index).Energy = getSave.energy;
+                        if (!getSave.energy.IsDefault())
+                            GetItem(getSave.index).Energy = getSave.energy;
                         ReloadItemSlot(getSave.index);
                     }
                 }
@@ -654,6 +732,12 @@ namespace Item.Inventory
 
             obtainedStartingItems = inventorySaveData.obtainedStartingItems;
             AddConfiguredStarterTools();
+            AddTimedCropStarterItems(inventorySaveData.timedCropSystemVersion);
+        }
+
+        private static bool IsLegacyKaleSeed(string guidString)
+        {
+            return guidString == "e0ebb43e-de48-49af-a6cf-aa4c17d7ebd7";
         }
 
         private static bool IsManagedStarterTool(string guidString)
@@ -691,6 +775,23 @@ namespace Item.Inventory
                 {
                     AddItem(data, starterItem.Amount);
                 }
+            }
+        }
+
+        private void AddTimedCropStarterItems(int savedVersion)
+        {
+            if (savedVersion >= 1 || startingItems == null)
+                return;
+
+            foreach (InventoryItem starterItem in startingItems.Items)
+            {
+                ItemData data = starterItem?.Data;
+                if (data == null || !data.HasSlot || !data.CanStack)
+                    continue;
+
+                bool isCarrotSeed = data.ItemName == "Carrot Seed";
+                if (isCarrotSeed && GetItem(data, out _) == null)
+                    AddItem(data, starterItem.Amount);
             }
         }
 

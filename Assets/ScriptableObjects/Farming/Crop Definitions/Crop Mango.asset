@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4637c032f15f224d9517c27f7615aa6, type: 3}
+  m_Name: Crop Mango
+  m_EditorClassIdentifier: 
+  guid: cde63086-29d9-4d33-b944-2f65351a25c6
+  displayName: Mango
+  firstGrowthSeconds: 300
+  regrowthSeconds: 120
+  maximumHarvests: 2147483647
+  regrowthStageStart: 4
+  perennialTree: 1
+  growthSprites:
+  - {fileID: 7102267909103473962, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -506185474543622721, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -5965305179197851891, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: 5937044347180423757, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -781058433731040281, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -1463390491970998071, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -3967545777354590727, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -9141870520966081075, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  - {fileID: -5520059437331813550, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  stagePositionOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  harvestedItem: {fileID: 11400000, guid: 82a9b5369f61ec94a989d2cc113068c1, type: 2}

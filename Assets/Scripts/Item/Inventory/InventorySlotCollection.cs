@@ -18,17 +18,19 @@ namespace Item.Inventory
             if (!initialized)
             {
                 InventorySlot[] getSlots = GetComponentsInChildren<InventorySlot>(true);
+                slots.Clear();
 
                 for (int i = 0; i < getSlots.Length; i++)
                 {
-                    slots.Add(getSlots[i].GetSlotIndex(), getSlots[i]);
+                    int slotIndex = getSlots[i].GetSlotIndex();
+                    slots[slotIndex] = getSlots[i];
                 }
                 initialized = true;
             }
 
-            for (int i = 0; i < slots.Count; i++)
+            foreach (InventorySlot slot in slots.Values)
             {
-                slots[i].OnInventoryInitialized(inventory);
+                slot.OnInventoryInitialized(inventory);
             }
         }
 

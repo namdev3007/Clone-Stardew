@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using Weather;
 using World;
+using World.NPC;
 
 namespace Item.Actions
 {
@@ -54,18 +55,20 @@ namespace Item.Actions
             {
                 Vector3Int selectionLocation = gridSelector.GetGridSelectionPosition();
 
-                userInventory.GetComponent<Aimer>().LookAt(gridManager.Grid.CellToWorld(selectionLocation));
+                Aimer aimer = userInventory.GetComponent<Aimer>();
+                aimer?.SetAimDirection(gridSelector.GetMouseLookDirection());
 
                 Mover getMover = userInventory.GetComponent<Mover>();
                 getMover?.FreezeMovement(true);
 
-                BodyAnimation[] getEntityAnimator = userInventory.GetComponentsInChildren<BodyAnimation>();
+                FullBodyPlayerSpriteAnimator[] getEntityAnimator = userInventory.GetComponentsInChildren<FullBodyPlayerSpriteAnimator>();
 
                 float animationTime = 0;
 
                 for (int i = 0; i < getEntityAnimator.Length; i++)
                 {
-                    animationTime = getEntityAnimator[i].ApplyHoeAnimation(speed, userInventory.GetItem(itemIndex).Data.Icon);
+                    getEntityAnimator[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Hoe, speed);
+                    animationTime = 1 / speed;
                 }
 
                 gridSelector.SetFrozen(true);
@@ -75,6 +78,8 @@ namespace Item.Actions
                 if (!gridManager.HasDirtHole(selectionLocation) && !gridManager.HasWater(selectionLocation) && gridManager.HasDirt(selectionLocation))
                 {
                     gridManager.SetDirtHoleTile(selectionLocation);
+                    gridManager.RegisterFarmPlot(selectionLocation);
+                    TutorialProgressService.Instance.RecordHoedCell(selectionLocation);
 
                     if (currentWeather == EWeather.Rainy)
                     {

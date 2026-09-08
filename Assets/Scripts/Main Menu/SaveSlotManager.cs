@@ -51,15 +51,10 @@ namespace Main_Menu
 
             if (saveGames.Count == 0)
             {
-                confirmationWindow.Reference?.GetComponent<ConfirmationWindow>().Configure(new ConfirmationWindow.Configuration()
-                {
-                    acceptOnly = true,
-                    question = "No save games found",
-                    answerYes = "Okay"
-                });
-
-                this.gameObject.SetActive(false);
-
+                // Keep the load-game screen visible. Its plus button is the entry
+                // point for creating the first save slot.
+                currentTabIndex = 0;
+                LoadSlots(currentTabIndex);
                 return;
             }
 

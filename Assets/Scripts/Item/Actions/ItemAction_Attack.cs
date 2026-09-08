@@ -2,6 +2,7 @@ using Combat;
 using Combat.Data;
 using Entity_Components;
 using Entity_Components.Character;
+using Entity_Components.Player;
 using Referencing.Scriptable_Pool;
 using System.Collections;
 using UnityEngine;
@@ -38,17 +39,19 @@ namespace Item.Actions
         {
             Aimer getAimer = userInventory.GetComponent<Aimer>();
             Mover getMover = userInventory.GetComponent<Mover>();
-            //GridSelector getGridSelector = userInventory.GetComponent<GridSelector>();
+            GridSelector getGridSelector = userInventory.GetComponent<GridSelector>();
 
             if (getMover.IsMovementFrozen)
                 yield break;
 
-            Vector2 attackLocation = (Vector2)userInventory.transform.position + (getAimer.GetAimDirection() * attackDistance);
-            //Vector2 attackLocation = getGridSelector.GetGridWorldSelectionPosition();
+            Vector2 aimDirection = getGridSelector != null
+                ? getGridSelector.GetMouseLookDirection()
+                : getAimer.GetAimDirection();
+            Vector2 attackLocation = (Vector2)userInventory.transform.position + (aimDirection * attackDistance);
 
             getAimer.LookAt(attackLocation);
 
-            BodyAnimation[] getEntityAnimator = userInventory.GetComponentsInChildren<BodyAnimation>();
+            FullBodyPlayerSpriteAnimator[] getEntityAnimator = userInventory.GetComponentsInChildren<FullBodyPlayerSpriteAnimator>();
 
             float animationTime = 0;
 
@@ -57,10 +60,12 @@ namespace Item.Actions
                 switch (attackType)
                 {
                     case AttackType.Smash:
-                        animationTime = getEntityAnimator[i].ApplySmashAnimation(speed, userInventory.GetItem(itemIndex).Data.Icon);
+                        getEntityAnimator[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Chop, speed);
+                        animationTime = 1 / speed;
                         break;
                     case AttackType.Slash:
-                        animationTime = getEntityAnimator[i].ApplySlashAnimation(speed, userInventory.GetItem(itemIndex).Data.Icon);
+                        getEntityAnimator[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Chop, speed);
+                        animationTime = 1 / speed;
                         break;
                     default:
                         break;

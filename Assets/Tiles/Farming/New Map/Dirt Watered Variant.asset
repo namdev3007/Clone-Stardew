@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6304ac031506f342bf5f698d184c9e4, type: 3}
+  m_Name: Dirt Watered Variant
+  m_EditorClassIdentifier: 
+  guid: aeb9f47e-6010-41b9-bd9a-b89a112bca96
+  variants:
+  - {fileID: -4447795076652309349, guid: 2105b1b2aa988db4ab9ea2383a5109dc, type: 3}
+  - {fileID: -2034445667, guid: 2105b1b2aa988db4ab9ea2383a5109dc, type: 3}
+  - {fileID: -1725299713, guid: 2105b1b2aa988db4ab9ea2383a5109dc, type: 3}
+  useGridCollider: 0

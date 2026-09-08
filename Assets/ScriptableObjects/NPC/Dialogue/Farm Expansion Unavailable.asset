@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f657fe66321aeef4cb94c09475921a2e, type: 3}
+  m_Name: Farm Expansion Unavailable
+  m_EditorClassIdentifier: 
+  sequenceId: grandpa.expand_unavailable
+  lines:
+  - speaker: 1
+    localizationKey: grandpa.expand_unavailable.001
+    english: Let's get the first plot in shape before we clear any more land.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.expand_unavailable.002
+    english: Come back when the village is ready to handle land permits and payments
+      again.
+    vietnamese: 

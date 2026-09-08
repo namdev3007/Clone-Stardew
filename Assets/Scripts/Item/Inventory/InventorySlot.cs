@@ -43,6 +43,18 @@ namespace Item.Inventory
         private bool initialized = false;
         private bool isDragging = false;
         private bool hasEnergySlider = false;
+        private bool isSelected = false;
+        private BagItemDescriptionPanel descriptionPanel;
+        [SerializeField, HideInInspector]
+        private int forcedSlotIndex = -1;
+        private Transform amountTextParent;
+        private Vector2 amountAnchorMin;
+        private Vector2 amountAnchorMax;
+        private Vector2 amountPivot;
+        private Vector2 amountAnchoredPosition;
+        private Vector2 amountSizeDelta;
+        private Vector3 amountLocalScale;
+        private bool amountLayoutCached;
 
         public int GetSlotIndex()
         {
@@ -66,7 +78,29 @@ namespace Item.Inventory
         {
             if (!initialized)
             {
-                slotIndex = transform.GetSiblingIndex() + settings.slotIndexOffset;
+                // The gameplay bar has decorative connector objects between slots.
+                // Count only actual inventory slots so those decorations do not alter
+                // the item indexes (the five visible slots must remain indexes 0-4).
+                if (forcedSlotIndex >= 0)
+                {
+                    slotIndex = forcedSlotIndex;
+                }
+                else if (transform.parent != null && transform.parent.name == "InventoryBar")
+                {
+                    slotIndex = 0;
+
+                    for (int i = 0; i < transform.GetSiblingIndex(); i++)
+                    {
+                        if (transform.parent.GetChild(i).GetComponent<InventorySlot>() != null)
+                        {
+                            slotIndex++;
+                        }
+                    }
+                }
+                else
+                {
+                    slotIndex = transform.GetSiblingIndex() + settings.slotIndexOffset;
+                }
 
                 if (settings.displaySlotNumber)
                 {
@@ -86,6 +120,78 @@ namespace Item.Inventory
 
                 initialized = true;
             }
+        }
+
+        public void ConfigureBagSlot(int index, Sprite normalSprite, Sprite selectedSprite, bool quickSlot)
+        {
+            forcedSlotIndex = index;
+            settings.displaySlotNumber = false;
+            settings.equipItemOnClick = quickSlot;
+            settings.moveItemOnDrag = true;
+            settings.slotIndexOffset = 0;
+            settings.hasSelectionHighlight = true;
+
+            Image background = GetComponent<Image>();
+            if (background != null)
+            {
+                background.sprite = normalSprite;
+                background.color = Color.white;
+                background.preserveAspect = true;
+                background.raycastTarget = true;
+            }
+
+            if (references.Highlight != null)
+            {
+                references.Highlight.sprite = selectedSprite;
+                references.Highlight.color = Color.white;
+                references.Highlight.preserveAspect = true;
+                references.Highlight.raycastTarget = false;
+                RectTransform highlightRect = references.Highlight.rectTransform;
+                highlightRect.anchorMin = Vector2.zero;
+                highlightRect.anchorMax = Vector2.one;
+                highlightRect.anchoredPosition = Vector2.zero;
+                highlightRect.sizeDelta = Vector2.zero;
+                references.Highlight.transform.SetAsFirstSibling();
+            }
+
+            if (references.SlotText != null)
+                references.SlotText.gameObject.SetActive(false);
+
+            CacheAmountTextLayout();
+
+            initialized = false;
+            Initialize();
+        }
+
+        private void CacheAmountTextLayout()
+        {
+            if (references.AmountText == null)
+                return;
+
+            RectTransform amountRect = references.AmountText.rectTransform;
+            amountTextParent = amountRect.parent;
+            amountAnchorMin = amountRect.anchorMin;
+            amountAnchorMax = amountRect.anchorMax;
+            amountPivot = amountRect.pivot;
+            amountAnchoredPosition = amountRect.anchoredPosition;
+            amountSizeDelta = amountRect.sizeDelta;
+            amountLocalScale = amountRect.localScale;
+            amountLayoutCached = true;
+        }
+
+        private void RestoreAmountTextLayout()
+        {
+            if (!amountLayoutCached || references.AmountText == null)
+                return;
+
+            RectTransform amountRect = references.AmountText.rectTransform;
+            amountRect.SetParent(amountTextParent != null ? amountTextParent : transform, false);
+            amountRect.anchorMin = amountAnchorMin;
+            amountRect.anchorMax = amountAnchorMax;
+            amountRect.pivot = amountPivot;
+            amountRect.anchoredPosition = amountAnchoredPosition;
+            amountRect.sizeDelta = amountSizeDelta;
+            amountRect.localScale = amountLocalScale;
         }
 
         public void OnRemoveItem(int index)
@@ -194,10 +300,14 @@ namespace Item.Inventory
         {
             if (index == slotIndex)
             {
+                isSelected = selected;
                 if (settings.hasSelectionHighlight)
                 {
                     SetHighlighted(selected);
                 }
+
+                if (selected)
+                    ShowItemDescription();
             }
         }
 
@@ -220,6 +330,7 @@ namespace Item.Inventory
             {
                 if (isDragging == false)
                 {
+                    CacheAmountTextLayout();
                     if (references.iconLayer != null)
                     {
                         Transform iconLayerTransform = references.iconLayer.Reference.transform;
@@ -272,9 +383,7 @@ namespace Item.Inventory
 
         private void OnDragStop()
         {
-            references.AmountText.transform.SetParent(this.transform);
-            references.AmountText.transform.localPosition = Vector2.zero;
-            references.AmountText.transform.localScale = Vector3.one;
+            RestoreAmountTextLayout();
 
             references.Icon.transform.SetParent(this.transform);
             references.Icon.transform.localPosition = Vector2.zero;
@@ -318,12 +427,30 @@ namespace Item.Inventory
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            // Display item info
+            if (settings.hasSelectionHighlight)
+                SetHighlighted(true);
+            ShowItemDescription();
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            // Hide item info
+            if (settings.hasSelectionHighlight)
+                SetHighlighted(isSelected);
+
+            GetDescriptionPanel()?.ClearIfNotPinned(slotIndex);
+        }
+
+        private void ShowItemDescription()
+        {
+            InventoryItem item = references.Inventory?.GetItem(slotIndex);
+            GetDescriptionPanel()?.Show(slotIndex, item, isSelected);
+        }
+
+        private BagItemDescriptionPanel GetDescriptionPanel()
+        {
+            if (descriptionPanel == null)
+                descriptionPanel = GetComponentInParent<BagItemDescriptionPanel>(true);
+            return descriptionPanel;
         }
     }
 }

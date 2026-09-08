@@ -109,6 +109,13 @@ namespace Entity_Components.Player
             else
             {
                 selectionGameObject.gameObject.SetActive(false);
+                Vector2 mouseDirection = location - (Vector2)transform.position;
+                if (mouseDirection.sqrMagnitude > 0.001f)
+                {
+                    characterForwardGridLocation = gridManager.Grid.WorldToCell(
+                        (Vector2)transform.position
+                        + Vector2.ClampMagnitude(mouseDirection, gridManager.Grid.cellSize.x));
+                }
                 currentSelectionGridPosition = characterForwardGridLocation;
             }
         }
@@ -148,6 +155,12 @@ namespace Entity_Components.Player
 
         }
 
+        public Vector2 GetMouseLookDirection()
+        {
+            Vector2 direction = lastMousePosition - (Vector2)transform.position;
+            return direction.sqrMagnitude > 0.001f ? direction.normalized : lastMoveDirection;
+        }
+
         public Vector3Int GetGridSelectionPosition()
         {
             return currentSelectionGridPosition;
@@ -161,6 +174,11 @@ namespace Entity_Components.Player
             }
 
             return (Vector2)gridManager.Grid.CellToWorld(GetGridSelectionPosition()) + gridOffset;
+        }
+
+        public GridManager GetGridManager()
+        {
+            return gridManager;
         }
 
         public bool IsStandingOnSelectedTile()

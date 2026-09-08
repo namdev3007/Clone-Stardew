@@ -3,8 +3,9 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -36,9 +37,15 @@ MonoBehaviour:
       min: 0
       max: 0
       current: 0
-  - Data: {fileID: 11400000, guid: 38547a62d61ad1a4fbb02efa9b7728de, type: 2}
+  - Data: {fileID: 11400000, guid: 0cab5641581250140ab6d9d757462593, type: 2}
     Amount: 15
     Energy:
       min: 0
       max: 0
       current: 0
+  - Data: {fileID: 11400000, guid: b74c8d1802b30034db61818663596c37, type: 2}
+    Amount: 0
+    Energy:
+      min: 0
+      max: 12
+      current: 12

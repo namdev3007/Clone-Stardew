@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f58b7715f91074746a607529a135c2bb, type: 3}
+  m_Name: Item_Cabbage
+  m_EditorClassIdentifier: 
+  guid: 9f2d6bd8-cca9-4ee5-a832-be93a19712d7
+  icon: {fileID: -5227340281758563551, guid: 1ca9d540391193140ac9a628ad63e1a4, type: 3}
+  itemName: Cabbage
+  description: Harvested Cabbage
+  canStack: 1
+  hasSlot: 1
+  hasEnergy: 0
+  energyStartValue:
+    min: 0
+    max: 0
+    current: 0
+  isRemoveable: 1
+  action: {fileID: 0}
+  worldDropScale: 0.5

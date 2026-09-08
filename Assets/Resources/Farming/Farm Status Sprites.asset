@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cca4169099d1f8469d30ff229c4153c, type: 3}
+  m_Name: Farm Status Sprites
+  m_EditorClassIdentifier: 
+  fertilize: {fileID: 3622450583918244449, guid: d5f0d168369d0c44c94bd35d270cffbc,
+    type: 3}
+  sowSeed: {fileID: 7311759262364097256, guid: 9e29df99a98b9c443932ec0e4bde706f, type: 3}
+  water: {fileID: 7994859186677151027, guid: ba541bc9d036da44da3bce441ca99ab2, type: 3}
+  harvest: {fileID: 833687815044038640, guid: ae385a7c927c2a746b6f8201008d6312, type: 3}

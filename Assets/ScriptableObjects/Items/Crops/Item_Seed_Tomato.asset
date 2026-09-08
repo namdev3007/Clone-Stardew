@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f58b7715f91074746a607529a135c2bb, type: 3}
+  m_Name: Item_Seed_Tomato
+  m_EditorClassIdentifier: 
+  guid: 258e70af-33e1-41f6-92dc-8778ccbaea18
+  icon: {fileID: -3962807554240710951, guid: 3e2c8ecc6201245478f0b7ff7e6ef549, type: 3}
+  itemName: Tomato Seed
+  description: Used to grow Tomato
+  canStack: 1
+  hasSlot: 1
+  hasEnergy: 0
+  energyStartValue:
+    min: 0
+    max: 0
+    current: 0
+  isRemoveable: 1
+  action: {fileID: 11400000, guid: 47d85dcbbe871be42b5054590d8d3b1b, type: 2}

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f58b7715f91074746a607529a135c2bb, type: 3}
+  m_Name: Item_Tomato
+  m_EditorClassIdentifier: 
+  guid: fe6444a8-48d3-4191-9d51-24236f64bbd2
+  icon: {fileID: 152873553834392601, guid: 354e277e614406a4097a2d8956dc8a98, type: 3}
+  itemName: Tomato
+  description: Harvested Tomato
+  canStack: 1
+  hasSlot: 1
+  hasEnergy: 0
+  energyStartValue:
+    min: 0
+    max: 0
+    current: 0
+  isRemoveable: 1
+  action: {fileID: 0}
+  worldDropScale: 0.5

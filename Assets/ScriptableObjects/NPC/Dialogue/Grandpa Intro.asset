@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f657fe66321aeef4cb94c09475921a2e, type: 3}
+  m_Name: Grandpa Intro
+  m_EditorClassIdentifier: 
+  sequenceId: grandpa.intro
+  lines:
+  - speaker: 1
+    localizationKey: grandpa.intro.001
+    english: There you are. The sun's already over the treetops. City life taught
+      you to sleep this late, did it?
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.intro.002
+    english: Yeah... I haven't been sleeping well lately. I guess I finally caught
+      up.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.intro.003
+    english: That country breeze will do it. Still, daylight's wasting, and I've
+      got a small job for you.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.intro.004
+    english: "Here. Take this hat, this hoe, and a packet of seeds. Keep the hat
+      on\u2014the sun out here is harsher than you remember."
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.intro.005
+    english: You want me to start right now?
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.intro.006
+    english: Would you rather wait until noon and roast out there?
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.intro.007
+    english: The weeds have taken over the plot beside the house. Clear a little
+      ground and loosen the soil for me.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.intro.008
+    english: Plant the blade firmly, then pull it back toward you. Don't overthink
+      it. Try three patches first.
+    vietnamese: 

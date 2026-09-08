@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f657fe66321aeef4cb94c09475921a2e, type: 3}
+  m_Name: Uncle Hai Intro
+  m_EditorClassIdentifier: 
+  sequenceId: hai.intro
+  lines:
+  - speaker: 0
+    localizationKey: hai.intro.001
+    english: Hello, Uncle. I'm Old Man Tam's grandkid from down the road. I came
+      back yesterday.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.002
+    english: Old Tam's grandkid? Well, look at you!
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.003
+    english: You came home yesterday and only now decided to say hello?
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.004
+    english: "Fair skin, clean hands\u2014you look every bit like a city boy."
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.005
+    english: So, what brings you here? Wine for your grandpa? Something sweet for
+      yourself?
+    vietnamese: 
+  - speaker: 0
+    localizationKey: hai.intro.006
+    english: Neither. Grandpa sent me to buy seeds and a few farming tools.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.007
+    english: You're taking up farming? Good!
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.008
+    english: It's nice to see a young person willing to get some dirt under their
+      nails.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.009
+    english: Better than staring at a phone all day until your brain turns to porridge.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: hai.intro.010
+    english: I carry seeds, tools, and whatever else a small farm needs. Take a look.
+    vietnamese: 

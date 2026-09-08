@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4637c032f15f224d9517c27f7615aa6, type: 3}
+  m_Name: Crop Banana
+  m_EditorClassIdentifier: 
+  guid: a4f8623f-dc14-4ae9-86c4-b3dde9822c0a
+  displayName: Banana
+  firstGrowthSeconds: 180
+  regrowthSeconds: 60
+  maximumHarvests: 2147483647
+  regrowthStageStart: 4
+  perennialTree: 1
+  growthSprites:
+  - {fileID: 2114168569335544942, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: 1238429782869093049, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: -8382836726527147517, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: 8330634097647454986, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: -1788222900288174138, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: -6550827849559121272, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: 1243337951010794613, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  - {fileID: 2282996643972149970, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  stagePositionOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  harvestedItem: {fileID: 11400000, guid: 91deccdc849a67944b54120ffd505e98, type: 2}

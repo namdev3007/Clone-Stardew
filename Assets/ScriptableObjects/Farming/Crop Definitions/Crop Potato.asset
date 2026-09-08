@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4637c032f15f224d9517c27f7615aa6, type: 3}
+  m_Name: Crop Potato
+  m_EditorClassIdentifier: 
+  guid: 74ba08b6-d1b2-46ec-84f7-c7bb26a02547
+  displayName: Potato
+  firstGrowthSeconds: 90
+  regrowthSeconds: 0
+  maximumHarvests: 1
+  regrowthStageStart: 0
+  growthSprites:
+  - {fileID: 5662074031921036221, guid: 2aa7981fe9568a84a91c3e98ab4c5686, type: 3}
+  - {fileID: -7135803837120484100, guid: 2aa7981fe9568a84a91c3e98ab4c5686, type: 3}
+  - {fileID: 5891310100423773292, guid: 2aa7981fe9568a84a91c3e98ab4c5686, type: 3}
+  - {fileID: 5672898666175964946, guid: 2aa7981fe9568a84a91c3e98ab4c5686, type: 3}
+  - {fileID: 7262534988586402167, guid: 2aa7981fe9568a84a91c3e98ab4c5686, type: 3}
+  stagePositionOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  harvestedItem: {fileID: 11400000, guid: eef7a38eab398e340bec330a36e3b82d, type: 2}

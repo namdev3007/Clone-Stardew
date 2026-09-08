@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 872db0a3e24ed2140aa4d5b375196aac, type: 3}
   m_Name: Scene Core
   m_EditorClassIdentifier: 
-  value: Core
+  value: Core 1

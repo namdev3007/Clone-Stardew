@@ -34,6 +34,9 @@ namespace Item
         [SerializeField]
         private ItemAction action;
 
+        [SerializeField, Tooltip("Scale used when this item is displayed as a pickup in the world.")]
+        private float worldDropScale = 1f;
+
         public Sprite Icon
         {
             get { return icon; }
@@ -42,6 +45,11 @@ namespace Item
         public string ItemName
         {
             get { return itemName; }
+        }
+
+        public string Description
+        {
+            get { return description; }
         }
 
         public ItemAction Action
@@ -72,6 +80,11 @@ namespace Item
         public bool IsRemoveable
         {
             get { return isRemoveable; }
+        }
+
+        public float WorldDropScale
+        {
+            get { return worldDropScale > 0f ? worldDropScale : 1f; }
         }
     }
 }

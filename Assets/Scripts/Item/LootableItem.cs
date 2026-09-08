@@ -46,6 +46,7 @@ namespace Item
             if (configuration.data != null)
             {
                 references.spriteRenderer.sprite = configuration.data.Icon;
+                references.spriteRenderer.transform.localScale = Vector3.one * configuration.data.WorldDropScale;
             }
         }
 
@@ -75,6 +76,7 @@ namespace Item
             if (configuration.data != null)
             {
                 references.spriteRenderer.sprite = configuration.data.Icon;
+                references.spriteRenderer.transform.localScale = Vector3.one * configuration.data.WorldDropScale;
 
                 if (configuration.amount > 1 && configuration.data.CanStack)
                 {

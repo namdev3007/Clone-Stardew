@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4637c032f15f224d9517c27f7615aa6, type: 3}
+  m_Name: Crop Carrot
+  m_EditorClassIdentifier: 
+  guid: 0f0094d3-c2ce-41c8-9140-00a579592b11
+  displayName: Carrot
+  firstGrowthSeconds: 15
+  regrowthSeconds: 0
+  maximumHarvests: 1
+  regrowthStageStart: 0
+  growthSprites:
+  - {fileID: 8949464532172305883, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
+  - {fileID: -4085787973326048821, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
+  - {fileID: -9029623659281127719, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
+  - {fileID: 2274012154259825846, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
+  stagePositionOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  harvestedItem: {fileID: 11400000, guid: a055df8b130a0bd4f9e851798d19b744, type: 2}

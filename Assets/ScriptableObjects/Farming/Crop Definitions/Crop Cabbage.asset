@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4637c032f15f224d9517c27f7615aa6, type: 3}
+  m_Name: Crop Cabbage
+  m_EditorClassIdentifier: 
+  guid: 229ba554-c8a3-4396-9708-898045942245
+  displayName: Cabbage
+  firstGrowthSeconds: 60
+  regrowthSeconds: 0
+  maximumHarvests: 1
+  regrowthStageStart: 0
+  growthSprites:
+  - {fileID: 7158203149403221074, guid: ab96791adcaef4c43950dbeaebf0d370, type: 3}
+  - {fileID: -5243499004022874106, guid: ab96791adcaef4c43950dbeaebf0d370, type: 3}
+  - {fileID: -1077485169359442323, guid: ab96791adcaef4c43950dbeaebf0d370, type: 3}
+  - {fileID: 1909790719951518803, guid: ab96791adcaef4c43950dbeaebf0d370, type: 3}
+  - {fileID: -7188841499462398510, guid: ab96791adcaef4c43950dbeaebf0d370, type: 3}
+  stagePositionOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  harvestedItem: {fileID: 11400000, guid: 6b39d8dd98e0f09499a3d92196b4c4ec, type: 2}

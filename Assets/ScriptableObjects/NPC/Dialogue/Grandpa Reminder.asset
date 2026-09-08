@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f657fe66321aeef4cb94c09475921a2e, type: 3}
+  m_Name: Grandpa Reminder
+  m_EditorClassIdentifier: 
+  sequenceId: grandpa.reminder
+  lines:
+  - speaker: 1
+    localizationKey: grandpa.reminder.001
+    english: Take things one step at a time. The plot beside the house is a good
+      place to begin.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.reminder.002
+    english: Three patches will do for now. Mind where you swing that hoe.
+    vietnamese: 

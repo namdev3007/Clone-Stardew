@@ -1,13 +1,13 @@
 using Entity_Components;
 using Entity_Components.Character;
 using Entity_Components.Player;
-using Event.Listeners;
 using Item.Inventory;
 using Referencing.Scriptable_Reference;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using World;
+using World.Objects;
 
 namespace Item.Actions
 {
@@ -64,18 +64,36 @@ namespace Item.Actions
             {
                 Vector3Int location = gridSelector.GetGridSelectionPosition();
 
-                userInventory.GetComponent<Aimer>().LookAt(gridManager.Grid.CellToWorld(location));
+                bool obtainingWater = gridManager.HasWater(location);
+                Crop targetCrop = gridManager.GetCrop(location);
+                bool cropNeedsWater = targetCrop != null && targetCrop.NeedsWater;
+                bool dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
+                bool canWaterGround = gridManager.HasDirtHole(location) && (cropNeedsWater || dryFarmGround);
+
+                // Validate before starting the animation. Held mouse input can ask
+                // to use the can again just after a tile became wet; previously the
+                // second request still played the full animation before doing nothing.
+                if (!obtainingWater && !canWaterGround)
+                    yield break;
+
+                if (!obtainingWater && getInventoryItem != null && !FarmingCheats.InfiniteWater
+                    && getInventoryItem.Energy.current < energyCost)
+                    yield break;
+
+                Aimer aimer = userInventory.GetComponent<Aimer>();
+                aimer?.SetAimDirection(gridSelector.GetMouseLookDirection());
 
                 Mover getMover = userInventory.GetComponent<Mover>();
                 getMover?.FreezeMovement(true);
 
-                BodyAnimation[] getEntityAnimator = userInventory.GetComponentsInChildren<BodyAnimation>();
+                FullBodyPlayerSpriteAnimator[] getEntityAnimator = userInventory.GetComponentsInChildren<FullBodyPlayerSpriteAnimator>();
 
                 float animationTime = 0;
 
                 for (int i = 0; i < getEntityAnimator.Length; i++)
                 {
-                    animationTime = getEntityAnimator[i].ApplyDropAnimation(speed, userInventory.GetItem(itemIndex).Data.Icon);
+                    getEntityAnimator[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Water, speed);
+                    animationTime = 1 / speed;
                 }
 
                 gridSelector.SetFrozen(true);
@@ -84,16 +102,25 @@ namespace Item.Actions
 
                 if (!gridManager.HasWater(location))
                 {
-                    if (!gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location))
+                    Crop crop = gridManager.GetCrop(location);
+                    cropNeedsWater = crop != null && crop.NeedsWater;
+                    dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
+
+                    if (gridManager.HasDirtHole(location) && (cropNeedsWater || dryFarmGround))
                     {
                         ItemEnergy currentItemEnergy = getInventoryItem.Energy;
 
-                        if (currentItemEnergy.current >= energyCost)
+                        if (FarmingCheats.InfiniteWater || currentItemEnergy.current >= energyCost)
                         {
-                            gridManager.SetWateredDirtTile(location);
+                            if (!gridManager.HasWateredDirt(location))
+                                gridManager.SetWateredDirtTile(location);
 
-                            float newEnergy = currentItemEnergy.current - energyCost;
-                            if (newEnergy < energyCost)
+                            crop?.TryWater();
+
+                            float newEnergy = FarmingCheats.InfiniteWater
+                                ? currentItemEnergy.max
+                                : currentItemEnergy.current - energyCost;
+                            if (!FarmingCheats.InfiniteWater && newEnergy < energyCost)
                             {
                                 newEnergy = 0;
                             }
@@ -104,21 +131,6 @@ namespace Item.Actions
                                 max = currentItemEnergy.max,
                                 current = newEnergy
                             };
-
-                            // Also do a sphere cast to ensure that any Day Count Listener is no longer frozen
-                            // It becomes frozen when there is no watered ground, meaning the plant growth will stagnate.
-
-                            Vector3 loc = gridSelector.GetGridWorldSelectionPosition();
-
-                            RaycastHit2D[] findObjects = Physics2D.BoxCastAll(loc, gridManager.Grid.cellSize * 0.5f, 0, Vector2.zero, 50);
-
-                            for (int i = 0; i < findObjects.Length; i++)
-                            {
-                                if (findObjects[i].transform.CompareTag("Crop"))
-                                {
-                                    findObjects[i].transform?.GetComponent<DayCountDownListener>()?.FreezeCountDown(false);
-                                }
-                            }
 
                             OnWateredGround.Invoke();
 

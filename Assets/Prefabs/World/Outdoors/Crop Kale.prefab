@@ -256,26 +256,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridManagerReference: {fileID: 11400000, guid: 3fae82f7a21ee7147a3130aa736701b1,
     type: 2}
-  onTimeDayEvent: {fileID: 11400000, guid: b146691cba0bc374f8ff047918c1d6ea, type: 2}
   health: {fileID: 114743568093149004}
   itemDropper: {fileID: 114544917884048334}
   spriteRenderer: {fileID: 212127202933513372}
   groundWetTilemapName: Dirt Hole Wet
-  timeDayOffset: {fileID: 11400000, guid: 126ad94bc46c85c458378ff9cef84b36, type: 2}
-  surviveDaysWithoutWater: 1
-  harvestDayStart: 5
-  harvestDayEnd: 6
-  daySprites:
-  - sprite: {fileID: 21300000, guid: 37a351663d744ea4593d912e93f9c43f, type: 3}
-    day: 1
-  - sprite: {fileID: 21300002, guid: 37a351663d744ea4593d912e93f9c43f, type: 3}
-    day: 2
-  - sprite: {fileID: 21300004, guid: 37a351663d744ea4593d912e93f9c43f, type: 3}
-    day: 3
-  - sprite: {fileID: 21300006, guid: 37a351663d744ea4593d912e93f9c43f, type: 3}
-    day: 4
-  - sprite: {fileID: 21300008, guid: 37a351663d744ea4593d912e93f9c43f, type: 3}
-    day: 5
 --- !u!1 &1444371575320324
 GameObject:
   m_ObjectHideFlags: 0

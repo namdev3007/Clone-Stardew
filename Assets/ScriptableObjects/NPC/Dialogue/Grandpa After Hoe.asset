@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f657fe66321aeef4cb94c09475921a2e, type: 3}
+  m_Name: Grandpa After Hoe
+  m_EditorClassIdentifier: 
+  sequenceId: grandpa.after_hoe
+  lines:
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.001
+    english: Not bad. Your hands still remember more than you think.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.002
+    english: Now tell me the truth. What happened in the city that sent you home
+      without a word?
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.003
+    english: Nothing happened. Work slowed down, so I took a few days off. I just
+      thought I'd visit.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.004
+    english: You might fool someone else with that, but not me.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.005
+    english: I've seen the shadows under your eyes. I've heard you sighing since
+      morning.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.006
+    english: Were they working you to the bone again? Or pushing you around while
+      paying you next to nothing?
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.007
+    english: ...
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.008
+    english: When I was your age, I thought strong shoulders were enough to carry
+      anything.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.009
+    english: I joined the youth volunteers, worked at the cooperative, and tried
+      to prove I could handle every burden put in front of me.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.010
+    english: But life doesn't care how stubborn you are.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.011
+    english: "You young people are always racing somewhere\u2014trying to get ahead,
+      trying to prove yourselves."
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.012
+    english: Then something knocks you down, and pride makes you carry the hurt alone.
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.013
+    english: I just feel like I've fallen behind.
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.014
+    english: My friends are getting promoted. They're buying homes and cars, and
+      I'm... back where I started.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.015
+    english: Stop measuring your life against theirs.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.016
+    english: Different people start in different places. They move at different speeds.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.017
+    english: If you try to leap straight to the top, all you'll earn is a harder
+      fall.
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.018
+    english: So what am I supposed to do?
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.019
+    english: Look at this soil. You don't throw down a seed and demand a harvest
+      the next morning.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.020
+    english: First, you prepare a place where something can grow. Then you plant.
+      After that, you tend it a little at a time.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.021
+    english: People aren't so different.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.022
+    english: You're exhausted, and your thoughts are tangled. Give yourself room
+      to breathe before deciding where to run next.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.023
+    english: Slow doesn't mean you've failed. It means you're still growing.
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.024
+    english: I think I understand.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.025
+    english: Good. For now, eat properly, get some sleep, and work the land at your
+      own pace.
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.026
+    english: "When you need seeds or proper tools, talk to Uncle Hai. He's the round
+      fellow nearby\u2014you won't miss him."
+    vietnamese: 
+  - speaker: 1
+    localizationKey: grandpa.after_hoe.027
+    english: And keep an eye around the garden. I left my watering can somewhere
+      out there.
+    vietnamese: 
+  - speaker: 0
+    localizationKey: grandpa.after_hoe.028
+    english: Alright, Grandpa. I'll remember.
+    vietnamese: 

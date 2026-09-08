@@ -57,6 +57,18 @@ namespace Interactions
         [SerializeField]
         private UnityEvent interactAction;
 
+        public void Configure(float distance, InteractionEvent hoverEvent, UnityAction action)
+        {
+            useableFromAnyDistance = false;
+            useDistance = Mathf.Max(0.1f, distance);
+            onMouseInteractionEvent = hoverEvent;
+            if (interactAction == null)
+                interactAction = new UnityEvent();
+            interactAction.RemoveAllListeners();
+            if (action != null)
+                interactAction.AddListener(action);
+        }
+
         public bool IsWithinUseDistance(Vector2 worldPosition)
         {
             return useableFromAnyDistance || Vector2.Distance(worldPosition, this.transform.position) < useDistance;

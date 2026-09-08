@@ -27,6 +27,26 @@ namespace Item
         [SerializeField]
         private float dropRadius = 0.5f;
 
+        public void ConfigureSingleDrop(ItemData itemData, int amount = 1)
+        {
+            if (itemData == null)
+            {
+                itemsToDrop = new DroppableItem[0];
+                return;
+            }
+
+            int safeAmount = Mathf.Max(1, amount);
+            itemsToDrop = new[]
+            {
+                new DroppableItem
+                {
+                    itemData = itemData,
+                    itemAmount = new Vector2Int(safeAmount, safeAmount),
+                    dropCount = Vector2Int.one
+                }
+            };
+        }
+
         public void Drop(Vector2 location)
         {
             for (int i = 0; i < itemsToDrop.Length; i++)

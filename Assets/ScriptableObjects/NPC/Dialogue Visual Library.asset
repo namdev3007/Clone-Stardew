@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0412e81eaff9184b958620c011c8621, type: 3}
+  m_Name: Dialogue Visual Library
+  m_EditorClassIdentifier: 
+  npcDialogueBox: {fileID: 6304183567500822673, guid: aad229d7569c46a409743db16f26391a,
+    type: 3}
+  playerDialogueBox: {fileID: 7904028089577799856, guid: 830c22fe259abac4fb1b28202f8458fd,
+    type: 3}
+  namePlate: {fileID: -448841343029052346, guid: 36c4510c91c90244a9c3b4e81683405e,
+    type: 3}
+  continueIcon: {fileID: 1654322235956061313, guid: adc07d7bdca413b4bbc6c5cabe8ff97b,
+    type: 3}
+  skipButton: {fileID: -4358472242703741127, guid: 7f152760febe246498c114f240a76a0f,
+    type: 3}
+  textFont: {fileID: 11400000, guid: 974c4748fcff0a7458d6de9b114ddf64, type: 2}
+  playerPortrait: {fileID: 3980469479438065256, guid: 1fa441edc5595bc4991bae3dee393c6f,
+    type: 3}
+  grandpaPortrait: {fileID: 5137486874329215177, guid: 6630973054d1bf24a892087b7479e6b6,
+    type: 3}
+  sellerPortrait: {fileID: -6095755055776031339, guid: ef5fb95a5779e3d47b5ebe65cb414e48,
+    type: 3}

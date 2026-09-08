@@ -32,6 +32,12 @@ namespace GameSystem.Systems
         [SerializeField]
         private bool ignoreMouseWhenOverlappingUI;
 
+        [SerializeField, Min(0.03f), Tooltip("Delay between repeated uses while the left mouse button is held.")]
+        private float heldUseInterval = 0.08f;
+
+        [SerializeField, Min(0.001f), Tooltip("Minimum world-space cursor movement before held use is dispatched again.")]
+        private float heldUseMinWorldDistance = 0.08f;
+
         [System.NonSerialized]
         private bool gamePauzed;
 
@@ -43,6 +49,12 @@ namespace GameSystem.Systems
 
         [System.NonSerialized]
         private bool isMoving;
+
+        [System.NonSerialized]
+        private float nextHeldUseTime;
+
+        [System.NonSerialized]
+        private Vector2 lastHeldUseWorldPosition;
 
         private new UnityEngine.Camera camera;
         private EventSystem eventSystem;
@@ -146,17 +158,35 @@ namespace GameSystem.Systems
 
                     if (Input.GetMouseButtonDown(0))
                     {
-                        if (!ignoreMouseWhenOverlappingUI || !EventSystem.current.IsPointerOverGameObject())
+                        if (!IsPointerBlockedByUI())
                         {
-                            events.leftMouseClick?.Invoke(camera.ScreenToWorldPoint(lastMousePosition));
+                            Vector2 worldPosition = camera.ScreenToWorldPoint(Input.mousePosition);
+                            events.leftMouseClick?.Invoke(worldPosition);
+                            lastHeldUseWorldPosition = worldPosition;
+                            nextHeldUseTime = UnityEngine.Time.unscaledTime + Mathf.Max(0.03f, heldUseInterval);
                         }
+                    }
+                    else if (Input.GetMouseButton(0) && UnityEngine.Time.unscaledTime >= nextHeldUseTime)
+                    {
+                        Vector2 worldPosition = camera.ScreenToWorldPoint(Input.mousePosition);
+                        float minimumDistance = Mathf.Max(0.001f, heldUseMinWorldDistance);
+                        bool movedToAnotherPosition = (worldPosition - lastHeldUseWorldPosition).sqrMagnitude
+                            >= minimumDistance * minimumDistance;
+
+                        if (!IsPointerBlockedByUI() && movedToAnotherPosition)
+                        {
+                            events.leftMouseClick?.Invoke(worldPosition);
+                            lastHeldUseWorldPosition = worldPosition;
+                        }
+
+                        nextHeldUseTime = UnityEngine.Time.unscaledTime + Mathf.Max(0.03f, heldUseInterval);
                     }
 
                     if (Input.GetMouseButtonDown(1))
                     {
-                        if (!ignoreMouseWhenOverlappingUI || !EventSystem.current.IsPointerOverGameObject())
+                        if (!IsPointerBlockedByUI())
                         {
-                            events.rightMouseClick?.Invoke(camera.ScreenToWorldPoint(lastMousePosition));
+                            events.rightMouseClick?.Invoke(camera.ScreenToWorldPoint(Input.mousePosition));
                         }
                     }
                 }
@@ -187,6 +217,11 @@ namespace GameSystem.Systems
                 events.mouseMovement?.Invoke(mouseWorldPoint);
                 lastMousePosition = mousePosition;
             }
+        }
+
+        private bool IsPointerBlockedByUI()
+        {
+            return ignoreMouseWhenOverlappingUI && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         }
     }
 }

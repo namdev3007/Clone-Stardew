@@ -16,9 +16,49 @@ public static class SetupFullBodyPlayer
         EditorApplication.delayCall += () =>
         {
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
-            if (prefab != null && prefab.GetComponentInChildren<FullBodyPlayerSpriteAnimator>(true) == null)
+            if (prefab != null)
+            {
+                RemoveLegacyVisuals();
                 Run();
+            }
         };
+    }
+
+    private static void RemoveLegacyVisuals()
+    {
+        GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
+        bool changed = false;
+        try
+        {
+            Transform body = Find(root.transform, "CharacterVisualization_Body");
+            if (body != null)
+            {
+                for (int i = body.childCount - 1; i >= 0; i--)
+                {
+                    Transform child = body.GetChild(i);
+                    if (child.name == "FullBody Player Sprite") continue;
+                    UnityEngine.Object.DestroyImmediate(child.gameObject);
+                    changed = true;
+                }
+            }
+
+            Transform clothes = Find(root.transform, "CharacterVisualization_Clothes");
+            if (clothes != null)
+            {
+                UnityEngine.Object.DestroyImmediate(clothes.gameObject);
+                changed = true;
+            }
+
+            if (changed)
+                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+
+        if (changed)
+            AssetDatabase.SaveAssets();
     }
 
     public static void Run()
@@ -40,8 +80,8 @@ public static class SetupFullBodyPlayer
             if (renderer == null) renderer = display.gameObject.AddComponent<SpriteRenderer>();
             renderer.sortingOrder = 10;
 
-            FullBodyPlayerSpriteAnimator skin = body.GetComponent<FullBodyPlayerSpriteAnimator>();
-            if (skin == null) skin = body.gameObject.AddComponent<FullBodyPlayerSpriteAnimator>();
+            FullBodyPlayerSpriteAnimator skin = display.GetComponent<FullBodyPlayerSpriteAnimator>();
+            if (skin == null) skin = display.gameObject.AddComponent<FullBodyPlayerSpriteAnimator>();
 
             SerializedObject so = new SerializedObject(skin);
             so.FindProperty("target").objectReferenceValue = renderer;
