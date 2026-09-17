@@ -634,3 +634,23 @@ Assets/Tiles/Map Layout/Map Layout Preview.prefab
 Assets/vFolders/VFoldersLibs.cs
 ---
 
+## Session End: 20260917_232751
+### Commits
+37e4b228 feat: update Level_Farm scene and add tree placement handoff doc
+9bf17e5d feat: update farming system, map decoration, UI and documentation
+### Uncommitted Changes
+Assets/Scripts/World/Objects/Crop.cs
+---
+
+## Session End: 20260917_234037
+### Commits
+37e4b228 feat: update Level_Farm scene and add tree placement handoff doc
+9bf17e5d feat: update farming system, map decoration, UI and documentation
+### Uncommitted Changes
+Assets/Editor/MapCellAndPropTool.cs
+Assets/Editor/SetupMapProps.cs
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/Scripts/World/Objects/Crop.cs
+production/session-logs/session-log.md
+---
+

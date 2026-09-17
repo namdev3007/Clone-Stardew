@@ -6,6 +6,8 @@ using Referencing.Scriptable_Assets;
 using Referencing.Scriptable_Reference;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
+using Utility;
 using World.Interfaces;
 using World.NPC;
 
@@ -42,6 +44,8 @@ namespace World.Objects
         private const float RegrowthRestSeconds = 10f;
         private const float CropVisualScale = 0.5f;
         private const float CropVisualPositionY = 0f;
+        private const string DepthSortingLayer = "Dynamic";
+        private const float DepthSortingScale = -100f;
 
         [Header("References")]
         [SerializeField] private ScriptableReference gridManagerReference;
@@ -64,6 +68,8 @@ namespace World.Objects
         private bool registered;
         private bool showcaseMode;
         private int showcaseStageIndex;
+        private SortingGroup depthSortingGroup;
+        private float lastDepthSortY = float.NaN;
 
         public bool NeedsWater => !wateredThisCycle && (phase == GrowthPhase.Growing || phase == GrowthPhase.Regrowing);
         public bool IsReadyToHarvest => phase == GrowthPhase.ReadyToHarvest;
@@ -87,6 +93,46 @@ namespace World.Objects
             gridManager = gridManagerReference.Reference?.GetComponent<GridManager>();
             health?.AddListener((IKillable)this);
             health?.SetInvulnerable(true);
+            SetupDepthSorting();
+        }
+
+        /// <summary>
+        /// Crops sort by the Y of their base on the same layer as the player and
+        /// decoration trees: the player is drawn over a crop when standing in
+        /// front of it and behind it when standing further up.
+        /// </summary>
+        private void SetupDepthSorting()
+        {
+            if (spriteRenderer == null)
+                return;
+
+            depthSortingGroup = spriteRenderer.GetComponent<SortingGroup>();
+            // The prefab's HeightBasedSorting sits on the sprite child, which is
+            // raised by each frame's pivot offset; sort from the crop root instead.
+            HeightBasedSorting childSorting = spriteRenderer.GetComponent<HeightBasedSorting>();
+            if (childSorting != null)
+                childSorting.enabled = false;
+
+            if (depthSortingGroup != null)
+                depthSortingGroup.sortingLayerName = DepthSortingLayer;
+            spriteRenderer.sortingLayerName = DepthSortingLayer;
+            UpdateDepthSorting();
+        }
+
+        private void LateUpdate()
+        {
+            if (!Mathf.Approximately(lastDepthSortY, transform.position.y))
+                UpdateDepthSorting();
+        }
+
+        private void UpdateDepthSorting()
+        {
+            lastDepthSortY = transform.position.y;
+            int order = Mathf.RoundToInt(lastDepthSortY * DepthSortingScale);
+            if (depthSortingGroup != null)
+                depthSortingGroup.sortingOrder = order;
+            else if (spriteRenderer != null)
+                spriteRenderer.sortingOrder = order;
         }
 
         private void Start()

@@ -459,7 +459,7 @@ public static class SetupMapProps
         renderer.color = Color.white;
         renderer.sharedMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
         renderer.sortingLayerName = "Dynamic";
-        renderer.sortingOrder = Mathf.RoundToInt(-groundAnchor.y * 100f);
+        renderer.sortingOrder = MapPropSorting.GetSortingOrder(sprite, groundAnchor.y);
 
         bool isGroundDetail = sprite.name.EndsWith("_4") || sprite.name.EndsWith("_5") || sprite.name.EndsWith("_6");
         if (!isGroundDetail && bounds.size.x >= 0.25f && bounds.size.y >= 0.25f)

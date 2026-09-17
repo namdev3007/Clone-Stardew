@@ -737,7 +737,7 @@ public sealed class MapCellAndPropTool : EditorWindow
         renderer.sprite = sprite;
         renderer.sharedMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
         renderer.sortingLayerName = "Dynamic";
-        renderer.sortingOrder = Mathf.RoundToInt(-anchor.y * 100f);
+        renderer.sortingOrder = MapPropSorting.GetSortingOrder(sprite, anchor.y);
 
         MapRegionGeneratedProp marker = prop.AddComponent<MapRegionGeneratedProp>();
         marker.Initialize(region.RegionName, cell);
@@ -1198,7 +1198,7 @@ public sealed class MapCellAndPropTool : EditorWindow
         renderer.sprite = sprite;
         renderer.sharedMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
         renderer.sortingLayerName = "Dynamic";
-        renderer.sortingOrder = Mathf.RoundToInt(-anchor.y * 100f);
+        renderer.sortingOrder = MapPropSorting.GetSortingOrder(sprite, anchor.y);
 
         if (addCollider)
         {
