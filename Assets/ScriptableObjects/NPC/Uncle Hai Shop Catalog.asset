@@ -16,42 +16,78 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 762a52d8b76c780469aa1692ea9edf49, type: 2}
     futurePrice: 0
     visible: 1
-  - item: {fileID: 11400000, guid: 2c1d4e5c41d3a5648ae463bcad1d10a6, type: 2}
-    futurePrice: 0
-    visible: 1
-  - item: {fileID: 11400000, guid: c010c4ebd113da44fab726c7de473055, type: 2}
-    futurePrice: 0
-    visible: 1
-  - item: {fileID: 11400000, guid: 0cab5641581250140ab6d9d757462593, type: 2}
-    futurePrice: 0
-    visible: 1
-  - item: {fileID: 11400000, guid: 468868d7e435ded4590b6e4e1a955106, type: 2}
-    futurePrice: 0
-    visible: 1
+    cropUnlockOrder: -1
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
   - item: {fileID: 11400000, guid: b6c7bc5235a3e174bb24477617cbadf0, type: 2}
     futurePrice: 0
     visible: 1
-  - item: {fileID: 11400000, guid: 38547a62d61ad1a4fbb02efa9b7728de, type: 2}
+    cropUnlockOrder: -1
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
+  - item: {fileID: 11400000, guid: b74c8d1802b30034db61818663596c37, type: 2}
     futurePrice: 0
     visible: 1
-  - item: {fileID: 11400000, guid: e0ccef7595396844697f781e7377637a, type: 2}
+    cropUnlockOrder: -1
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
+  - item: {fileID: 11400000, guid: 0cab5641581250140ab6d9d757462593, type: 2}
     futurePrice: 0
     visible: 1
+    cropUnlockOrder: 0
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
   - item: {fileID: 11400000, guid: f3f359c4564aef34f8fafb171a5b4f58, type: 2}
     futurePrice: 0
     visible: 1
-  - item: {fileID: 11400000, guid: 8570aac18e0f2894981189f5452f8875, type: 2}
+    cropUnlockOrder: 1
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
+  - item: {fileID: 11400000, guid: 468868d7e435ded4590b6e4e1a955106, type: 2}
     futurePrice: 0
     visible: 1
+    cropUnlockOrder: 2
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
+  - item: {fileID: 11400000, guid: c010c4ebd113da44fab726c7de473055, type: 2}
+    futurePrice: 0
+    visible: 1
+    cropUnlockOrder: 3
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
   - item: {fileID: 11400000, guid: 8d0c64627f83d9f4392a3ea5897ad1b7, type: 2}
     futurePrice: 0
     visible: 1
-  - item: {fileID: 11400000, guid: bc59c779f17f48b4eada0be8c748b201, type: 2}
-    futurePrice: 0
-    visible: 1
+    cropUnlockOrder: 4
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
   - item: {fileID: 11400000, guid: 0c929a378bb540944a45c1d47480816d, type: 2}
     futurePrice: 0
     visible: 1
-  - item: {fileID: 11400000, guid: 26741901f5e3eb64aade72e03860b605, type: 2}
+    cropUnlockOrder: 5
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 0
+  - item: {fileID: 11400000, guid: 2c1d4e5c41d3a5648ae463bcad1d10a6, type: 2}
     futurePrice: 0
     visible: 1
+    cropUnlockOrder: 6
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 1
+  - item: {fileID: 11400000, guid: e0ccef7595396844697f781e7377637a, type: 2}
+    futurePrice: 0
+    visible: 1
+    cropUnlockOrder: 7
+    requiredSpecialArea: 0
+    requiresHomeOrchard: 1
+  - item: {fileID: 11400000, guid: a1000000000000000000000000000004, type: 2}
+    futurePrice: 0
+    visible: 1
+    cropUnlockOrder: -1
+    requiredSpecialArea: 1
+    requiresHomeOrchard: 0
+  - item: {fileID: 11400000, guid: a1000000000000000000000000000008, type: 2}
+    futurePrice: 0
+    visible: 1
+    cropUnlockOrder: -1
+    requiredSpecialArea: 2
+    requiresHomeOrchard: 0

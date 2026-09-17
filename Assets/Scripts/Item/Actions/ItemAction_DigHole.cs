@@ -36,6 +36,10 @@ namespace Item.Actions
     
         public override IEnumerator ItemUseAction(Inventory.Inventory userInventory, int itemIndex)
         {
+            Inventory.InventoryItem tool = userInventory.GetItem(itemIndex);
+            if (tool == null || (tool.Data.HasEnergy && tool.Energy.current <= tool.Energy.min))
+                yield break;
+
             GridSelector gridSelector = userInventory.GetComponent<GridSelector>();
 
             if (gridManager == null)
@@ -75,7 +79,10 @@ namespace Item.Actions
 
                 yield return new WaitForSeconds(animationTime * 0.5f);
 
-                if (!gridManager.HasDirtHole(selectionLocation) && !gridManager.HasWater(selectionLocation) && gridManager.HasDirt(selectionLocation))
+                if (gridManager.CanHoeCell(selectionLocation) &&
+                    !gridManager.HasDirtHole(selectionLocation) &&
+                    !gridManager.HasWater(selectionLocation) &&
+                    gridManager.HasDirt(selectionLocation))
                 {
                     gridManager.SetDirtHoleTile(selectionLocation);
                     gridManager.RegisterFarmPlot(selectionLocation);
@@ -87,6 +94,7 @@ namespace Item.Actions
                     }
 
                     onSuccess.Invoke();
+                    userInventory.TryConsumeToolDurability(itemIndex);
                 }
 
                 yield return new WaitForSeconds(animationTime * 0.5f);

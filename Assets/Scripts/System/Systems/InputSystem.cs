@@ -1,6 +1,8 @@
 using Event.Events;
+using User_Interface;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using World.NPC;
 
 namespace GameSystem.Systems
 {
@@ -76,7 +78,7 @@ namespace GameSystem.Systems
 
         public override void OnFixedTick()
         {
-            if (!gamePauzed)
+            if (!gamePauzed && !World.FarmExpansionRuntime.IsRevealActive)
             {
                 Vector2 movementVector;
                 movementVector.x = Input.GetAxisRaw("Horizontal");
@@ -101,7 +103,12 @@ namespace GameSystem.Systems
 
         public override void OnTick()
         {
-            if (!gamePauzed)
+            bool foregroundWindowOpen = BagWindow.AnyOpen || ShopWindowController.AnyOpen ||
+                                        DialogueUIController.IsDialogueOpen ||
+                                        ConfirmationWindow.AnyOpen ||
+                                        World.FarmExpansionRuntime.IsRevealActive;
+
+            if (!gamePauzed && !foregroundWindowOpen)
             {
                 if (Input.mouseScrollDelta.y != 0)
                 {
@@ -139,7 +146,7 @@ namespace GameSystem.Systems
 
             if (Input.anyKey)
             {
-                if (!gamePauzed)
+                if (!gamePauzed && !foregroundWindowOpen)
                 {
                     for (int i = 0; i < 10; i++)
                     {
@@ -195,7 +202,13 @@ namespace GameSystem.Systems
                 // explicit key prevents WASD input from reaching the pause event.
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    events.pauze?.Invoke();
+                    if (World.FarmExpansionRuntime.IsRevealActive)
+                        return;
+                    // Foreground windows own Escape. Pause is only allowed when
+                    // there is no bag or shop to close first.
+                    if (!ConfirmationWindow.TryCloseOpen() &&
+                        !ShopWindowController.TryCloseOpen() && !BagWindow.TryCloseOpen())
+                        events.pauze?.Invoke();
                 }
 
                 if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Space))

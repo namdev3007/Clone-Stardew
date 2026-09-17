@@ -95,8 +95,12 @@ namespace World
 
         private readonly Dictionary<Vector3Int, FarmPlotData> farmPlots = new Dictionary<Vector3Int, FarmPlotData>();
         private readonly Dictionary<Vector3Int, SpriteRenderer> farmPlotIndicators = new Dictionary<Vector3Int, SpriteRenderer>();
+        private readonly Dictionary<Vector3Int, Vector3> farmPlotIndicatorBasePositions = new Dictionary<Vector3Int, Vector3>();
+        private readonly HashSet<Vector3Int> bobbingCropIndicators = new HashSet<Vector3Int>();
+        private readonly List<Vector3Int> staleFarmPlotIndicators = new List<Vector3Int>();
         private readonly Dictionary<Vector3Int, Crop> crops = new Dictionary<Vector3Int, Crop>();
         private readonly Dictionary<Vector3Int, Vector3Int> reservedPlantingCells = new Dictionary<Vector3Int, Vector3Int>();
+        private readonly HashSet<Vector3Int> waterRefillCells = new HashSet<Vector3Int>();
         private FarmStatusSpriteSet farmStatusSprites;
         private bool farmStatusIndicatorsVisible = true;
 
@@ -104,9 +108,41 @@ namespace World
 
         private bool initialized = false;
 
+        private const float CropStatusScale = 0.5f;
+        private const float CropStatusGap = 0.012f;
+        private const float CropStatusBobAmplitude = 0.006f;
+        private const float CropStatusBobCyclesPerSecond = 1.15f;
+        private const float GroundStatusCellFill = 0.72f;
+        private const float WateredDirtOverlayAlpha = 0.58f;
+        private const float FarmStatusValidationInterval = 0.25f;
+        private float nextFarmStatusValidationTime;
+
         private void Awake()
         {
             Initialize();
+        }
+
+        private void LateUpdate()
+        {
+            if (UnityEngine.Time.unscaledTime >= nextFarmStatusValidationTime)
+            {
+                nextFarmStatusValidationTime = UnityEngine.Time.unscaledTime + FarmStatusValidationInterval;
+                PruneStaleFarmPlotIndicators();
+            }
+
+            if (!farmStatusIndicatorsVisible || bobbingCropIndicators.Count == 0)
+                return;
+
+            float bobOffset = Mathf.Sin(UnityEngine.Time.time * Mathf.PI * 2f * CropStatusBobCyclesPerSecond)
+                              * CropStatusBobAmplitude;
+            foreach (Vector3Int location in bobbingCropIndicators)
+            {
+                if (farmPlotIndicators.TryGetValue(location, out SpriteRenderer renderer) && renderer != null &&
+                    renderer.enabled && farmPlotIndicatorBasePositions.TryGetValue(location, out Vector3 basePosition))
+                {
+                    renderer.transform.position = basePosition + Vector3.up * bobOffset;
+                }
+            }
         }
 
         private void EmitGridTilemapAdd(Vector3Int position, string tilemapName)
@@ -183,6 +219,12 @@ namespace World
 
             if (farmStatusSprites == null)
                 farmStatusSprites = Resources.Load<FarmStatusSpriteSet>("Farming/Farm Status Sprites");
+
+            // Wet ground is an overlay above the normal hoed tile. Blending it
+            // with the dry tile keeps the wet cue readable without turning the
+            // whole cell into an opaque dark block.
+            if (wateredDirtTileMap != null)
+                wateredDirtTileMap.color = new Color(1f, 1f, 1f, WateredDirtOverlayAlpha);
         }
 
         public void RegisterFarmPlot(Vector3Int location)
@@ -212,7 +254,8 @@ namespace World
         {
             Initialize();
 
-            if (reservedPlantingCells.ContainsKey(location) ||
+            if (!SpecialCropRuntime.CanHoe(location) ||
+                reservedPlantingCells.ContainsKey(location) ||
                 !farmPlots.TryGetValue(location, out FarmPlotData plot) ||
                 plot.occupied || plot.fertilized || !HasDirtHole(location))
             {
@@ -233,6 +276,14 @@ namespace World
         public bool TryBeginPlanting(Vector3Int location, CropDefinition definition, out bool fertilized)
         {
             fertilized = false;
+
+            if (!SpecialCropRuntime.CanPlant(location, definition))
+                return false;
+
+            // Cucumber/dragon fruit posts need no hoeing. Prepare the same soil
+            // state a hoed cell has so watering, growth and harvest keep working.
+            if (definition != null && SpecialCropRuntime.IsRepairedPlantingSlot(location))
+                PrepareTrellisPlantingSlot(location);
 
             if (definition != null && definition.IsPerennialTree)
             {
@@ -263,6 +314,14 @@ namespace World
             return true;
         }
 
+        private void PrepareTrellisPlantingSlot(Vector3Int location)
+        {
+            EnsureDirtTile(location);
+            if (!HasDirtHole(location))
+                SetDirtHoleTile(location);
+            RegisterFarmPlot(location);
+        }
+
         public bool CheatBeginShowcasePlanting(Vector3Int location, CropDefinition definition, out bool fertilized)
         {
             fertilized = true;
@@ -290,8 +349,7 @@ namespace World
             if (wasPerennialPlanting)
             {
                 farmPlots.Remove(location);
-                if (farmPlotIndicators.TryGetValue(location, out SpriteRenderer indicator) && indicator != null)
-                    indicator.enabled = false;
+                RemoveFarmPlotIndicator(location);
                 return;
             }
 
@@ -337,27 +395,51 @@ namespace World
             RefreshFarmPlotIndicator(plot);
         }
 
+        public void RefreshCropStatusPosition(Vector3 worldPosition)
+        {
+            Vector3Int location = GetGridLocation(worldPosition);
+            if (farmPlots.TryGetValue(location, out FarmPlotData plot) && plot.occupied &&
+                plot.status != FarmPlotStatus.None)
+            {
+                RefreshFarmPlotIndicator(plot);
+            }
+        }
+
         public void ReleaseFarmPlot(Vector3 worldPosition)
         {
             Vector3Int location = GetGridLocation(worldPosition);
+            bool wasPerennialPlot = reservedPlantingCells.TryGetValue(location, out Vector3Int center) &&
+                                    center == location;
             ReleasePerennialFootprint(location);
+            crops.Remove(location);
+
+            // Fruit trees are planted directly on hoeable ground. Once chopped,
+            // restore that cell to ordinary ground instead of leaving behind a
+            // phantom farm plot/status marker.
+            if (wasPerennialPlot)
+            {
+                farmPlots.Remove(location);
+                RemoveFarmPlotIndicator(location);
+                return;
+            }
+
             RegisterFarmPlot(location);
             FarmPlotData plot = farmPlots[location];
             plot.occupied = false;
             plot.fertilized = false;
             plot.status = FarmPlotStatus.Fertilize;
-            crops.Remove(location);
             RefreshFarmPlotIndicator(plot);
         }
 
         private bool CanPlantPerennialTree(Vector3Int center)
         {
+            bool canPlantOnGrass = FarmExpansionRuntime.CanPlantPerennialFootprint(center);
             for (int y = -1; y <= 1; y++)
             {
                 for (int x = -1; x <= 1; x++)
                 {
                     Vector3Int location = center + new Vector3Int(x, y, 0);
-                    if (!HasDirt(location) || HasDirtHole(location) || HasWater(location) ||
+                    if ((!canPlantOnGrass && !HasDirt(location)) || HasDirtHole(location) || HasWater(location) ||
                         reservedPlantingCells.ContainsKey(location) || crops.ContainsKey(location))
                         return false;
 
@@ -393,6 +475,12 @@ namespace World
 
         private void RefreshFarmPlotIndicator(FarmPlotData plot)
         {
+            if (plot.status != FarmPlotStatus.None && !IsFarmStatusApplicable(plot))
+            {
+                RemoveFarmPlotIndicator(plot.location);
+                return;
+            }
+
             if (!farmStatusIndicatorsVisible)
             {
                 if (farmPlotIndicators.TryGetValue(plot.location, out SpriteRenderer disabledRenderer))
@@ -405,6 +493,8 @@ namespace World
             {
                 if (farmPlotIndicators.TryGetValue(plot.location, out SpriteRenderer hiddenRenderer))
                     hiddenRenderer.enabled = false;
+                bobbingCropIndicators.Remove(plot.location);
+                farmPlotIndicatorBasePositions.Remove(plot.location);
                 return;
             }
 
@@ -418,21 +508,115 @@ namespace World
                 farmPlotIndicators[plot.location] = renderer;
             }
 
-            renderer.sprite = sprite;
-            const float statusScale = 0.5f;
-            const float statusAlpha = 75f / 255f;
-            const float statusBottomOffset = 0f;
-            renderer.transform.localScale = Vector3.one * statusScale;
-            renderer.color = new Color(1f, 1f, 1f, statusAlpha);
+            Vector3 cropAnchor = Vector3.zero;
+            bool followsCrop = plot.occupied && crops.TryGetValue(plot.location, out Crop crop) && crop != null &&
+                               crop.gameObject.activeInHierarchy && crop.TryGetStatusAnchor(out cropAnchor);
+            float statusScale = followsCrop ? CropStatusScale : GetGroundStatusScale(sprite);
 
-            // Keep the visible sprite centered over the cell and anchor its bottom
-            // after scaling, instead of leaving its old center floating too high.
-            Vector3 spriteAnchorOffset = new Vector3(
-                -sprite.bounds.center.x * statusScale,
-                statusBottomOffset - sprite.bounds.min.y * statusScale,
-                0f);
-            renderer.transform.position = GetWorldLocation(plot.location) + spriteAnchorOffset;
+            renderer.sprite = sprite;
+            renderer.transform.localScale = Vector3.one * statusScale;
+            renderer.color = Color.white;
+
+            Vector3 basePosition;
+            if (followsCrop)
+            {
+                // The imported status sprites use a bottom-left pivot. Anchor the
+                // visible bottom-centre just above the current crop frame.
+                basePosition = cropAnchor + new Vector3(
+                    -sprite.bounds.center.x * statusScale,
+                    CropStatusGap - sprite.bounds.min.y * statusScale,
+                    0f);
+                bobbingCropIndicators.Add(plot.location);
+            }
+            else
+            {
+                // Empty-plot instructions belong inside the soil cell. Centre the
+                // visible bounds instead of centring the sprite's custom pivot.
+                basePosition = GetWorldLocation(plot.location) - sprite.bounds.center * statusScale;
+                bobbingCropIndicators.Remove(plot.location);
+            }
+
+            farmPlotIndicatorBasePositions[plot.location] = basePosition;
+            renderer.transform.position = basePosition;
             renderer.enabled = true;
+        }
+
+        private bool IsFarmStatusApplicable(FarmPlotData plot)
+        {
+            if (plot.status == FarmPlotStatus.None)
+                return false;
+
+            if (!plot.occupied)
+                return HasDirtHole(plot.location);
+
+            return crops.TryGetValue(plot.location, out Crop crop) && crop != null &&
+                   crop.gameObject.activeInHierarchy;
+        }
+
+        private void PruneStaleFarmPlotIndicators()
+        {
+            if (farmPlotIndicators.Count == 0)
+                return;
+
+            staleFarmPlotIndicators.Clear();
+            foreach (KeyValuePair<Vector3Int, SpriteRenderer> entry in farmPlotIndicators)
+            {
+                if (entry.Value == null || !farmPlots.TryGetValue(entry.Key, out FarmPlotData plot) ||
+                    !IsFarmStatusApplicable(plot))
+                {
+                    staleFarmPlotIndicators.Add(entry.Key);
+                }
+            }
+
+            for (int i = 0; i < staleFarmPlotIndicators.Count; i++)
+            {
+                Vector3Int location = staleFarmPlotIndicators[i];
+                bool removePlot = farmPlots.TryGetValue(location, out FarmPlotData plot) &&
+                                  !plot.occupied && !HasDirtHole(location);
+
+                RemoveFarmPlotIndicator(location);
+                if (removePlot)
+                {
+                    farmPlots.Remove(location);
+                    RemoveRecordedFarmTileActions(location);
+                }
+            }
+        }
+
+        private void RemoveRecordedFarmTileActions(Vector3Int location)
+        {
+            string dirtHoleMapName = dirtHoleTileMap != null ? dirtHoleTileMap.name : null;
+            string wateredMapName = wateredDirtTileMap != null ? wateredDirtTileMap.name : null;
+
+            for (int i = saveData.actions.Count - 1; i >= 0; i--)
+            {
+                TileManipulationAction action = saveData.actions[i];
+                if (action.Location == location &&
+                    (action.Tag == dirtHoleMapName || action.Tag == wateredMapName))
+                {
+                    saveData.actions.RemoveAt(i);
+                }
+            }
+        }
+
+        private void RemoveFarmPlotIndicator(Vector3Int location)
+        {
+            if (farmPlotIndicators.TryGetValue(location, out SpriteRenderer renderer) && renderer != null)
+                Destroy(renderer.gameObject);
+
+            farmPlotIndicators.Remove(location);
+            farmPlotIndicatorBasePositions.Remove(location);
+            bobbingCropIndicators.Remove(location);
+        }
+
+        private float GetGroundStatusScale(Sprite sprite)
+        {
+            float spriteSize = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y);
+            float cellSize = Mathf.Min(Mathf.Abs(Grid.cellSize.x), Mathf.Abs(Grid.cellSize.y));
+            if (spriteSize <= Mathf.Epsilon || cellSize <= Mathf.Epsilon)
+                return CropStatusScale;
+
+            return Mathf.Min(CropStatusScale, cellSize * GroundStatusCellFill / spriteSize);
         }
 
         public void CheatSetFarmStatusVisible(bool visible)
@@ -926,12 +1110,49 @@ namespace World
             return waterTileMap != null && waterTileMap.GetTile(position) != null;
         }
 
+        public bool CanHoeCell(Vector3Int position)
+        {
+            return SpecialCropRuntime.CanHoe(position);
+        }
+
+        public void RegisterWaterRefillCell(Vector3Int position)
+        {
+            position.z = 0;
+            waterRefillCells.Add(position);
+        }
+
+        public void UnregisterWaterRefillCell(Vector3Int position)
+        {
+            position.z = 0;
+            waterRefillCells.Remove(position);
+        }
+
+        public bool CanRefillWaterAt(Vector3Int position)
+        {
+            position.z = 0;
+            return HasWater(position) || waterRefillCells.Contains(position);
+        }
+
         public void SetDirtTile(Vector3Int location)
         {
             if (dirtTileMap != null)
             {
                 SetTile(location, dirtTileMap.name, dirtTile);
             }
+        }
+
+        /// <summary>
+        /// Adds ordinary farmable ground only when the cell does not already
+        /// contain it. This keeps unlock-time terrain preparation idempotent
+        /// and avoids recording duplicate tile actions in the save data.
+        /// </summary>
+        public bool EnsureDirtTile(Vector3Int location)
+        {
+            if (dirtTileMap == null || dirtTile == null || HasDirt(location) || HasWater(location))
+                return false;
+
+            SetTile(location, dirtTileMap.name, dirtTile);
+            return true;
         }
 
         public void SetWateredDirtTile(Vector3Int location)

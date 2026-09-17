@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 7977042230178232086}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.29, z: -0.01}
+  m_LocalPosition: {x: 0, y: 0.462, z: 0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: -1
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -101,6 +101,8 @@ GameObject:
   - component: {fileID: 5481008341311304365}
   - component: {fileID: 3086497993451606728}
   - component: {fileID: 1806098812390068480}
+  - component: {fileID: 7806223303114143235}
+  - component: {fileID: 5459656498833081899}
   m_Layer: 0
   m_Name: NPC Seed Seller
   m_TagString: Untagged
@@ -168,7 +170,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -155175177020113876, guid: ec8025506696f794384b6d72ae01ede5,
+  m_Sprite: {fileID: 4950430765039985783, guid: 59fd51b7a0aa0f2449dc8493f268555e,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -194,12 +196,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 4004637264435659149}
   idleFrames:
-  - {fileID: -155175177020113876, guid: ec8025506696f794384b6d72ae01ede5, type: 3}
-  - {fileID: -7214434699414855344, guid: ec8025506696f794384b6d72ae01ede5, type: 3}
-  - {fileID: 2660160098718716277, guid: ec8025506696f794384b6d72ae01ede5, type: 3}
-  - {fileID: -997104925916360597, guid: ec8025506696f794384b6d72ae01ede5, type: 3}
-  - {fileID: -5295175979433034826, guid: ec8025506696f794384b6d72ae01ede5, type: 3}
-  - {fileID: -1132665933351489177, guid: ec8025506696f794384b6d72ae01ede5, type: 3}
+  - {fileID: 4950430765039985783, guid: 59fd51b7a0aa0f2449dc8493f268555e, type: 3}
+  - {fileID: 2493980915078759067, guid: 59fd51b7a0aa0f2449dc8493f268555e, type: 3}
+  - {fileID: -3598980173320854040, guid: 59fd51b7a0aa0f2449dc8493f268555e, type: 3}
+  - {fileID: 4510834732353430796, guid: 59fd51b7a0aa0f2449dc8493f268555e, type: 3}
+  - {fileID: 738873719452866464, guid: 59fd51b7a0aa0f2449dc8493f268555e, type: 3}
+  - {fileID: 7462902595880005379, guid: 59fd51b7a0aa0f2449dc8493f268555e, type: 3}
   framesPerSecond: 6
 --- !u!114 &5481008341311304365
 MonoBehaviour:
@@ -255,10 +257,10 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.1088}
+  m_Offset: {x: 0, y: 0.0612}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0}
     oldSize: {x: 0.2, y: 0.34}
     newSize: {x: 0.2, y: 0.34}
     adaptiveTilingThreshold: 0.5
@@ -281,7 +283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 1
   englishName: Uncle Hai
-  portrait: {fileID: -6095755055776031339, guid: ef5fb95a5779e3d47b5ebe65cb414e48,
+  portrait: {fileID: -6202418465624162077, guid: 4a76992bf0ae1114fb0f7de551c4c8fa,
     type: 3}
   visuals: {fileID: 11400000, guid: 99363ac605977694484eaf62ea80ed02, type: 2}
   introduction: {fileID: 11400000, guid: 962a83e35b85a1d4cbbad1e23f56a75b, type: 2}
@@ -302,3 +304,30 @@ MonoBehaviour:
   hoverInteractionEvent: {fileID: 11400000, guid: 956f458aa3cfb5c45ae24917ff8b57a6,
     type: 2}
   interactionDistance: 0.8
+--- !u!210 &7806223303114143235
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8695163212306728205}
+  m_Enabled: 1
+  m_SortingLayerID: -1284687703
+  m_SortingLayer: 1
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+--- !u!114 &5459656498833081899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8695163212306728205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81be0520ef8be7c40aa90cf28e8d0438, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sortingGroup: {fileID: 7806223303114143235}
+  positionScaling: -100
+  flip: 0

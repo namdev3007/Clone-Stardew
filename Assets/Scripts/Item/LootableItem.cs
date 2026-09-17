@@ -46,6 +46,7 @@ namespace Item
             if (configuration.data != null)
             {
                 references.spriteRenderer.sprite = configuration.data.Icon;
+                references.spriteRenderer.color = Color.white;
                 references.spriteRenderer.transform.localScale = Vector3.one * configuration.data.WorldDropScale;
             }
         }
@@ -76,6 +77,9 @@ namespace Item
             if (configuration.data != null)
             {
                 references.spriteRenderer.sprite = configuration.data.Icon;
+                // Lootables are pooled. Always clear any tint left by their
+                // previous use and render harvest drops at their source colour.
+                references.spriteRenderer.color = Color.white;
                 references.spriteRenderer.transform.localScale = Vector3.one * configuration.data.WorldDropScale;
 
                 if (configuration.amount > 1 && configuration.data.CanStack)

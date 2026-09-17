@@ -6,6 +6,7 @@ using Entity_Components.Player;
 using Referencing.Scriptable_Pool;
 using System.Collections;
 using UnityEngine;
+using World.Objects;
 
 namespace Item.Actions
 {
@@ -44,6 +45,26 @@ namespace Item.Actions
             if (getMover.IsMovementFrozen)
                 yield break;
 
+            Inventory.InventoryItem heldItem = userInventory.GetItem(itemIndex);
+            bool isCropAxe = heldItem?.Data?.ItemName == "Axe";
+            Crop axeTarget = null;
+            World.ClearableOrchardProp orchardPropTarget = null;
+            if (isCropAxe)
+            {
+                if (heldItem.Data.HasEnergy && heldItem.Energy.current <= heldItem.Energy.min)
+                    yield break;
+                if (getGridSelector == null)
+                    yield break;
+
+                Vector3Int selectedCell = getGridSelector.GetGridSelectionPosition();
+                orchardPropTarget = World.ClearableOrchardProp.FindAtCell(selectedCell);
+                axeTarget = getGridSelector?.GetGridManager()?.GetCrop(selectedCell);
+                // The axe is deliberately isolated from scenery trees and from
+                // ordinary vegetable crops.
+                if (orchardPropTarget == null && (axeTarget == null || !axeTarget.UsesPerennialFootprint))
+                    yield break;
+            }
+
             Vector2 aimDirection = getGridSelector != null
                 ? getGridSelector.GetMouseLookDirection()
                 : getAimer.GetAimDirection();
@@ -75,6 +96,19 @@ namespace Item.Actions
             getMover.FreezeMovement(true);
 
             yield return new WaitForSeconds(animationTime * 0.5f);
+
+            if (isCropAxe)
+            {
+                bool hitAccepted = orchardPropTarget != null
+                    ? orchardPropTarget.TryHit()
+                    : axeTarget != null && axeTarget.TryUseAxe();
+                if (hitAccepted)
+                    userInventory.TryConsumeToolDurability(itemIndex);
+
+                yield return new WaitForSeconds(animationTime * 0.5f);
+                getMover.FreezeMovement(false);
+                yield break;
+            }
 
             GameObject damageVolume = damageVolumePool.Retrieve(attackLocation, new Quaternion());
 

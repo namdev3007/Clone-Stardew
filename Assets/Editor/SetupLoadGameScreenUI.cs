@@ -13,7 +13,9 @@ public static class SetupLoadGameScreenUI
     private const string PanelPath = "Assets/Sprites/settings-loadgame-ui/bản-load-game.png";
     private const string AddButtonPath = "Assets/Sprites/settings-loadgame-ui/new-game-plus-1.png";
     private const string AddIconPath = "Assets/Sprites/settings-loadgame-ui/new-game-plus-2.png";
-    private const int LayoutVersion = 1;
+    private const string BackButtonPath = "Assets/Sprites/Buttons/other-button/back-lùi về.png";
+    private const string BackgroundPath = "Assets/Sprites/Background/screen-home.png";
+    private const int LayoutVersion = 2;
 
     [InitializeOnLoadMethod]
     private static void InstallAfterCompile()
@@ -50,15 +52,43 @@ public static class SetupLoadGameScreenUI
             Sprite panelSprite = LoadSprite(PanelPath);
             Sprite buttonSprite = LoadSprite(AddButtonPath);
             Sprite iconSprite = LoadSprite(AddIconPath);
-            if (panelSprite == null || buttonSprite == null || iconSprite == null)
+            Sprite backSprite = LoadSprite(BackButtonPath);
+            Sprite backgroundSprite = LoadSprite(BackgroundPath);
+            if (panelSprite == null || buttonSprite == null || iconSprite == null ||
+                backSprite == null || backgroundSprite == null)
             {
                 Debug.LogError("Load-game UI setup: one or more replacement sprites could not be loaded.");
                 return;
             }
 
             Image oldScreenImage = screen.GetComponent<Image>();
-            if (oldScreenImage != null)
-                oldScreenImage.enabled = false;
+            if (oldScreenImage == null)
+                oldScreenImage = screen.AddComponent<Image>();
+            oldScreenImage.enabled = true;
+            oldScreenImage.sprite = backgroundSprite;
+            oldScreenImage.color = Color.white;
+            oldScreenImage.preserveAspect = false;
+            oldScreenImage.raycastTarget = true;
+
+            Transform returnTransform = screen.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(child => child.name == "Button_Return");
+            if (returnTransform != null)
+            {
+                foreach (Transform child in returnTransform.Cast<Transform>().ToArray())
+                    Object.DestroyImmediate(child.gameObject);
+                Image returnImage = returnTransform.GetComponent<Image>();
+                if (returnImage == null)
+                    returnImage = returnTransform.gameObject.AddComponent<Image>();
+                returnImage.sprite = backSprite;
+                returnImage.color = Color.white;
+                returnImage.preserveAspect = true;
+                returnImage.raycastTarget = true;
+                Button returnButton = returnTransform.GetComponent<Button>();
+                if (returnButton != null)
+                    returnButton.targetGraphic = returnImage;
+                SetRect((RectTransform)returnTransform, new Vector2(0f, 1f),
+                    new Vector2(82f, -52f), new Vector2(132f, 66f));
+            }
 
             RectTransform panel = CreateImage(screen.transform, "Load Game Panel", panelSprite);
             SetRect(panel, Vector2.one * 0.5f, new Vector2(0f, 65f), new Vector2(810f, 268.5f));

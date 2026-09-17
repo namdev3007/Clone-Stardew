@@ -34,9 +34,11 @@ public static class SetupNpcAssets
         EditorApplication.delayCall += () =>
         {
             Setup(false);
-            EnsureNpcPrefabColliders();
+            // Dialogue data is independent from prefab physics. Populate the
+            // localized assets first so a collider/prefab warning cannot leave
+            // every Vietnamese line empty and force the runtime English fallback.
             EnsureNpcDialogueSetup();
-            SpawnTestNpcs(false);
+            EnsureNpcPrefabColliders();
         };
     }
 
@@ -45,9 +47,8 @@ public static class SetupNpcAssets
         if (state == PlayModeStateChange.EnteredEditMode)
             EditorApplication.delayCall += () =>
             {
-                EnsureNpcPrefabColliders();
                 EnsureNpcDialogueSetup();
-                SpawnTestNpcs(false);
+                EnsureNpcPrefabColliders();
             };
     }
 
@@ -185,7 +186,7 @@ public static class SetupNpcAssets
         return null;
     }
 
-    [MenuItem("Tools/NPC/Setup English Dialogue")]
+    [MenuItem("Tools/NPC/Setup Localized Dialogue")]
     public static void EnsureNpcDialogueSetupFromMenu()
     {
         EnsureNpcDialogueSetup();
@@ -206,9 +207,12 @@ public static class SetupNpcAssets
         visuals.continueIcon = LoadFirst(SpriteFolder + "/dialogue-box/dialogue-box-icon.png");
         visuals.skipButton = LoadFirst("Assets/Sprites/Buttons/tieng-anh/skip.png");
         visuals.textFont = CreateOrLoadTmpFont(DialogueFontSource, DialogueFontAsset);
-        visuals.playerPortrait = LoadFirst(SpriteFolder + "/nhân vật chi tiết/nhân vật player_800.png");
-        visuals.grandpaPortrait = LoadFirst(SpriteFolder + "/nhân vật chi tiết/nhân vật người ông_800.png");
-        visuals.sellerPortrait = LoadFirst(SpriteFolder + "/nhân vật chi tiết/nhân vật người bán_800.png");
+        visuals.playerPortraitFrames = LoadSprites(SpriteFolder + "/nhân vật chi tiết new/character portrait-1news-Sheet.png");
+        visuals.grandpaPortraitFrames = LoadSprites(SpriteFolder + "/nhân vật chi tiết new/character portrait-2news-Sheet.png");
+        visuals.sellerPortraitFrames = LoadSprites(SpriteFolder + "/nhân vật chi tiết new/character portrait-3news-Sheet.png");
+        visuals.playerPortrait = visuals.playerPortraitFrames.FirstOrDefault();
+        visuals.grandpaPortrait = visuals.grandpaPortraitFrames.FirstOrDefault();
+        visuals.sellerPortrait = visuals.sellerPortraitFrames.FirstOrDefault();
         EditorUtility.SetDirty(visuals);
 
         DialogueSequence grandpaIntro = SaveSequence("Grandpa Intro", "grandpa.intro", new[]
@@ -317,7 +321,7 @@ public static class SetupNpcAssets
 
         EnsureDialogueUiInCoreScene(visuals, false);
         AssetDatabase.SaveAssets();
-        Debug.Log("English NPC dialogue, tutorial and shop catalog are ready.");
+        Debug.Log("Localized NPC dialogue, tutorial and shop catalog are ready.");
     }
 
     [MenuItem("Tools/NPC/Create Dialogue UI In Core 1")]
@@ -413,19 +417,102 @@ public static class SetupNpcAssets
             speaker = speaker,
             localizationKey = key,
             english = english,
-            vietnamese = string.Empty
+            vietnamese = GetVietnameseDialogue(key)
         };
+    }
+
+    private static string GetVietnameseDialogue(string key)
+    {
+        switch (key)
+        {
+            case "grandpa.intro.001": return "Dậy rồi đấy à? Nắng lên đến đọt cây rồi kia kìa. Ở trên phố quen ngủ nướng rồi phải không?";
+            case "grandpa.intro.002": return "Dạ... tại dạo này cháu mất ngủ. Lâu lắm rồi cháu mới ngủ được một giấc dài như vậy.";
+            case "grandpa.intro.003": return "Gió quê mát nên dễ ngủ đấy. Nhưng thôi, trời sáng lâu rồi, ông có chút việc cho cháu đây.";
+            case "grandpa.intro.004": return "Này, cầm lấy cái nón, cái cuốc và bịch hạt giống này. Nhớ đội nón vào, nắng ngoài này gắt hơn cháu nhớ đấy.";
+            case "grandpa.intro.005": return "Làm luôn bây giờ hả ông?";
+            case "grandpa.intro.006": return "Chứ cháu muốn đợi đến trưa nắng chang chang mới làm à?";
+            case "grandpa.intro.007": return "Cỏ dại mọc lấn hết mảnh đất bên hông nhà rồi. Cháu dọn bớt cỏ và xới đất cho tơi ra nhé.";
+            case "grandpa.intro.008": return "Cắm chắc lưỡi cuốc xuống rồi kéo ngược về phía mình. Đừng nghĩ nhiều, trước mắt cuốc thử ba ô đất đi.";
+
+            case "grandpa.reminder.001": return "Cứ làm từng bước một thôi. Mảnh đất bên hông nhà là chỗ thích hợp để bắt đầu.";
+            case "grandpa.reminder.002": return "Trước mắt cuốc ba ô là được. Nhớ để ý chỗ cháu vung cuốc đấy.";
+
+            case "grandpa.after_hoe.001": return "Khá lắm. Tay chân cháu vẫn còn nhớ việc hơn cháu tưởng đấy.";
+            case "grandpa.after_hoe.002": return "Này, ông hỏi thật. Trên thành phố rốt cuộc có chuyện gì mà cháu lại đột ngột về đây thế?";
+            case "grandpa.after_hoe.003": return "Dạ... cũng không có gì đâu ông. Dạo này công ty ít việc nên cháu xin nghỉ vài hôm về thăm ông thôi.";
+            case "grandpa.after_hoe.004": return "Cháu giấu ai chứ giấu sao nổi ông.";
+            case "grandpa.after_hoe.005": return "Nhìn quầng thâm dưới mắt cháu, rồi nghe cháu thở dài từ sáng đến giờ là ông biết rồi.";
+            case "grandpa.after_hoe.006": return "Lại làm bù đầu bù cổ, hay bị người ta chèn ép mà lương chẳng được bao nhiêu, đúng không?";
+            case "grandpa.after_hoe.007": return "...";
+            case "grandpa.after_hoe.008": return "Bằng tuổi cháu bây giờ, ông cũng từng nghĩ mình sức dài vai rộng thì việc gì cũng gánh được.";
+            case "grandpa.after_hoe.009": return "Ông từng đi thanh niên xung phong, rồi làm ở hợp tác xã, lúc nào cũng muốn chứng minh rằng mình chịu được mọi thứ.";
+            case "grandpa.after_hoe.010": return "Nhưng đời đâu có đơn giản như vậy.";
+            case "grandpa.after_hoe.011": return "Người trẻ cứ mải chạy về phía trước, lúc nào cũng muốn nhanh hơn và chứng tỏ bản thân.";
+            case "grandpa.after_hoe.012": return "Đến khi vấp ngã thì lại vì sĩ diện mà ôm hết buồn bực vào người.";
+            case "grandpa.after_hoe.013": return "Cháu chỉ cảm thấy mình đang bị tụt lại phía sau thôi ông ạ.";
+            case "grandpa.after_hoe.014": return "Bạn bè cháu đứa nào cũng thăng chức, mua nhà mua xe, còn cháu thì... lại quay về vạch xuất phát.";
+            case "grandpa.after_hoe.015": return "Đừng lấy cuộc đời mình ra so với người khác.";
+            case "grandpa.after_hoe.016": return "Mỗi người có một vạch xuất phát và một nhịp sống khác nhau.";
+            case "grandpa.after_hoe.017": return "Cháu cứ đòi nhảy thẳng lên đỉnh thì chỉ có ngã đau hơn thôi.";
+            case "grandpa.after_hoe.018": return "Vậy cháu nên làm gì hả ông?";
+            case "grandpa.after_hoe.019": return "Nhìn mảnh đất này xem. Không phải cứ ném hạt xuống là sáng hôm sau có rau để hái đâu.";
+            case "grandpa.after_hoe.020": return "Đầu tiên phải chuẩn bị một mảnh đất tốt, rồi mới gieo hạt. Sau đó mỗi ngày chăm nó một chút.";
+            case "grandpa.after_hoe.021": return "Con người cũng chẳng khác là bao.";
+            case "grandpa.after_hoe.022": return "Cháu đang kiệt sức, đầu óc lại rối bời. Cứ cho mình thời gian nghỉ ngơi rồi hãy quyết định sẽ đi đâu tiếp.";
+            case "grandpa.after_hoe.023": return "Đi chậm không có nghĩa là thất bại. Cháu vẫn đang trưởng thành từng ngày đấy thôi.";
+            case "grandpa.after_hoe.024": return "Dạ, cháu hiểu rồi.";
+            case "grandpa.after_hoe.025": return "Tốt. Giờ cứ ăn uống, ngủ nghỉ cho khỏe rồi làm đất theo sức của mình.";
+            case "grandpa.after_hoe.026": return "Khi cần hạt giống hay nông cụ thì sang tìm chú Hải. Chú ấy tròn tròn ở gần đây, cháu nhìn là nhận ra ngay.";
+            case "grandpa.after_hoe.027": return "À, để ý quanh vườn nhé. Ông để quên cái bình tưới ở đâu đó ngoài kia rồi.";
+            case "grandpa.after_hoe.028": return "Dạ, cháu nhớ rồi ông.";
+
+            case "grandpa.farming_advice.001": return "Cải tạo đất trước, gieo hạt xuống rồi kiên nhẫn chờ cây lớn.";
+            case "grandpa.farming_advice.002": return "Chăm sóc tốt là cần, nhưng kiên nhẫn mới là việc quan trọng nhất.";
+            case "grandpa.farming_advice.003": return "Dạ, cháu nhớ rồi ông.";
+            case "grandpa.expand_unavailable.001": return "Cứ lo cho mảnh ruộng đầu tiên ổn thỏa đã rồi mình mới tính chuyện khai thêm đất.";
+            case "grandpa.expand_unavailable.002": return "Khi nào trong làng giải quyết lại được giấy phép và tiền mở đất thì cháu quay lại nhé.";
+
+            case "hai.intro.001": return "Dạ chào chú. Cháu là cháu nội ông Tám ở xóm dưới, mới về hôm qua ạ.";
+            case "hai.intro.002": return "Ơ! Cháu lão Tám đấy à? Trông lớn thế này rồi cơ à!";
+            case "hai.intro.003": return "Về từ hôm qua mà giờ mới chịu sang chào chú đấy nhé?";
+            case "hai.intro.004": return "Da trắng, tay sạch thế này đúng là dân thành phố rồi!";
+            case "hai.intro.005": return "Sao, sang đây mua gì? Rượu cho ông nội hay bánh kẹo cho mình?";
+            case "hai.intro.006": return "Dạ không chú. Ông nội bảo cháu sang mua ít hạt giống với dụng cụ làm vườn ạ.";
+            case "hai.intro.007": return "Cháu định trồng rau à? Tốt!";
+            case "hai.intro.008": return "Thanh niên giờ chịu đụng tay vào đất cát là quý rồi đấy.";
+            case "hai.intro.009": return "Còn hơn cứ cắm mặt vào điện thoại cả ngày đến mụ mị người.";
+            case "hai.intro.010": return "Chú có hạt giống, nông cụ và đủ thứ cần cho một khu vườn nhỏ. Cháu vào xem đi.";
+            case "hai.revisit.001.001": return "Lại mua hạt giống hả cháu? Hay lần này định sắm thêm ít đồ nghề?";
+            case "hai.revisit.002.001": return "Cái cuốc dùng có êm không, hay cháu đã làm cong nó mất rồi?";
+            case "hai.revisit.003.001": return "Đợi chú tỉa nốt cành này nhé. Cháu cần gì thì cứ vào xem trước đi.";
+            case "hai.revisit.004.001": return "Ông cháu ngày trước mua một hạt cũng phải mặc cả thành ba. Đừng học cái tính ấy nhé.";
+            case "hai.revisit.005.001": return "Làm nông thì tưởng đơn giản, cho đến khi thời tiết tự dưng đổi ý đấy.";
+            default: return string.Empty;
+        }
     }
 
     private static ItemData[] LoadShopItems()
     {
-        return AssetDatabase.FindAssets("t:ItemData", new[] { "Assets/ScriptableObjects/Items" })
-            .Select(AssetDatabase.GUIDToAssetPath)
-            .Where(path => path.Contains("/Item_Seed_") ||
-                (path.Contains("/Tools/") && !path.EndsWith("Item_Gold.asset") && !path.EndsWith("Item_Fertilizer.asset")))
+        string[] paths =
+        {
+            "Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset",
+            "Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset",
+            "Assets/ScriptableObjects/Items/Tools/Item_Fertilizer.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Carrot.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Onion.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Garlic.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Cabbage.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Potato.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Tomato.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Banana.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Mango.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_Cucumber.asset",
+            "Assets/ScriptableObjects/Items/Crops/Item_Seed_DragonFruit.asset"
+        };
+
+        return paths
             .Select(AssetDatabase.LoadAssetAtPath<ItemData>)
             .Where(item => item != null)
-            .OrderBy(item => item.ItemName)
             .ToArray();
     }
 
@@ -499,10 +586,10 @@ public static class SetupNpcAssets
 
             GameObject statusObject = new GameObject("Dialogue Status");
             statusObject.transform.SetParent(root.transform, false);
-            statusObject.transform.localPosition = new Vector3(0f, 0.29f, -0.01f);
+            statusObject.transform.localPosition = new Vector3(0f, 0.462f, 0.01f);
             SpriteRenderer statusRenderer = statusObject.AddComponent<SpriteRenderer>();
             statusRenderer.sortingLayerID = body.sortingLayerID;
-            statusRenderer.sortingOrder = body.sortingOrder + 1;
+            statusRenderer.sortingOrder = body.sortingOrder - 1;
             statusRenderer.enabled = false;
 
             NpcDialogueStatus dialogueStatus = root.AddComponent<NpcDialogueStatus>();
@@ -534,7 +621,6 @@ public static class SetupNpcAssets
             SpriteRenderer body = prefabRoot.GetComponent<SpriteRenderer>();
             if (body == null || body.sprite == null)
                 return;
-
             BoxCollider2D bodyCollider = prefabRoot.GetComponent<BoxCollider2D>();
             if (bodyCollider == null)
                 bodyCollider = prefabRoot.AddComponent<BoxCollider2D>();

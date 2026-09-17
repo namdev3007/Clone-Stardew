@@ -10,18 +10,15 @@ public static class SetupFullBodyPlayer
     private const string PrefabPath = "Assets/Prefabs/World/Player.prefab";
     private const string SpriteRoot = "Assets/Sprites/Player/";
 
-    [InitializeOnLoadMethod]
-    private static void RunWhenScriptsReload()
+    [MenuItem("Tools/Game/Setup Full Body Player")]
+    private static void RunFromMenu()
     {
-        EditorApplication.delayCall += () =>
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        if (prefab != null)
         {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
-            if (prefab != null)
-            {
-                RemoveLegacyVisuals();
-                Run();
-            }
-        };
+            RemoveLegacyVisuals();
+            Run();
+        }
     }
 
     private static void RemoveLegacyVisuals()

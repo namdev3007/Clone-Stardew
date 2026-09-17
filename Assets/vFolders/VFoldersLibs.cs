@@ -1361,8 +1361,16 @@ namespace VFolders.Libs
             {
                 this.Clear();
 
-                for (int i = 0; i < keys.Count; i++)
+                int count = System.Math.Min(keys != null ? keys.Count : 0, values != null ? values.Count : 0);
+                for (int i = 0; i < count; i++)
+                {
+                    // Old/moved Unity assets can leave a missing reference in
+                    // VFolders' serialized cache. Dictionary rejects null keys,
+                    // so ignore that stale entry and allow the cache to rebuild.
+                    if (ReferenceEquals(keys[i], null))
+                        continue;
                     this[keys[i]] = values[i];
+                }
 
             }
 

@@ -18,5 +18,17 @@ namespace World.NPC
         public Sprite playerPortrait;
         public Sprite grandpaPortrait;
         public Sprite sellerPortrait;
+        public Sprite[] playerPortraitFrames;
+        public Sprite[] grandpaPortraitFrames;
+        public Sprite[] sellerPortraitFrames;
+
+        public Sprite[] GetNpcPortraitFrames(string npcName)
+        {
+            if (!string.IsNullOrWhiteSpace(npcName) &&
+                npcName.IndexOf("Hai", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                return sellerPortraitFrames;
+
+            return grandpaPortraitFrames;
+        }
     }
 }

@@ -2,6 +2,8 @@ using Data;
 using Event.Events;
 using Plugins.Lowscope.ComponentSaveSystem;
 using Referencing.Scriptable_Variables.References;
+using System;
+using System.Globalization;
 using UnityEngine;
 
 namespace GameSystem.Systems
@@ -56,19 +58,41 @@ namespace GameSystem.Systems
             if (string.IsNullOrEmpty(saveJson))
             {
                 isNewGame = true;
+                string synchronizedName = !string.IsNullOrWhiteSpace(farmName.Value)
+                    ? farmName.Value.Trim()
+                    : playerName.Value?.Trim() ?? string.Empty;
+                SetReferenceValue(playerName, synchronizedName);
+                SetReferenceValue(farmName, synchronizedName);
                 cachedSaveData = new SaveData {
                     lastScene = initialScene.Value,
-                    playerName = playerName.Value,
-                    farmName = farmName.Value
+                    playerName = synchronizedName,
+                    farmName = synchronizedName,
+                    creationDate = DateTime.Now.ToString("O", CultureInfo.InvariantCulture)
                 };
                 SaveMaster.SetMetaData("savedata", JsonUtility.ToJson(cachedSaveData));
             }
             else
             {
                 cachedSaveData = JsonUtility.FromJson<SaveData>(saveJson);
+                if (string.IsNullOrWhiteSpace(cachedSaveData.farmName))
+                    cachedSaveData.farmName = cachedSaveData.playerName;
+                if (string.IsNullOrWhiteSpace(cachedSaveData.playerName))
+                    cachedSaveData.playerName = cachedSaveData.farmName;
+                SetReferenceValue(playerName, cachedSaveData.playerName);
+                SetReferenceValue(farmName, cachedSaveData.farmName);
             }
 
             onSceneWarp?.AddListener(OnSceneWarp);
+        }
+
+        private static void SetReferenceValue(StringReference reference, string value)
+        {
+            if (reference == null)
+                return;
+            if (reference.UseConstant)
+                reference.ConstantValue = value;
+            else if (reference.Variable != null)
+                reference.Variable.Value = value;
         }
 
         private void OnSceneWarp(string scene)

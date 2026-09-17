@@ -1,94 +1,94 @@
+using System;
 using Event.Events;
+using Item;
+using Item.Inventory;
 using Plugins.Lowscope.ComponentSaveSystem.Interfaces;
 using Referencing.Scriptable_Variables.Variables;
 using UnityEngine;
-using System;
 
 namespace GameSystem.Systems
 {
     /// <summary>
-    /// Responsible for sending time events to listeners.
-    /// Handles the current time of the game.
+    /// A simple elapsed game clock. One system tick equals one elapsed second.
+    /// There is deliberately no calendar, day/night cycle, or daily weather here.
     /// </summary>
-    [AddComponentMenu("Farming Kit/Systems/Time System")]
+    [AddComponentMenu("Farming Kit/Systems/Simple Game Clock")]
     public class TimeSystem : GameSystem, ISaveable
     {
-        // Happens based on the given tick rate of this system
-        [SerializeField]
-        private TimeEvent timeTickEvent;
+        private static readonly DateTime ClockEpoch = new DateTime(2000, 1, 1, 0, 0, 0);
 
-        // Happens at start, and when it is a new day, useful to minimize the amount of event calls.
-        [SerializeField]
-        private TimeEvent timeDayEvent;
+        [SerializeField] private TimeEvent timeTickEvent;
+        [SerializeField] private BoolEvent pauzeEvent;
 
-        [SerializeField]
-        private BoolEvent pauzeEvent;
+        [Header("Passive coin reward")]
+        [SerializeField] private ItemData currencyItem;
+        [SerializeField, Min(1)] private int coinRewardAmount = 3;
+        [SerializeField, Min(1f)] private float coinRewardIntervalSeconds = 12f * 60f * 60f;
 
-        [SerializeField, Range(1, 9999)]
-        private int year = 2000;
+        public DateTime startTime { get; private set; } = ClockEpoch;
+        public DateTime currentTime { get; private set; } = ClockEpoch;
+        public TimeSpan ElapsedTime => TimeSpan.FromSeconds(elapsedSeconds);
 
-        [SerializeField, Range(1, 12)]
-        private int month = 5;
-
-        [SerializeField, Range(1, 31)]
-        private int day = 1;
-
-        [SerializeField, Range(0, 23)]
-        private int hour = 8;
-
-        [SerializeField]
-        private int minutesPerTick = 1;
-
-        [SerializeField, Tooltip("Offset when the new day event happens. Setting this to 6 means that it will happen on 6 AM")]
-        private IntVariable newDayHourOffset;
-
-        public DateTime startTime;
-        public DateTime currentTime;
-        public TimeSpan ElapsedTime => currentTime - startTime;
-
-        private bool isNewDay = false;
-        private bool loadedSave = false;
+        private double elapsedSeconds;
+        private long rewardedCoinIntervals;
+        private bool loadedSave;
+        private Inventory playerInventory;
 
         public override void OnLoadSystem()
         {
             if (!loadedSave)
-            {
-                startTime = new DateTime(year, month, day, hour, 0, 0);
-                currentTime = startTime;
-            }
+                SetElapsedSeconds(0d, false);
 
             pauzeEvent?.AddListener(OnGamePauzed);
         }
 
-        public void Start()
+        private void Start()
         {
             timeTickEvent?.Invoke(currentTime);
-            timeDayEvent?.Invoke(currentTime);
         }
 
         public override void OnTick()
         {
-            DateTime currentTimeCopy = currentTime;
+            SetElapsedSeconds(elapsedSeconds + 1d, true);
+            GrantPendingCoinRewards();
+        }
 
-            AddMinute(minutesPerTick);
+        private void GrantPendingCoinRewards()
+        {
+            if (currencyItem == null || coinRewardAmount <= 0 || coinRewardIntervalSeconds <= 0f)
+                return;
 
-            if (currentTimeCopy.DayOfWeek != currentTime.DayOfWeek)
+            long completedIntervals = (long)Math.Floor(elapsedSeconds / coinRewardIntervalSeconds);
+            long pendingIntervals = completedIntervals - rewardedCoinIntervals;
+            if (pendingIntervals <= 0)
+                return;
+
+            if (playerInventory == null)
             {
-                if (newDayHourOffset.Value == 0)
-                {
-                    timeDayEvent?.Invoke(currentTime);
-                }
-                else
-                {
-                    isNewDay = true;
-                }
+                GameObject player = GameObject.FindGameObjectWithTag("Player");
+                playerInventory = player != null ? player.GetComponent<Inventory>() : null;
             }
 
-            if (isNewDay && currentTime.TimeOfDay.Hours >= newDayHourOffset.Value)
+            if (playerInventory == null)
+                return;
+
+            long totalReward = pendingIntervals * coinRewardAmount;
+            while (totalReward > 0)
             {
-                timeDayEvent?.Invoke(currentTime);
-                isNewDay = false;
+                int rewardChunk = (int)Math.Min(totalReward, int.MaxValue);
+                if (!playerInventory.AddItem(currencyItem, rewardChunk))
+                    return;
+
+                totalReward -= rewardChunk;
             }
+
+            rewardedCoinIntervals = completedIntervals;
+            Debug.Log($"Passive income: +{pendingIntervals * coinRewardAmount} coins after {completedIntervals * 12} elapsed hours.");
+        }
+
+        private void OnDisable()
+        {
+            pauzeEvent?.RemoveListener(OnGamePauzed);
         }
 
         private void OnGamePauzed(bool state)
@@ -96,123 +96,58 @@ namespace GameSystem.Systems
             Pauze(state);
         }
 
-        /// <param name="year"> Specify a year between 1 and 9999</param>
-        public void SetYear(int year)
+        private void SetElapsedSeconds(double value, bool notify)
         {
-            currentTime = ChangeTime(year, currentTime.Month, currentTime.Day, currentTime.Hour, currentTime.Minute);
-            timeTickEvent?.Invoke(currentTime);
+            elapsedSeconds = Math.Max(0d, value);
+            startTime = ClockEpoch;
+            currentTime = ClockEpoch.AddSeconds(elapsedSeconds);
+
+            if (notify)
+                timeTickEvent?.Invoke(currentTime);
         }
 
-        /// <param name="month"> Specify a month between 1 and 12</param>
-        public void SetMonth(int month)
+        [Serializable]
+        private struct SaveData
         {
-            currentTime = ChangeTime(currentTime.Year, month, currentTime.Day, currentTime.Hour, currentTime.Minute);
-            timeTickEvent?.Invoke(currentTime);
-        }
+            public int version;
+            public double elapsedSeconds;
+            public long rewardedCoinIntervals;
 
-        /// <param name="day"> Specify a day between 1 and 31</param>
-        public void SetDay(int day)
-        {
-            currentTime = ChangeTime(currentTime.Year, currentTime.Month, day, currentTime.Hour, currentTime.Minute);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        /// <param name="hour"> Specify a hour between 0 and 23. (0 to 12 = AM), (12 to 23 = PM)</param>
-        public void SetHour(int hour)
-        {
-            currentTime = ChangeTime(currentTime.Year, currentTime.Month, currentTime.Day, hour, currentTime.Minute);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        /// <param name="minute"> Specify a minute between 0 and 59</param>
-        public void SetMinute(int minute)
-        {
-            currentTime = ChangeTime(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, minute);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        public void AddYear(int amount)
-        {
-            currentTime = currentTime.AddYears(amount);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        public void AddMonth(int amount)
-        {
-            currentTime = currentTime.AddMonths(amount);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        public void AddDay(int amount)
-        {
-            currentTime = currentTime.AddDays(amount);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        public void AddHour(int amount)
-        {
-            currentTime = currentTime.AddHours(amount);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        public void AddMinute(int amount)
-        {
-            currentTime = currentTime.AddMinutes(amount);
-            timeTickEvent?.Invoke(currentTime);
-        }
-
-        private DateTime ChangeTime(int year, int month, int day, int hours, int minutes)
-        {
-            return new DateTime(
-                year,
-                month,
-                day,
-                hours,
-                minutes,
-                0);
-        }
-
-        [System.Serializable]
-        public struct SaveData
-        {
+            // Kept only so existing save files can be migrated to the simple clock.
             public int year;
             public int month;
             public int day;
             public int hour;
             public int minute;
 
-            public bool isNewDay;
-
-            public bool IsValidDate()
+            public bool HasLegacyTime()
             {
-                return (year + month + day + hour + minute) != 0;
+                return year != 0 || month != 0 || day != 0 || hour != 0 || minute != 0;
             }
         }
 
         public string OnSave()
         {
-            return JsonUtility.ToJson(new SaveData()
+            return JsonUtility.ToJson(new SaveData
             {
-                year = currentTime.Year,
-                month = currentTime.Month,
-                day = currentTime.Day,
-                hour = currentTime.Hour,
-                minute = currentTime.Minute,
-                isNewDay = this.isNewDay
+                version = 2,
+                elapsedSeconds = elapsedSeconds,
+                rewardedCoinIntervals = rewardedCoinIntervals
             });
         }
 
-        public void OnLoad(string _data)
+        public void OnLoad(string dataString)
         {
-            SaveData data = JsonUtility.FromJson<SaveData>(_data);
+            SaveData data = JsonUtility.FromJson<SaveData>(dataString);
+            double savedSeconds = data.version >= 1
+                ? data.elapsedSeconds
+                : data.HasLegacyTime() ? data.hour * 3600d + data.minute * 60d : 0d;
 
-            if (data.IsValidDate())
-            {
-                currentTime = new DateTime(data.year, data.month, data.day, data.hour, data.minute, 0);
-                this.isNewDay = data.isNewDay;
-                timeTickEvent?.Invoke(currentTime);
-            }
+            rewardedCoinIntervals = data.version >= 2
+                ? Math.Max(0L, data.rewardedCoinIntervals)
+                : (long)Math.Floor(savedSeconds / Math.Max(1f, coinRewardIntervalSeconds));
 
+            SetElapsedSeconds(savedSeconds, true);
             loadedSave = true;
         }
 

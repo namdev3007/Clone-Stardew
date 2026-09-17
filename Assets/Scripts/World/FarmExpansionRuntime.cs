@@ -1,0 +1,182 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using World.Objects;
+
+namespace World
+{
+    /// <summary>Runtime policy and reveal sequence for the named initial farm and home orchard regions.</summary>
+    public static class FarmExpansionRuntime
+    {
+        private static GridManager grid;
+        private static SpecialCropProgressService progress;
+        private static MapRegionDefinition initialFarm;
+        private static MapRegionDefinition homeOrchard;
+
+        public static bool IsRevealActive { get; private set; }
+        public static bool QuestAvailable => progress != null && progress.DragonFruitRepaired &&
+                                             !progress.HomeOrchardUnlocked && !IsRevealActive;
+        public static bool HomeOrchardUnlocked => progress != null && progress.HomeOrchardUnlocked;
+
+        public static void Configure(GridManager gridManager, SpecialCropProgressService progressService,
+            MapRegionDefinition initialFarmRegion, MapRegionDefinition homeOrchardRegion)
+        {
+            grid = gridManager;
+            progress = progressService;
+            initialFarm = initialFarmRegion;
+            homeOrchard = homeOrchardRegion;
+        }
+
+        public static bool CanHoe(Vector3Int cell)
+        {
+            if (initialFarm == null)
+                return false;
+
+            // Only the named normal farm accepts ordinary hoeing. Special crop
+            // areas are handled before this method by SpecialCropRuntime.
+            return initialFarm.Contains(cell);
+        }
+
+        public static bool CanPlant(Vector3Int cell, CropDefinition definition)
+        {
+            if (initialFarm == null)
+                return false;
+            if (definition == null)
+                return false;
+
+            // Vegetables and other ordinary crops are exclusive to the normal
+            // farm. Banana/Mango keep their progression gate and may use either
+            // the normal farm or the unlocked perennial orchard.
+            if (!definition.IsPerennialTree)
+                return initialFarm.Contains(cell);
+
+            return HomeOrchardUnlocked &&
+                   (initialFarm.Contains(cell) ||
+                    (homeOrchard != null && homeOrchard.Contains(cell)));
+        }
+
+        public static bool CanPlantPerennialFootprint(Vector3Int center)
+        {
+            if (!HomeOrchardUnlocked)
+                return false;
+            MapRegionDefinition owner = initialFarm != null && initialFarm.Contains(center)
+                ? initialFarm
+                : homeOrchard != null && homeOrchard.Contains(center) ? homeOrchard : null;
+            if (owner == null)
+                return false;
+            for (int y = -1; y <= 1; y++)
+            for (int x = -1; x <= 1; x++)
+                if (!owner.Contains(center + new Vector3Int(x, y, 0)))
+                    return false;
+            return true;
+        }
+
+        public static void BeginReveal(MonoBehaviour host, System.Action completed = null)
+        {
+            if (host == null || grid == null || progress == null || homeOrchard == null || IsRevealActive)
+            {
+                completed?.Invoke();
+                return;
+            }
+            host.StartCoroutine(RevealRoutine(completed));
+        }
+
+        private static IEnumerator RevealRoutine(System.Action completed)
+        {
+            IsRevealActive = true;
+            Vector3 min = grid.GetWorldLocation(homeOrchard.MinCell);
+            Vector3 max = grid.GetWorldLocation(homeOrchard.MaxCell + new Vector3Int(1, 1, 0));
+            Vector3 target = (min + max) * 0.5f;
+            target.z = -10f;
+
+            UnityEngine.Camera mainCamera = UnityEngine.Camera.main;
+            Vector3 oldPosition = mainCamera != null ? mainCamera.transform.position : Vector3.zero;
+            float oldSize = mainCamera != null ? mainCamera.orthographicSize : 1f;
+            List<Behaviour> suspended = SuspendCinemachineCameras();
+            GameObject markers = BuildCornerMarkers(min, max);
+
+            if (mainCamera != null)
+            {
+                float revealSize = Mathf.Max((max.y - min.y) * 0.6f,
+                    (max.x - min.x) / Mathf.Max(0.1f, mainCamera.aspect) * 0.6f);
+                float elapsed = 0f;
+                while (elapsed < 0.7f)
+                {
+                    elapsed += UnityEngine.Time.unscaledDeltaTime;
+                    float p = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / 0.7f));
+                    mainCamera.transform.position = Vector3.Lerp(oldPosition, target, p);
+                    mainCamera.orthographicSize = Mathf.Lerp(oldSize, revealSize, p);
+                    yield return null;
+                }
+            }
+
+            float flashTime = 0f;
+            while (flashTime < 5f)
+            {
+                flashTime += UnityEngine.Time.unscaledDeltaTime;
+                markers.SetActive(Mathf.Repeat(flashTime, 0.6f) < 0.4f);
+                yield return null;
+            }
+
+            progress.UnlockHomeOrchard();
+            if (mainCamera != null)
+            {
+                mainCamera.transform.position = oldPosition;
+                mainCamera.orthographicSize = oldSize;
+            }
+            for (int i = 0; i < suspended.Count; i++)
+                if (suspended[i] != null)
+                    suspended[i].enabled = true;
+            Object.Destroy(markers);
+            IsRevealActive = false;
+            completed?.Invoke();
+        }
+
+        private static List<Behaviour> SuspendCinemachineCameras()
+        {
+            List<Behaviour> result = new List<Behaviour>();
+            MonoBehaviour[] behaviours = Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                MonoBehaviour behaviour = behaviours[i];
+                if (behaviour != null && behaviour.enabled && behaviour.GetType().Name == "CinemachineCamera")
+                {
+                    behaviour.enabled = false;
+                    result.Add(behaviour);
+                }
+            }
+            return result;
+        }
+
+        private static GameObject BuildCornerMarkers(Vector3 min, Vector3 max)
+        {
+            GameObject root = new GameObject("Home Orchard Corner Highlight");
+            Vector3[] corners =
+            {
+                new Vector3(min.x, min.y), new Vector3(max.x, min.y),
+                new Vector3(min.x, max.y), new Vector3(max.x, max.y)
+            };
+            for (int i = 0; i < corners.Length; i++)
+            {
+                bool right = (i & 1) != 0;
+                bool top = (i & 2) != 0;
+                GameObject corner = new GameObject("Corner " + (i + 1));
+                corner.transform.SetParent(root.transform, false);
+                LineRenderer line = corner.AddComponent<LineRenderer>();
+                line.useWorldSpace = true;
+                line.positionCount = 3;
+                line.startWidth = line.endWidth = 0.035f;
+                line.material = new Material(Shader.Find("Sprites/Default"));
+                line.startColor = line.endColor = Color.white;
+                line.sortingOrder = 32000;
+                float dx = right ? -0.35f : 0.35f;
+                float dy = top ? -0.35f : 0.35f;
+                line.SetPosition(0, corners[i] + new Vector3(dx, 0f));
+                line.SetPosition(1, corners[i]);
+                line.SetPosition(2, corners[i] + new Vector3(0f, dy));
+            }
+            return root;
+        }
+    }
+}

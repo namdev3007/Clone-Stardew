@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace World.Objects
 {
+    public enum PlantingZone
+    {
+        Normal,
+        CucumberTrellis,
+        DragonFruitTrellis
+    }
+
     [CreateAssetMenu(fileName = "Crop Definition", menuName = "Farming/Crop Definition")]
     public class CropDefinition : ScriptableAsset
     {
@@ -11,9 +18,11 @@ namespace World.Objects
         [SerializeField] private float firstGrowthSeconds = 15f;
         [SerializeField] private float regrowthSeconds;
         [SerializeField] private int maximumHarvests = 1;
+        [SerializeField, Min(1)] private int harvestYield = 1;
         [SerializeField] private int regrowthStageStart;
         [SerializeField, Tooltip("Perennial trees are planted directly on hoeable ground and reserve a 3x3 area.")]
         private bool perennialTree;
+        [SerializeField] private PlantingZone plantingZone;
         [SerializeField] private Sprite[] growthSprites;
         [SerializeField, Tooltip("Local X/Y correction for each growth sprite, using the same array index.")]
         private Vector2[] stagePositionOffsets;
@@ -23,8 +32,10 @@ namespace World.Objects
         public float FirstGrowthSeconds => Mathf.Max(0.1f, firstGrowthSeconds);
         public float RegrowthSeconds => Mathf.Max(0.1f, regrowthSeconds);
         public int MaximumHarvests => Mathf.Max(1, maximumHarvests);
+        public int HarvestYield => Mathf.Max(1, harvestYield);
         public int RegrowthStageStart => Mathf.Clamp(regrowthStageStart, 0, Mathf.Max(0, growthSprites.Length - 1));
         public bool IsPerennialTree => perennialTree;
+        public PlantingZone PlantingZone => plantingZone;
         public Sprite[] GrowthSprites => growthSprites;
         public ItemData HarvestedItem => harvestedItem;
 

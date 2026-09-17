@@ -92,17 +92,7 @@ namespace Action.Actions
         [UpdateScriptableObject(eventType = EEventType.Awake)]
         public void Initialize()
         {
-            if (musicAudioSource == null)
-            {
-                musicAudioSource = CreateAudioSource();
-                musicAudioSource.outputAudioMixerGroup = musicAudioMixer;
-            }
-
-            if (fxAudioSource == null)
-            {
-                fxAudioSource = CreateAudioSource();
-                fxAudioSource.outputAudioMixerGroup = fxAudioMixer;
-            }
+            EnsureAudioSources();
 
             var loadData = PlayerPrefs.GetString("config", "");
             if (!string.IsNullOrEmpty(loadData))
@@ -125,11 +115,27 @@ namespace Action.Actions
             // Writing a lot of data to playerprefs is not reccomended.
             // However for small configurations it is accepted.
             PlayerPrefs.SetString("config", JsonUtility.ToJson(save));
+            PlayerPrefs.Save();
+        }
+
+        private void EnsureConfig()
+        {
+            if (save != null)
+                return;
+
+            string loadData = PlayerPrefs.GetString("config", string.Empty);
+            save = string.IsNullOrEmpty(loadData) ? new SaveConfig() : JsonUtility.FromJson<SaveConfig>(loadData);
+            if (save == null)
+                save = new SaveConfig();
+            musicEnabled = save.musicEnabled;
+            fxEnabled = save.fxEnabled;
         }
 
         [UpdateScriptableObject(eventType = EEventType.Start)]
         public void OnGameStart()
         {
+            EnsureConfig();
+            EnsureAudioSources();
             SetFXVolume(save.fxVolume);
             SetMusicVolume(save.musicVolume);
 
@@ -146,6 +152,7 @@ namespace Action.Actions
 
         public void SetFXVolume(float volume)
         {
+            EnsureConfig();
             FxVolume = (fxEnabled) ? volume : 0;
             fxVolumeEvent?.Invoke(volume);
 
@@ -155,6 +162,7 @@ namespace Action.Actions
 
         public void SetMusicVolume(float volume)
         {
+            EnsureConfig();
             MusicVolume = (musicEnabled) ? volume : 0;
             musicVolumeEvent?.Invoke(volume);
 
@@ -164,6 +172,7 @@ namespace Action.Actions
 
         public void ToggleSound()
         {
+            EnsureConfig();
             fxEnabled = !fxEnabled;
 
             FxVolume = (fxEnabled) ? save.fxVolume : 0;
@@ -177,6 +186,7 @@ namespace Action.Actions
 
         public void ToggleMusic()
         {
+            EnsureConfig();
             musicEnabled = !musicEnabled;
 
             MusicVolume = (musicEnabled) ? save.musicVolume : 0;
@@ -188,8 +198,42 @@ namespace Action.Actions
             WriteConfig();
         }
 
+        public void SetFXEnabled(bool enabled)
+        {
+            EnsureConfig();
+            if (fxEnabled == enabled)
+                return;
+
+            fxEnabled = enabled;
+            save.fxEnabled = enabled;
+            FxVolume = enabled ? save.fxVolume : 0f;
+            fxMutedEvent?.Invoke(!enabled);
+            WriteConfig();
+        }
+
+        public void SetMusicEnabled(bool enabled)
+        {
+            EnsureConfig();
+            if (musicEnabled == enabled)
+                return;
+
+            musicEnabled = enabled;
+            save.musicEnabled = enabled;
+            MusicVolume = enabled ? save.musicVolume : 0f;
+            musicMutedEvent?.Invoke(!enabled);
+            WriteConfig();
+        }
+
         public void PlayMusic(AudioClip clip)
         {
+            EnsureAudioSources();
+            if (clip == null)
+            {
+                musicAudioSource.Stop();
+                musicAudioSource.clip = null;
+                return;
+            }
+
             if (musicAudioSource.clip != clip)
             {
                 musicAudioSource.Stop();
@@ -206,6 +250,7 @@ namespace Action.Actions
 
         public void PlaySoundCollection(SoundCollection soundCollection)
         {
+            EnsureAudioSources();
             if (soundCollection != null)
             {
                 soundCollection.Play(fxAudioSource);
@@ -214,10 +259,28 @@ namespace Action.Actions
 
         public void PlaySound(AudioClip clip)
         {
-            if (fxAudioSource.enabled)
+            EnsureAudioSources();
+            if (clip != null && fxAudioSource.enabled)
             {
                 fxAudioSource.PlayOneShot(clip);
             }
+        }
+
+        private void EnsureAudioSources()
+        {
+            if (musicAudioSource == null)
+            {
+                musicAudioSource = CreateAudioSource();
+                musicAudioSource.name = "Music Audio Source";
+            }
+            musicAudioSource.outputAudioMixerGroup = musicAudioMixer;
+
+            if (fxAudioSource == null)
+            {
+                fxAudioSource = CreateAudioSource();
+                fxAudioSource.name = "FX Audio Source";
+            }
+            fxAudioSource.outputAudioMixerGroup = fxAudioMixer;
         }
 
         private AudioSource CreateAudioSource()

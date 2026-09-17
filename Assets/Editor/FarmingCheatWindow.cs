@@ -60,6 +60,11 @@ public class FarmingCheatWindow : EditorWindow
         EditorGUILayout.LabelField("Farming Cheat Tool", EditorStyles.boldLabel);
         EditorGUILayout.Space();
 
+        if (GUILayout.Button("Mở Map Cell Debug & Prop Tool"))
+            GetWindow<MapCellAndPropTool>("Map Cell & Props");
+
+        EditorGUILayout.Space();
+
         if (!EditorApplication.isPlaying)
         {
             EditorGUILayout.HelpBox("Hãy chạy game (Play Mode) rồi mới dùng các nút cheat.", MessageType.Warning);

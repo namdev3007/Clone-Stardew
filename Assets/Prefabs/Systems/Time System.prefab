@@ -47,14 +47,10 @@ MonoBehaviour:
   systemSettings:
     hasUpdate: 1
     hasFixedUpdate: 0
-    updateDelay: 0.35
+    updateDelay: 1
     fixedUpdateDelay: 0
   timeTickEvent: {fileID: 11400000, guid: 90ce0d1c3e8f0e846b308384ebca6a26, type: 2}
-  timeDayEvent: {fileID: 11400000, guid: b146691cba0bc374f8ff047918c1d6ea, type: 2}
   pauzeEvent: {fileID: 11400000, guid: 1e3ec68e4386ae34899c1744b5844ae8, type: 2}
-  year: 2000
-  month: 5
-  day: 1
-  hour: 8
-  minutesPerTick: 1
-  newDayHourOffset: {fileID: 11400000, guid: 126ad94bc46c85c458378ff9cef84b36, type: 2}
+  currencyItem: {fileID: 11400000, guid: 01f8d174962102c4d8c5cf00c70f82e5, type: 2}
+  coinRewardAmount: 3
+  coinRewardIntervalSeconds: 43200

@@ -6,6 +6,7 @@
         public string lastScene = "";
         public string playerName = "";
         public string farmName = "";
+        public string creationDate = "";
         public string timePlayed;
     }
 }

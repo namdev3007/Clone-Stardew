@@ -17,6 +17,7 @@ namespace World.NPC
             public bool receivedStarterTools;
             public bool completedGrandpaLesson;
             public bool metSeller;
+            public int highestUnlockedCropOrder;
             public List<string> hoedCells = new List<string>();
         }
 
@@ -49,6 +50,10 @@ namespace World.NPC
         public bool ReceivedStarterTools { get { EnsureLoaded(); return data.receivedStarterTools; } }
         public bool CompletedGrandpaLesson { get { EnsureLoaded(); return data.completedGrandpaLesson; } }
         public bool MetSeller { get { EnsureLoaded(); return data.metSeller; } }
+        public int HighestUnlockedCropOrder
+        {
+            get { EnsureLoaded(); return Mathf.Clamp(data.highestUnlockedCropOrder, 0, 7); }
+        }
         public int HoedCellCount { get { EnsureLoaded(); return data.hoedCells.Count; } }
         public bool HoeObjectiveComplete => HoedCellCount >= 3;
 
@@ -109,6 +114,41 @@ namespace World.NPC
             Commit();
         }
 
+        public void RecordCropHarvested(string cropName)
+        {
+            EnsureLoaded();
+            int harvestedOrder = GetCropOrder(cropName);
+            int currentOrder = Mathf.Clamp(data.highestUnlockedCropOrder, 0, 7);
+
+            // Only the currently available crop can advance the chain. This prevents
+            // showcase/cheat crops from skipping several shop unlocks at once.
+            if (harvestedOrder < 0 || harvestedOrder > currentOrder || currentOrder >= 7)
+                return;
+
+            int nextOrder = harvestedOrder + 1;
+            if (nextOrder <= currentOrder)
+                return;
+
+            data.highestUnlockedCropOrder = nextOrder;
+            Commit();
+        }
+
+        private static int GetCropOrder(string cropName)
+        {
+            switch (cropName)
+            {
+                case "Carrot": return 0;
+                case "Onion": return 1;
+                case "Garlic": return 2;
+                case "Cabbage": return 3;
+                case "Potato": return 4;
+                case "Tomato": return 5;
+                case "Banana": return 6;
+                case "Mango": return 7;
+                default: return -1;
+            }
+        }
+
         private void EnsureLoaded()
         {
             if (!SaveMaster.IsSlotLoaded())
@@ -129,6 +169,7 @@ namespace World.NPC
 
             if (data.hoedCells == null)
                 data.hoedCells = new List<string>();
+            data.highestUnlockedCropOrder = Mathf.Clamp(data.highestUnlockedCropOrder, 0, 7);
             loaded = true;
             loadedSlot = activeSlot;
         }

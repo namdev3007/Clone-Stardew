@@ -5,6 +5,8 @@ using Referencing.Scriptable_Reference;
 using Referencing.Scriptable_Variables.Variables;
 using Saving;
 using System;
+using System.Globalization;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -103,6 +105,7 @@ namespace Main_Menu
         private void Initialize()
         {
             isInitialized = true;
+            ResolveTextReferences();
 
             if (characterImage != null)
             {
@@ -110,6 +113,23 @@ namespace Main_Menu
             }
 
             buttonRequestRemove.onClick.AddListener(RequestRemoveSlot);
+        }
+
+        private void ResolveTextReferences()
+        {
+            TextMeshProUGUI[] labels = GetComponentsInChildren<TextMeshProUGUI>(true);
+            TextMeshProUGUI worldLabel = labels.FirstOrDefault(label =>
+                label.name == "Text_idWorldName" || label.name == "Text_WorldName");
+            TextMeshProUGUI creationLabel = labels.FirstOrDefault(label =>
+                label.name == "Text_CreationDate" || label.name == "Text_date");
+
+            if (worldLabel != null)
+            {
+                worldLabel.name = "Text_idWorldName";
+                farmNameText = worldLabel;
+            }
+            if (creationLabel != null)
+                dateText = creationLabel;
         }
 
         private void RequestRemoveSlot()
@@ -159,12 +179,25 @@ namespace Main_Menu
                 {
                     saveData = JsonUtility.FromJson<SaveData>(saveJson);
 
-                    farmNameText?.SetText($"{saveData.farmName}");
-                    playerNameText?.SetText($"{saveData.playerName}");
+                    string worldName = !string.IsNullOrWhiteSpace(saveData.farmName)
+                        ? saveData.farmName
+                        : saveData.playerName;
+                    farmNameText?.SetText(worldName);
 
-                    TimeSpan timeSpan = default;
-                    TimeSpan.TryParse(saveData.timePlayed, out timeSpan);
-                    dateText?.SetText($"{timeSpan.Hours.ToString("00")}:{timeSpan.Minutes.ToString("00")}");
+                    // The redesigned slot has exactly two labels: world name
+                    // and the calendar date on which that world was created.
+                    if (playerNameText != null && playerNameText != farmNameText)
+                        playerNameText.gameObject.SetActive(false);
+
+                    DateTime creationDate;
+                    if (!DateTime.TryParse(saveData.creationDate, CultureInfo.InvariantCulture,
+                            DateTimeStyles.RoundtripKind, out creationDate))
+                    {
+                        creationDate = SaveMaster.GetSaveCreationTime(slot);
+                        saveData.creationDate = creationDate.ToString("O", CultureInfo.InvariantCulture);
+                        SaveMaster.SetMetaData("savedata", JsonUtility.ToJson(saveData), slot);
+                    }
+                    dateText?.SetText(creationDate.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture));
 
                     slotAvailableObjects.gameObject.SetActive(false);
                     slotUsedObjects.gameObject.SetActive(true);

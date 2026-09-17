@@ -3,6 +3,7 @@ using Event.Events;
 using Interactions;
 using Item;
 using Item.Inventory;
+using User_Interface;
 using UnityEngine;
 
 namespace World.NPC
@@ -45,6 +46,7 @@ namespace World.NPC
         private NpcDialogueStatus status;
         private InteractionField interactionField;
         private int lastRandomRevisit = -1;
+        private DialogueSequence homeOrchardDialogue;
 
         public void Configure(NpcRole npcRole, string displayName, Sprite characterPortrait,
             DialogueVisualLibrary visualLibrary, DialogueSequence intro, DialogueSequence remind,
@@ -84,6 +86,14 @@ namespace World.NPC
         {
             if (Application.isPlaying)
                 status?.ShowEllipsis();
+        }
+
+        private void LateUpdate()
+        {
+            if (role != NpcRole.Grandpa || DialogueUIController.IsDialogueOpen)
+                return;
+            if (TutorialProgressService.Instance.CompletedGrandpaLesson && FarmExpansionRuntime.QuestAvailable)
+                status?.ShowExclamation();
         }
 
         public void StartInteraction()
@@ -128,18 +138,46 @@ namespace World.NPC
                 return;
             }
 
+            if (FarmExpansionRuntime.QuestAvailable)
+            {
+                Play(GetHomeOrchardDialogue(), () =>
+                    FarmExpansionRuntime.BeginReveal(this, () => status?.ShowEllipsis()));
+                return;
+            }
+
             ShowGrandpaMenu();
+        }
+
+        private DialogueSequence GetHomeOrchardDialogue()
+        {
+            if (homeOrchardDialogue != null)
+                return homeOrchardDialogue;
+            homeOrchardDialogue = ScriptableObject.CreateInstance<DialogueSequence>();
+            homeOrchardDialogue.Configure("grandpa_home_orchard_unlock", new[]
+            {
+                new DialogueSequence.Line
+                {
+                    speaker = DialogueSequence.Speaker.Npc,
+                    english = "You're actually pretty handy, huh? Alright, listen! We've got a small plot left in the backyard. Go clear out the weeds, then grab a few mango and banana saplings to plant so we'll have some fresh fruit to eat.",
+                    vietnamese = "Thằng cu này được việc phết nhỉ? Thôi! Phần đất nhà mình vẫn còn một ít sau vườn, cháu ra đó dọn đống cỏ dại rồi đi mua ít xoài với chuối giống về mà trồng cho có ít quả mà ăn."
+                }
+            });
+            return homeOrchardDialogue;
         }
 
         private void ShowGrandpaMenu()
         {
             DialogueUIController ui = DialogueUIController.Ensure(visuals);
-            ui.ShowChoices("What can I help you with?", new[]
+            bool canReplayOrchard = FarmExpansionRuntime.HomeOrchardUnlocked;
+            bool vietnamese = SettingsSoundUI.UseVietnamese;
+            ui.ShowChoices(vietnamese ? "Cháu cần ông giúp gì?" : "What can I help you with?", new[]
             {
-                "Remind me what to do",
-                "Tell me about farming",
-                "Expand the farm",
-                "Never mind"
+                vietnamese ? "Nhắc lại việc cháu cần làm" : "Remind me what to do",
+                vietnamese ? "Kể cháu nghe về việc làm vườn" : "Tell me about farming",
+                canReplayOrchard
+                    ? (vietnamese ? "Chỉ lại khu đất sau nhà" : "Show me the backyard plot again")
+                    : (vietnamese ? "Mở rộng khu vườn" : "Expand the farm"),
+                vietnamese ? "Thôi, không có gì ạ" : "Never mind"
             }, selected =>
             {
                 switch (selected)
@@ -151,7 +189,11 @@ namespace World.NPC
                         Play(farmingAdvice, () => status?.ShowEllipsis());
                         break;
                     case 2:
-                        Play(expansionUnavailable, () => status?.ShowEllipsis());
+                        if (canReplayOrchard)
+                            Play(GetHomeOrchardDialogue(), () =>
+                                FarmExpansionRuntime.BeginReveal(this, () => status?.ShowEllipsis()));
+                        else
+                            Play(expansionUnavailable, () => status?.ShowEllipsis());
                         break;
                     default:
                         ui.CloseAll();
@@ -169,37 +211,19 @@ namespace World.NPC
                 Play(introduction, () =>
                 {
                     progress.MarkMetSeller();
-                    status?.ShowEllipsis();
+                    OpenSellerShop();
                 });
                 return;
             }
 
-            DialogueUIController ui = DialogueUIController.Ensure(visuals);
-            ui.ShowChoices("What can I get for you, kid?", new[]
-            {
-                "Browse the shop",
-                "Talk",
-                "Never mind"
-            }, selected =>
-            {
-                if (selected == 0)
-                    ui.ShowShopCatalog(shopCatalog, () => status?.ShowEllipsis());
-                else if (selected == 1)
-                    PlayRandomRevisit();
-                else
-                {
-                    ui.CloseAll();
-                    status?.ShowEllipsis();
-                }
-            });
+            PlayRandomRevisitThenOpenShop();
         }
 
-        private void PlayRandomRevisit()
+        private void PlayRandomRevisitThenOpenShop()
         {
             if (randomRevisitLines == null || randomRevisitLines.Length == 0)
             {
-                DialogueUIController.Ensure(visuals).CloseAll();
-                status?.ShowEllipsis();
+                OpenSellerShop();
                 return;
             }
             int index = Random.Range(0, randomRevisitLines.Length);
@@ -207,7 +231,13 @@ namespace World.NPC
                 index = (index + 1) % randomRevisitLines.Length;
             lastRandomRevisit = index;
             DialogueSequence selected = randomRevisitLines[index];
-            Play(selected, () => status?.ShowEllipsis());
+            Play(selected, OpenSellerShop);
+        }
+
+        private void OpenSellerShop()
+        {
+            DialogueUIController.Ensure(visuals)
+                .ShowShopCatalog(shopCatalog, () => status?.ShowEllipsis());
         }
 
         private void Play(DialogueSequence sequence, System.Action completed)

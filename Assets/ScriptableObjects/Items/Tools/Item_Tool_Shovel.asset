@@ -14,9 +14,14 @@ MonoBehaviour:
   guid: 57c5c861-aaaa-4df8-8acf-b5d0391b75d5
   icon: {fileID: -4767968536205956035, guid: 50ed42e1bd030c245addf9a23bb722e7, type: 3}
   itemName: Hoe
-  description: Used to till the soil
+  description: Tills designated farm soil. 12 uses.
   canStack: 0
   hasSlot: 1
-  hasEnergy: 0
+  hasEnergy: 1
+  energyStartValue:
+    min: 0
+    max: 12
+    current: 12
   isRemoveable: 0
   action: {fileID: 11400000, guid: 1dd4fc782c9c62544bfd2a3d9944d3ee, type: 2}
+  worldDropScale: 1

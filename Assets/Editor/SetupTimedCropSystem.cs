@@ -33,6 +33,7 @@ public static class SetupTimedCropSystem
         public float firstSeconds;
         public float regrowthSeconds;
         public int maximumHarvests;
+        public int harvestYield = 1;
         public int regrowthStageStart;
         public string growthSheet;
         public string seedSprite;
@@ -48,9 +49,9 @@ public static class SetupTimedCropSystem
         new CropSpec { key = "Garlic", displayName = "Garlic", firstSeconds = 45f, maximumHarvests = 1, growthSheet = "Assets/Sprites/cây trồng/garlic/garlictree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/garlic.png", productSprite = "Assets/Sprites/cây trồng/garlic/garlic_200.png" },
         new CropSpec { key = "Cabbage", displayName = "Cabbage", firstSeconds = 60f, maximumHarvests = 1, growthSheet = "Assets/Sprites/cây trồng/cabbage/cabbagetree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/cabbage.png", productSprite = "Assets/Sprites/cây trồng/cabbage/cabbage_200.png" },
         new CropSpec { key = "Potato", displayName = "Potato", firstSeconds = 90f, maximumHarvests = 1, growthSheet = "Assets/Sprites/cây trồng/potato/potatotree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/potato.png", productSprite = "Assets/Sprites/cây trồng/potato/potato_200.png" },
-        new CropSpec { key = "Tomato", displayName = "Tomato", firstSeconds = 120f, regrowthSeconds = 30f, maximumHarvests = 3, regrowthStageStart = 4, growthSheet = "Assets/Sprites/cây trồng/tomato/tomatotree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/tomato.png", productSprite = "Assets/Sprites/cây trồng/tomato/tomato_200.png" },
-        new CropSpec { key = "Banana", displayName = "Banana", firstSeconds = 180f, regrowthSeconds = 60f, maximumHarvests = int.MaxValue, regrowthStageStart = 4, perennialTree = true, growthSpriteOrder = new[] { 4, 5, 6, 7, 0, 1, 2, 3 }, growthSheet = "Assets/Sprites/cây trồng/cây lâu năm/banana/bananatree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/banana.png", productSprite = "Assets/Sprites/cây trồng/cây lâu năm/banana/banana_200.png" },
-        new CropSpec { key = "Mango", displayName = "Mango", firstSeconds = 300f, regrowthSeconds = 120f, maximumHarvests = int.MaxValue, regrowthStageStart = 4, perennialTree = true, growthSheet = "Assets/Sprites/cây trồng/cây lâu năm/mango/mangotree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/mango.png", productSprite = "Assets/Sprites/cây trồng/cây lâu năm/mango/mango_200.png" }
+        new CropSpec { key = "Tomato", displayName = "Tomato", firstSeconds = 120f, regrowthSeconds = 30f, maximumHarvests = 3, harvestYield = 3, regrowthStageStart = 4, growthSheet = "Assets/Sprites/cây trồng/tomato/tomatotree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/tomato.png", productSprite = "Assets/Sprites/cây trồng/tomato/tomato_200.png" },
+        new CropSpec { key = "Banana", displayName = "Banana", firstSeconds = 180f, regrowthSeconds = 60f, maximumHarvests = int.MaxValue, harvestYield = 3, regrowthStageStart = 4, perennialTree = true, growthSpriteOrder = new[] { 4, 5, 6, 7, 0, 1, 2, 3 }, growthSheet = "Assets/Sprites/cây trồng/cây lâu năm/banana/bananatree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/banana.png", productSprite = "Assets/Sprites/cây trồng/cây lâu năm/banana/banana_200.png" },
+        new CropSpec { key = "Mango", displayName = "Mango", firstSeconds = 300f, regrowthSeconds = 120f, maximumHarvests = int.MaxValue, harvestYield = 3, regrowthStageStart = 4, perennialTree = true, growthSheet = "Assets/Sprites/cây trồng/cây lâu năm/mango/mangotree_200.png", seedSprite = "Assets/Sprites/cây trồng/hạt giống/mango.png", productSprite = "Assets/Sprites/cây trồng/cây lâu năm/mango/mango_200.png" }
     };
 
     [InitializeOnLoadMethod]
@@ -101,6 +102,8 @@ public static class SetupTimedCropSystem
         }
 
         ItemData fertilizer = CreateFertilizer(gridReference);
+        ConfigureToolDurability("Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset");
+        ConfigureToolDurability("Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset");
         UpdateStartingItems(carrotSeed, fertilizer);
 
         AssetDatabase.SaveAssets();
@@ -153,6 +156,8 @@ public static class SetupTimedCropSystem
             healthData.ApplyModifiedPropertiesWithoutUndo();
 
             renderer.sprite = LoadSprites(Crops[0].growthSheet).FirstOrDefault();
+            renderer.sharedMaterial = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
+            renderer.color = Color.white;
             return PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
         }
         finally
@@ -186,6 +191,7 @@ public static class SetupTimedCropSystem
         serialized.FindProperty("firstGrowthSeconds").floatValue = spec.firstSeconds;
         serialized.FindProperty("regrowthSeconds").floatValue = spec.regrowthSeconds;
         serialized.FindProperty("maximumHarvests").intValue = spec.maximumHarvests;
+        serialized.FindProperty("harvestYield").intValue = spec.harvestYield;
         serialized.FindProperty("regrowthStageStart").intValue = spec.regrowthStageStart;
         serialized.FindProperty("perennialTree").boolValue = spec.perennialTree;
         Sprite[] growthSprites = LoadSprites(spec.growthSheet);
@@ -245,11 +251,8 @@ public static class SetupTimedCropSystem
 
         ItemData gold = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/ScriptableObjects/Items/Tools/Item_Gold.asset");
         ItemData waterCan = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/ScriptableObjects/Items/Tools/Item_Tool_WaterCan.asset");
-        ItemData axe = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset");
-        ItemData hoe = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset");
-
-        ItemData[] data = { gold, waterCan, axe, hoe, carrotSeed, fertilizer };
-        int[] amounts = { 200, 0, 0, 0, 15, 0 };
+        ItemData[] data = { gold, waterCan, carrotSeed, fertilizer };
+        int[] amounts = { 200, 1, 3, 0 };
         SerializedObject serialized = new SerializedObject(collection);
         SerializedProperty items = serialized.FindProperty("items");
         items.arraySize = data.Length;
@@ -260,9 +263,25 @@ public static class SetupTimedCropSystem
             entry.FindPropertyRelative("Amount").intValue = amounts[i];
             SerializedProperty energy = entry.FindPropertyRelative("Energy");
             energy.FindPropertyRelative("min").floatValue = 0f;
-            energy.FindPropertyRelative("max").floatValue = data[i] == fertilizer ? 12f : 0f;
-            energy.FindPropertyRelative("current").floatValue = data[i] == fertilizer ? 12f : 0f;
+            float maxEnergy = data[i] == fertilizer ? 12f : (data[i] == waterCan ? 100f : 0f);
+            energy.FindPropertyRelative("max").floatValue = maxEnergy;
+            energy.FindPropertyRelative("current").floatValue = maxEnergy;
         }
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    private static void ConfigureToolDurability(string path)
+    {
+        ItemData tool = AssetDatabase.LoadAssetAtPath<ItemData>(path);
+        if (tool == null)
+            return;
+
+        SerializedObject serialized = new SerializedObject(tool);
+        serialized.FindProperty("hasEnergy").boolValue = true;
+        SerializedProperty energy = serialized.FindProperty("energyStartValue");
+        energy.FindPropertyRelative("min").floatValue = 0f;
+        energy.FindPropertyRelative("max").floatValue = 12f;
+        energy.FindPropertyRelative("current").floatValue = 12f;
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 

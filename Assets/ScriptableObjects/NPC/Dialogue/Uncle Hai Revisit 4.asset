@@ -18,4 +18,6 @@ MonoBehaviour:
     localizationKey: hai.revisit.004.001
     english: Your grandpa never bought one seed when he could bargain for three.
       Don't let him teach you that habit.
-    vietnamese: 
+    vietnamese: "\xD4ng ch\xE1u ng\xE0y tr\u01B0\u1EDBc mua m\u1ED9t h\u1EA1t c\u0169ng
+      ph\u1EA3i m\u1EB7c c\u1EA3 th\xE0nh ba. \u0110\u1EEBng h\u1ECDc c\xE1i t\xEDnh
+      \u1EA5y nh\xE9."

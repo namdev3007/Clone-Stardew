@@ -18,42 +18,53 @@ MonoBehaviour:
     localizationKey: hai.intro.001
     english: Hello, Uncle. I'm Old Man Tam's grandkid from down the road. I came
       back yesterday.
-    vietnamese: 
+    vietnamese: "D\u1EA1 ch\xE0o ch\xFA. Ch\xE1u l\xE0 ch\xE1u n\u1ED9i \xF4ng T\xE1m
+      \u1EDF x\xF3m d\u01B0\u1EDBi, m\u1EDBi v\u1EC1 h\xF4m qua \u1EA1."
   - speaker: 1
     localizationKey: hai.intro.002
     english: Old Tam's grandkid? Well, look at you!
-    vietnamese: 
+    vietnamese: "\u01A0! Ch\xE1u l\xE3o T\xE1m \u0111\u1EA5y \xE0? Tr\xF4ng l\u1EDBn
+      th\u1EBF n\xE0y r\u1ED3i c\u01A1 \xE0!"
   - speaker: 1
     localizationKey: hai.intro.003
     english: You came home yesterday and only now decided to say hello?
-    vietnamese: 
+    vietnamese: "V\u1EC1 t\u1EEB h\xF4m qua m\xE0 gi\u1EDD m\u1EDBi ch\u1ECBu sang
+      ch\xE0o ch\xFA \u0111\u1EA5y nh\xE9?"
   - speaker: 1
     localizationKey: hai.intro.004
     english: "Fair skin, clean hands\u2014you look every bit like a city boy."
-    vietnamese: 
+    vietnamese: "Da tr\u1EAFng, tay s\u1EA1ch th\u1EBF n\xE0y \u0111\xFAng l\xE0
+      d\xE2n th\xE0nh ph\u1ED1 r\u1ED3i!"
   - speaker: 1
     localizationKey: hai.intro.005
     english: So, what brings you here? Wine for your grandpa? Something sweet for
       yourself?
-    vietnamese: 
+    vietnamese: "Sao, sang \u0111\xE2y mua g\xEC? R\u01B0\u1EE3u cho \xF4ng n\u1ED9i
+      hay b\xE1nh k\u1EB9o cho m\xECnh?"
   - speaker: 0
     localizationKey: hai.intro.006
     english: Neither. Grandpa sent me to buy seeds and a few farming tools.
-    vietnamese: 
+    vietnamese: "D\u1EA1 kh\xF4ng ch\xFA. \xD4ng n\u1ED9i b\u1EA3o ch\xE1u sang mua
+      \xEDt h\u1EA1t gi\u1ED1ng v\u1EDBi d\u1EE5ng c\u1EE5 l\xE0m v\u01B0\u1EDDn
+      \u1EA1."
   - speaker: 1
     localizationKey: hai.intro.007
     english: You're taking up farming? Good!
-    vietnamese: 
+    vietnamese: "Ch\xE1u \u0111\u1ECBnh tr\u1ED3ng rau \xE0? T\u1ED1t!"
   - speaker: 1
     localizationKey: hai.intro.008
     english: It's nice to see a young person willing to get some dirt under their
       nails.
-    vietnamese: 
+    vietnamese: "Thanh ni\xEAn gi\u1EDD ch\u1ECBu \u0111\u1EE5ng tay v\xE0o \u0111\u1EA5t
+      c\xE1t l\xE0 qu\xFD r\u1ED3i \u0111\u1EA5y."
   - speaker: 1
     localizationKey: hai.intro.009
     english: Better than staring at a phone all day until your brain turns to porridge.
-    vietnamese: 
+    vietnamese: "C\xF2n h\u01A1n c\u1EE9 c\u1EAFm m\u1EB7t v\xE0o \u0111i\u1EC7n
+      tho\u1EA1i c\u1EA3 ng\xE0y \u0111\u1EBFn m\u1EE5 m\u1ECB ng\u01B0\u1EDDi."
   - speaker: 1
     localizationKey: hai.intro.010
     english: I carry seeds, tools, and whatever else a small farm needs. Take a look.
-    vietnamese: 
+    vietnamese: "Ch\xFA c\xF3 h\u1EA1t gi\u1ED1ng, n\xF4ng c\u1EE5 v\xE0 \u0111\u1EE7
+      th\u1EE9 c\u1EA7n cho m\u1ED9t khu v\u01B0\u1EDDn nh\u1ECF. Ch\xE1u v\xE0o
+      xem \u0111i."

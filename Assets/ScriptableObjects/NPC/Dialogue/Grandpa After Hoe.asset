@@ -17,127 +17,163 @@ MonoBehaviour:
   - speaker: 1
     localizationKey: grandpa.after_hoe.001
     english: Not bad. Your hands still remember more than you think.
-    vietnamese: 
+    vietnamese: "Kh\xE1 l\u1EAFm. Tay ch\xE2n ch\xE1u v\u1EABn c\xF2n nh\u1EDB vi\u1EC7c
+      h\u01A1n ch\xE1u t\u01B0\u1EDFng \u0111\u1EA5y."
   - speaker: 1
     localizationKey: grandpa.after_hoe.002
     english: Now tell me the truth. What happened in the city that sent you home
       without a word?
-    vietnamese: 
+    vietnamese: "N\xE0y, \xF4ng h\u1ECFi th\u1EADt. Tr\xEAn th\xE0nh ph\u1ED1 r\u1ED1t
+      cu\u1ED9c c\xF3 chuy\u1EC7n g\xEC m\xE0 ch\xE1u l\u1EA1i \u0111\u1ED9t ng\u1ED9t
+      v\u1EC1 \u0111\xE2y th\u1EBF?"
   - speaker: 0
     localizationKey: grandpa.after_hoe.003
     english: Nothing happened. Work slowed down, so I took a few days off. I just
       thought I'd visit.
-    vietnamese: 
+    vietnamese: "D\u1EA1... c\u0169ng kh\xF4ng c\xF3 g\xEC \u0111\xE2u \xF4ng. D\u1EA1o
+      n\xE0y c\xF4ng ty \xEDt vi\u1EC7c n\xEAn ch\xE1u xin ngh\u1EC9 v\xE0i h\xF4m
+      v\u1EC1 th\u0103m \xF4ng th\xF4i."
   - speaker: 1
     localizationKey: grandpa.after_hoe.004
     english: You might fool someone else with that, but not me.
-    vietnamese: 
+    vietnamese: "Ch\xE1u gi\u1EA5u ai ch\u1EE9 gi\u1EA5u sao n\u1ED5i \xF4ng."
   - speaker: 1
     localizationKey: grandpa.after_hoe.005
     english: I've seen the shadows under your eyes. I've heard you sighing since
       morning.
-    vietnamese: 
+    vietnamese: "Nh\xECn qu\u1EA7ng th\xE2m d\u01B0\u1EDBi m\u1EAFt ch\xE1u, r\u1ED3i
+      nghe ch\xE1u th\u1EDF d\xE0i t\u1EEB s\xE1ng \u0111\u1EBFn gi\u1EDD l\xE0 \xF4ng
+      bi\u1EBFt r\u1ED3i."
   - speaker: 1
     localizationKey: grandpa.after_hoe.006
     english: Were they working you to the bone again? Or pushing you around while
       paying you next to nothing?
-    vietnamese: 
+    vietnamese: "L\u1EA1i l\xE0m b\xF9 \u0111\u1EA7u b\xF9 c\u1ED5, hay b\u1ECB ng\u01B0\u1EDDi
+      ta ch\xE8n \xE9p m\xE0 l\u01B0\u01A1ng ch\u1EB3ng \u0111\u01B0\u1EE3c bao nhi\xEAu,
+      \u0111\xFAng kh\xF4ng?"
   - speaker: 0
     localizationKey: grandpa.after_hoe.007
     english: ...
-    vietnamese: 
+    vietnamese: ...
   - speaker: 1
     localizationKey: grandpa.after_hoe.008
     english: When I was your age, I thought strong shoulders were enough to carry
       anything.
-    vietnamese: 
+    vietnamese: "B\u1EB1ng tu\u1ED5i ch\xE1u b\xE2y gi\u1EDD, \xF4ng c\u0169ng t\u1EEBng
+      ngh\u0129 m\xECnh s\u1EE9c d\xE0i vai r\u1ED9ng th\xEC vi\u1EC7c g\xEC c\u0169ng
+      g\xE1nh \u0111\u01B0\u1EE3c."
   - speaker: 1
     localizationKey: grandpa.after_hoe.009
     english: I joined the youth volunteers, worked at the cooperative, and tried
       to prove I could handle every burden put in front of me.
-    vietnamese: 
+    vietnamese: "\xD4ng t\u1EEBng \u0111i thanh ni\xEAn xung phong, r\u1ED3i l\xE0m
+      \u1EDF h\u1EE3p t\xE1c x\xE3, l\xFAc n\xE0o c\u0169ng mu\u1ED1n ch\u1EE9ng
+      minh r\u1EB1ng m\xECnh ch\u1ECBu \u0111\u01B0\u1EE3c m\u1ECDi th\u1EE9."
   - speaker: 1
     localizationKey: grandpa.after_hoe.010
     english: But life doesn't care how stubborn you are.
-    vietnamese: 
+    vietnamese: "Nh\u01B0ng \u0111\u1EDDi \u0111\xE2u c\xF3 \u0111\u01A1n gi\u1EA3n
+      nh\u01B0 v\u1EADy."
   - speaker: 1
     localizationKey: grandpa.after_hoe.011
     english: "You young people are always racing somewhere\u2014trying to get ahead,
       trying to prove yourselves."
-    vietnamese: 
+    vietnamese: "Ng\u01B0\u1EDDi tr\u1EBB c\u1EE9 m\u1EA3i ch\u1EA1y v\u1EC1 ph\xEDa
+      tr\u01B0\u1EDBc, l\xFAc n\xE0o c\u0169ng mu\u1ED1n nhanh h\u01A1n v\xE0 ch\u1EE9ng
+      t\u1ECF b\u1EA3n th\xE2n."
   - speaker: 1
     localizationKey: grandpa.after_hoe.012
     english: Then something knocks you down, and pride makes you carry the hurt alone.
-    vietnamese: 
+    vietnamese: "\u0110\u1EBFn khi v\u1EA5p ng\xE3 th\xEC l\u1EA1i v\xEC s\u0129
+      di\u1EC7n m\xE0 \xF4m h\u1EBFt bu\u1ED3n b\u1EF1c v\xE0o ng\u01B0\u1EDDi."
   - speaker: 0
     localizationKey: grandpa.after_hoe.013
     english: I just feel like I've fallen behind.
-    vietnamese: 
+    vietnamese: "Ch\xE1u ch\u1EC9 c\u1EA3m th\u1EA5y m\xECnh \u0111ang b\u1ECB t\u1EE5t
+      l\u1EA1i ph\xEDa sau th\xF4i \xF4ng \u1EA1."
   - speaker: 0
     localizationKey: grandpa.after_hoe.014
     english: My friends are getting promoted. They're buying homes and cars, and
       I'm... back where I started.
-    vietnamese: 
+    vietnamese: "B\u1EA1n b\xE8 ch\xE1u \u0111\u1EE9a n\xE0o c\u0169ng th\u0103ng
+      ch\u1EE9c, mua nh\xE0 mua xe, c\xF2n ch\xE1u th\xEC... l\u1EA1i quay v\u1EC1
+      v\u1EA1ch xu\u1EA5t ph\xE1t."
   - speaker: 1
     localizationKey: grandpa.after_hoe.015
     english: Stop measuring your life against theirs.
-    vietnamese: 
+    vietnamese: "\u0110\u1EEBng l\u1EA5y cu\u1ED9c \u0111\u1EDDi m\xECnh ra so v\u1EDBi
+      ng\u01B0\u1EDDi kh\xE1c."
   - speaker: 1
     localizationKey: grandpa.after_hoe.016
     english: Different people start in different places. They move at different speeds.
-    vietnamese: 
+    vietnamese: "M\u1ED7i ng\u01B0\u1EDDi c\xF3 m\u1ED9t v\u1EA1ch xu\u1EA5t ph\xE1t
+      v\xE0 m\u1ED9t nh\u1ECBp s\u1ED1ng kh\xE1c nhau."
   - speaker: 1
     localizationKey: grandpa.after_hoe.017
     english: If you try to leap straight to the top, all you'll earn is a harder
       fall.
-    vietnamese: 
+    vietnamese: "Ch\xE1u c\u1EE9 \u0111\xF2i nh\u1EA3y th\u1EB3ng l\xEAn \u0111\u1EC9nh
+      th\xEC ch\u1EC9 c\xF3 ng\xE3 \u0111au h\u01A1n th\xF4i."
   - speaker: 0
     localizationKey: grandpa.after_hoe.018
     english: So what am I supposed to do?
-    vietnamese: 
+    vietnamese: "V\u1EADy ch\xE1u n\xEAn l\xE0m g\xEC h\u1EA3 \xF4ng?"
   - speaker: 1
     localizationKey: grandpa.after_hoe.019
     english: Look at this soil. You don't throw down a seed and demand a harvest
       the next morning.
-    vietnamese: 
+    vietnamese: "Nh\xECn m\u1EA3nh \u0111\u1EA5t n\xE0y xem. Kh\xF4ng ph\u1EA3i c\u1EE9
+      n\xE9m h\u1EA1t xu\u1ED1ng l\xE0 s\xE1ng h\xF4m sau c\xF3 rau \u0111\u1EC3
+      h\xE1i \u0111\xE2u."
   - speaker: 1
     localizationKey: grandpa.after_hoe.020
     english: First, you prepare a place where something can grow. Then you plant.
       After that, you tend it a little at a time.
-    vietnamese: 
+    vietnamese: "\u0110\u1EA7u ti\xEAn ph\u1EA3i chu\u1EA9n b\u1ECB m\u1ED9t m\u1EA3nh
+      \u0111\u1EA5t t\u1ED1t, r\u1ED3i m\u1EDBi gieo h\u1EA1t. Sau \u0111\xF3 m\u1ED7i
+      ng\xE0y ch\u0103m n\xF3 m\u1ED9t ch\xFAt."
   - speaker: 1
     localizationKey: grandpa.after_hoe.021
     english: People aren't so different.
-    vietnamese: 
+    vietnamese: "Con ng\u01B0\u1EDDi c\u0169ng ch\u1EB3ng kh\xE1c l\xE0 bao."
   - speaker: 1
     localizationKey: grandpa.after_hoe.022
     english: You're exhausted, and your thoughts are tangled. Give yourself room
       to breathe before deciding where to run next.
-    vietnamese: 
+    vietnamese: "Ch\xE1u \u0111ang ki\u1EC7t s\u1EE9c, \u0111\u1EA7u \xF3c l\u1EA1i
+      r\u1ED1i b\u1EDDi. C\u1EE9 cho m\xECnh th\u1EDDi gian ngh\u1EC9 ng\u01A1i r\u1ED3i
+      h\xE3y quy\u1EBFt \u0111\u1ECBnh s\u1EBD \u0111i \u0111\xE2u ti\u1EBFp."
   - speaker: 1
     localizationKey: grandpa.after_hoe.023
     english: Slow doesn't mean you've failed. It means you're still growing.
-    vietnamese: 
+    vietnamese: "\u0110i ch\u1EADm kh\xF4ng c\xF3 ngh\u0129a l\xE0 th\u1EA5t b\u1EA1i.
+      Ch\xE1u v\u1EABn \u0111ang tr\u01B0\u1EDFng th\xE0nh t\u1EEBng ng\xE0y \u0111\u1EA5y
+      th\xF4i."
   - speaker: 0
     localizationKey: grandpa.after_hoe.024
     english: I think I understand.
-    vietnamese: 
+    vietnamese: "D\u1EA1, ch\xE1u hi\u1EC3u r\u1ED3i."
   - speaker: 1
     localizationKey: grandpa.after_hoe.025
     english: Good. For now, eat properly, get some sleep, and work the land at your
       own pace.
-    vietnamese: 
+    vietnamese: "T\u1ED1t. Gi\u1EDD c\u1EE9 \u0103n u\u1ED1ng, ng\u1EE7 ngh\u1EC9
+      cho kh\u1ECFe r\u1ED3i l\xE0m \u0111\u1EA5t theo s\u1EE9c c\u1EE7a m\xECnh."
   - speaker: 1
     localizationKey: grandpa.after_hoe.026
     english: "When you need seeds or proper tools, talk to Uncle Hai. He's the round
       fellow nearby\u2014you won't miss him."
-    vietnamese: 
+    vietnamese: "Khi c\u1EA7n h\u1EA1t gi\u1ED1ng hay n\xF4ng c\u1EE5 th\xEC sang
+      t\xECm ch\xFA H\u1EA3i. Ch\xFA \u1EA5y tr\xF2n tr\xF2n \u1EDF g\u1EA7n \u0111\xE2y,
+      ch\xE1u nh\xECn l\xE0 nh\u1EADn ra ngay."
   - speaker: 1
     localizationKey: grandpa.after_hoe.027
     english: And keep an eye around the garden. I left my watering can somewhere
       out there.
-    vietnamese: 
+    vietnamese: "\xC0, \u0111\u1EC3 \xFD quanh v\u01B0\u1EDDn nh\xE9. \xD4ng \u0111\u1EC3
+      qu\xEAn c\xE1i b\xECnh t\u01B0\u1EDBi \u1EDF \u0111\xE2u \u0111\xF3 ngo\xE0i
+      kia r\u1ED3i."
   - speaker: 0
     localizationKey: grandpa.after_hoe.028
     english: Alright, Grandpa. I'll remember.
-    vietnamese: 
+    vietnamese: "D\u1EA1, ch\xE1u nh\u1EDB r\u1ED3i \xF4ng."

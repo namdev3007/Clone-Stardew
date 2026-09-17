@@ -20,25 +20,13 @@ MonoBehaviour:
       max: 0
       current: 0
   - Data: {fileID: 11400000, guid: 26741901f5e3eb64aade72e03860b605, type: 2}
-    Amount: 0
+    Amount: 1
     Energy:
       min: 0
-      max: 0
-      current: 0
-  - Data: {fileID: 11400000, guid: 762a52d8b76c780469aa1692ea9edf49, type: 2}
-    Amount: 0
-    Energy:
-      min: 0
-      max: 0
-      current: 0
-  - Data: {fileID: 11400000, guid: b6c7bc5235a3e174bb24477617cbadf0, type: 2}
-    Amount: 0
-    Energy:
-      min: 0
-      max: 0
-      current: 0
+      max: 100
+      current: 100
   - Data: {fileID: 11400000, guid: 0cab5641581250140ab6d9d757462593, type: 2}
-    Amount: 15
+    Amount: 3
     Energy:
       min: 0
       max: 0

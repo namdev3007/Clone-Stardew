@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42ab45e50a794fb1b91be76cc55db42f, type: 3}
+  m_Name: Special Crop Runtime Config
+  m_EditorClassIdentifier:
+  regions: {fileID: 11400000, guid: e76295cd1354ef64ab431e20799ac30c, type: 2}
+  cucumberStages:
+  - {fileID: -49827021452715039, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: -2418970267053101933, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: 1644491032362328050, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: 7079356569533678363, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: -7931534375995494044, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: -7177264488276086914, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: 8923761706521908252, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: 7724814800384690607, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: 6784259067789096798, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  - {fileID: -3169058226599716941, guid: 8742fd298c866924198bb7acdc00a8b1, type: 3}
+  dragonFruitStages:
+  - {fileID: 6284861853261582594, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: -9006002687204775262, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: -1560490545571434017, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: -209484398309525465, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: 2551108070031638253, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: 7474634605538559278, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: -4773143002421663189, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  - {fileID: -9059674702905948968, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  cucumberBrokenSprites:
+  - {fileID: -6253245054861527749, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
+  - {fileID: -2062003219898376686, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
+  - {fileID: 4821437798414693900, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
+  - {fileID: 2983786636311293438, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
+  lockSign: {fileID: -2232192959912990605, guid: b87daf26be0da3f4fad301209afa3f4d, type: 3}
+  currencyItem: {fileID: 11400000, guid: 01f8d174962102c4d8c5cf00c70f82e5, type: 2}
+  confirmationWindowPrefab: {fileID: 1676738617491330, guid: e971388e6414fe24ba70867c684f42bd,
+    type: 2}
+  mouseInteractionEvent: {fileID: 11400000, guid: 956f458aa3cfb5c45ae24917ff8b57a6, type: 2}

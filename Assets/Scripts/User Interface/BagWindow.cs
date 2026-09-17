@@ -12,6 +12,8 @@ namespace User_Interface
     [AddComponentMenu("Farming Kit/User Interface/Bag Window")]
     public class BagWindow : MonoBehaviour
     {
+        private static BagWindow activeWindow;
+
         [SerializeField, Tooltip("The window that gets shown and hidden. Usually Window_Inventory.")]
         private GameObject window;
 
@@ -19,7 +21,7 @@ namespace User_Interface
         private KeyCode toggleKey = KeyCode.Tab;
 
         [SerializeField, Min(0.1f), Tooltip("Scale of the window while the bag is open.")]
-        private float windowScale = 1.95f;
+        private float windowScale = 2.535f;
 
         [SerializeField, Tooltip("Gameplay stays frozen while the bag is open.")]
         private BoolEvent pauzeEvent;
@@ -32,9 +34,23 @@ namespace User_Interface
         private bool invokingPauze;
 
         public bool IsOpen { get { return isOpen; } }
+        public static bool AnyOpen => activeWindow != null && activeWindow.isOpen;
+
+        public static bool TryCloseOpen()
+        {
+            BagWindow bag = activeWindow;
+            if (bag == null)
+                bag = FindFirstObjectByType<BagWindow>(FindObjectsInactive.Include);
+            if (bag == null || !bag.isOpen)
+                return false;
+
+            bag.Close();
+            return true;
+        }
 
         private void OnEnable()
         {
+            activeWindow = this;
             pauzeEvent?.AddListener(OnPauzeStateChanged);
             displayPauzeMenu?.AddListener(OnPauzeMenuDisplayed);
         }
@@ -43,6 +59,8 @@ namespace User_Interface
         {
             pauzeEvent?.RemoveListener(OnPauzeStateChanged);
             displayPauzeMenu?.RemoveListener(OnPauzeMenuDisplayed);
+            if (activeWindow == this)
+                activeWindow = null;
         }
 
         // Hiding happens in Start instead of Awake so the inventory slots inside the

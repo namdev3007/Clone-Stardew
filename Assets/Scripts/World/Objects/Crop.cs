@@ -7,6 +7,7 @@ using Referencing.Scriptable_Reference;
 using System.Collections;
 using UnityEngine;
 using World.Interfaces;
+using World.NPC;
 
 namespace World.Objects
 {
@@ -32,6 +33,7 @@ namespace World.Objects
             public bool fertilized;
             public bool wateredThisCycle;
             public int harvestCount;
+            public int axeHitCount;
         }
 
         private const float MissingFertilizerPenaltySeconds = 15f;
@@ -58,6 +60,7 @@ namespace World.Objects
         private bool fertilized;
         private bool wateredThisCycle;
         private int harvestCount;
+        private int axeHitCount;
         private bool registered;
         private bool showcaseMode;
         private int showcaseStageIndex;
@@ -65,6 +68,19 @@ namespace World.Objects
         public bool NeedsWater => !wateredThisCycle && (phase == GrowthPhase.Growing || phase == GrowthPhase.Regrowing);
         public bool IsReadyToHarvest => phase == GrowthPhase.ReadyToHarvest;
         public bool UsesPerennialFootprint => definition != null && definition.IsPerennialTree;
+
+        public bool TryGetStatusAnchor(out Vector3 anchor)
+        {
+            if (spriteRenderer == null || spriteRenderer.sprite == null || !spriteRenderer.enabled)
+            {
+                anchor = transform.position;
+                return false;
+            }
+
+            Bounds visualBounds = spriteRenderer.bounds;
+            anchor = new Vector3(visualBounds.center.x, visualBounds.max.y, transform.position.z);
+            return true;
+        }
 
         private void Awake()
         {
@@ -221,12 +237,13 @@ namespace World.Objects
             gridManager.SubscribeToGridChanges(this, transform.position);
             gridManager.RegisterCrop(this, transform.position);
             registered = true;
+            gridManager.RefreshCropStatusPosition(transform.position);
         }
 
         private void ConfigureDrop()
         {
             if (definition != null && itemDropper != null)
-                itemDropper.ConfigureSingleDrop(definition.HarvestedItem, 1);
+                itemDropper.ConfigureSingleDrop(definition.HarvestedItem, definition.HarvestYield);
         }
 
         private void BecomeHarvestable()
@@ -234,7 +251,9 @@ namespace World.Objects
             phase = GrowthPhase.ReadyToHarvest;
             remainingSeconds = 0f;
             SetSprite(GetLastSprite());
-            health?.SetInvulnerable(false);
+            // Banana/mango trees are handled by the dedicated axe interaction;
+            // generic crop attacks must never harvest or remove them.
+            health?.SetInvulnerable(definition != null && definition.IsPerennialTree);
             gridManager?.SetCropStatus(transform.position, FarmPlotStatus.Harvest);
         }
 
@@ -256,7 +275,7 @@ namespace World.Objects
                     break;
                 case GrowthPhase.ReadyToHarvest:
                     SetSprite(GetLastSprite());
-                    health?.SetInvulnerable(false);
+                    health?.SetInvulnerable(definition.IsPerennialTree);
                     gridManager?.SetCropStatus(transform.position, FarmPlotStatus.Harvest);
                     break;
                 case GrowthPhase.RestingAfterHarvest:
@@ -308,7 +327,11 @@ namespace World.Objects
             if (spriteRenderer == null || sprite == null)
                 return;
 
+            bool spriteChanged = spriteRenderer.sprite != sprite;
             spriteRenderer.sprite = sprite;
+            // Crops are not part of the removed day/night lighting system. Keep
+            // their source colours intact when the wet-ground tile is applied.
+            spriteRenderer.color = Color.white;
 
             // Imported crop frames are tightly trimmed and have different sizes.
             // Offset each frame so its bottom-center remains fixed to the soil cell.
@@ -318,12 +341,27 @@ namespace World.Objects
 
             spriteRenderer.transform.localScale = Vector3.one * scale;
             float x = ((pivot.x - sprite.rect.width * 0.5f) / pixelsPerUnit) * scale;
-            float y = (pivot.y / pixelsPerUnit) * scale;
+            Sprite[] growthSprites = definition != null ? definition.GrowthSprites : null;
+            // Trellis crops start on a tall post sprite, so they stay bottom-anchored
+            // like the empty post they replace instead of dropping into the cell.
+            bool isPlantedSeedStage = growthSprites != null && growthSprites.Length > 0 &&
+                                      growthSprites[0] == sprite &&
+                                      definition.PlantingZone == PlantingZone.Normal;
+
+            // Large growth stages stand on the cell centre by their bottom edge.
+            // The freshly planted seed is a small ground marker, so centre its
+            // complete sprite inside the soil cell instead of pushing it upward.
+            float y = isPlantedSeedStage
+                ? ((pivot.y - sprite.rect.height * 0.5f) / pixelsPerUnit) * scale
+                : (pivot.y / pixelsPerUnit) * scale;
             Vector2 stageOffset = definition != null ? definition.GetStagePositionOffset(sprite) : Vector2.zero;
             spriteRenderer.transform.localPosition = new Vector3(
                 x + stageOffset.x,
                 CropVisualPositionY + y + stageOffset.y,
                 0f);
+
+            if (spriteChanged)
+                gridManager?.RefreshCropStatusPosition(transform.position);
         }
 
         public void OnDeath(Health killedHealth)
@@ -337,6 +375,7 @@ namespace World.Objects
                 return false;
 
             itemDropper?.Drop(transform.position);
+            TutorialProgressService.Instance.RecordCropHarvested(definition.DisplayName);
             harvestCount++;
 
             if (harvestCount >= definition.MaximumHarvests)
@@ -354,6 +393,34 @@ namespace World.Objects
             health?.SetInvulnerable(true);
             RefreshVisuals();
             StartCoroutine(ReviveAfterDamageCompletes());
+            return true;
+        }
+
+        /// <summary>
+        /// Handles axe interaction for planted banana/mango trees only. Ripe
+        /// fruit is harvested without counting as tree damage; every other
+        /// growth phase counts toward chopping the whole tree down.
+        /// </summary>
+        public bool TryUseAxe()
+        {
+            if (definition == null || !definition.IsPerennialTree || showcaseMode)
+                return false;
+
+            if (phase == GrowthPhase.ReadyToHarvest)
+                return Harvest();
+
+            axeHitCount++;
+            int requiredHits = definition.DisplayName.IndexOf("Mango", System.StringComparison.OrdinalIgnoreCase) >= 0
+                ? 6
+                : 3;
+            if (axeHitCount < requiredHits)
+                return true;
+
+            gridManager?.ReleaseFarmPlot(transform.position);
+            if (gridManager != null)
+                gridManager.UnSubscribeToGridChanges(this, transform.position);
+            registered = false;
+            Destroy(gameObject);
             return true;
         }
 
@@ -440,13 +507,14 @@ namespace World.Objects
         {
             return JsonUtility.ToJson(new SaveData
             {
-                version = 4,
+                version = 5,
                 definitionGuid = definition != null ? definition.GetGuid() : string.Empty,
                 phase = (int)phase,
                 remainingSeconds = remainingSeconds,
                 fertilized = fertilized,
                 wateredThisCycle = wateredThisCycle,
-                harvestCount = harvestCount
+                harvestCount = harvestCount,
+                axeHitCount = axeHitCount
             });
         }
 
@@ -459,6 +527,7 @@ namespace World.Objects
             fertilized = saveData.fertilized;
             wateredThisCycle = saveData.wateredThisCycle;
             harvestCount = Mathf.Max(0, saveData.harvestCount);
+            axeHitCount = Mathf.Max(0, saveData.axeHitCount);
 
             if (definition != null)
             {

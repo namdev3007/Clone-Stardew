@@ -18,8 +18,11 @@ MonoBehaviour:
     localizationKey: grandpa.reminder.001
     english: Take things one step at a time. The plot beside the house is a good
       place to begin.
-    vietnamese: 
+    vietnamese: "C\u1EE9 l\xE0m t\u1EEBng b\u01B0\u1EDBc m\u1ED9t th\xF4i. M\u1EA3nh
+      \u0111\u1EA5t b\xEAn h\xF4ng nh\xE0 l\xE0 ch\u1ED7 th\xEDch h\u1EE3p \u0111\u1EC3
+      b\u1EAFt \u0111\u1EA7u."
   - speaker: 1
     localizationKey: grandpa.reminder.002
     english: Three patches will do for now. Mind where you swing that hoe.
-    vietnamese: 
+    vietnamese: "Tr\u01B0\u1EDBc m\u1EAFt cu\u1ED1c ba \xF4 l\xE0 \u0111\u01B0\u1EE3c.
+      Nh\u1EDB \u0111\u1EC3 \xFD ch\u1ED7 ch\xE1u vung cu\u1ED1c \u0111\u1EA5y."

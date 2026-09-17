@@ -6,6 +6,7 @@ using Referencing.Scriptable_Reference;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 using World;
 using World.Objects;
 
@@ -35,8 +36,15 @@ namespace Item.Actions
         [SerializeField]
         private float energyCost;
 
+        [Header("Water gauge above player")]
         [SerializeField]
-        private float waterEnergyRecovery;
+        private Sprite waterGaugeBackground;
+
+        [SerializeField]
+        private Sprite waterGaugeFill;
+
+        [SerializeField]
+        private Vector2 waterGaugeOffset = new Vector2(0f, 0.385f);
 
         [SerializeField]
         private UnityEvent OnWateredGround;
@@ -64,7 +72,7 @@ namespace Item.Actions
             {
                 Vector3Int location = gridSelector.GetGridSelectionPosition();
 
-                bool obtainingWater = gridManager.HasWater(location);
+                bool obtainingWater = gridManager.CanRefillWaterAt(location);
                 Crop targetCrop = gridManager.GetCrop(location);
                 bool cropNeedsWater = targetCrop != null && targetCrop.NeedsWater;
                 bool dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
@@ -79,6 +87,25 @@ namespace Item.Actions
                 if (!obtainingWater && getInventoryItem != null && !FarmingCheats.InfiniteWater
                     && getInventoryItem.Energy.current < energyCost)
                     yield break;
+
+                // Refilling is immediate: no watering pose, movement lock or wait.
+                if (obtainingWater)
+                {
+                    if (getInventoryItem == null)
+                        yield break;
+
+                    ItemEnergy currentItemEnergy = getInventoryItem.Energy;
+                    getInventoryItem.Energy = new ItemEnergy
+                    {
+                        min = currentItemEnergy.min,
+                        max = currentItemEnergy.max,
+                        current = currentItemEnergy.max
+                    };
+                    OnObtainedWater.Invoke();
+                    UpdateWorldGauge(userInventory, getInventoryItem.Energy, true);
+                    userInventory.ReloadItemSlot(itemIndex);
+                    yield break;
+                }
 
                 Aimer aimer = userInventory.GetComponent<Aimer>();
                 aimer?.SetAimDirection(gridSelector.GetMouseLookDirection());
@@ -100,7 +127,7 @@ namespace Item.Actions
 
                 yield return new WaitForSeconds(animationTime * 0.5f);
 
-                if (!gridManager.HasWater(location))
+                if (!gridManager.CanRefillWaterAt(location))
                 {
                     Crop crop = gridManager.GetCrop(location);
                     cropNeedsWater = crop != null && crop.NeedsWater;
@@ -134,26 +161,11 @@ namespace Item.Actions
 
                             OnWateredGround.Invoke();
 
+                            UpdateWorldGauge(userInventory, getInventoryItem.Energy, true);
                             userInventory.ReloadItemSlot(itemIndex);
                         }
                     }
                 }
-                else
-                {
-                    ItemEnergy currentItemEnergy = getInventoryItem.Energy;
-
-                    getInventoryItem.Energy = new ItemEnergy()
-                    {
-                        min = currentItemEnergy.min,
-                        max = currentItemEnergy.max,
-                        current = Mathf.Clamp(currentItemEnergy.current + waterEnergyRecovery, currentItemEnergy.min, currentItemEnergy.max)
-                    };
-
-                    OnObtainedWater.Invoke();
-
-                    userInventory.ReloadItemSlot(itemIndex);
-                }
-
                 yield return new WaitForSeconds(animationTime * 0.5f);
 
                 getMover.FreezeMovement(false);
@@ -169,12 +181,142 @@ namespace Item.Actions
 
         public override void ItemActiveAction(Inventory.Inventory userInventory, int itemIndex)
         {
-            //userInventory.GetComponent<GridSelector>()?.Display(true);
+            InventoryItem item = userInventory.GetItem(itemIndex);
+            if (item != null)
+                UpdateWorldGauge(userInventory, item.Energy, true);
         }
 
         public override void ItemUnactiveAction(Inventory.Inventory userInventory, int itemIndex)
         {
-            //userInventory.GetComponent<GridSelector>()?.Display(false);
+            WaterCanWorldGauge gauge = userInventory.GetComponent<WaterCanWorldGauge>();
+            if (gauge != null)
+                gauge.SetVisible(false);
+        }
+
+        private void UpdateWorldGauge(Inventory.Inventory inventory, ItemEnergy energy, bool visible)
+        {
+            WaterCanWorldGauge gauge = inventory.GetComponent<WaterCanWorldGauge>();
+            if (gauge == null)
+                gauge = inventory.gameObject.AddComponent<WaterCanWorldGauge>();
+
+            gauge.Configure(waterGaugeBackground, waterGaugeFill, waterGaugeOffset);
+            gauge.SetValue(energy.min, energy.max, energy.current);
+            gauge.SetVisible(visible);
+        }
+    }
+
+    [DisallowMultipleComponent]
+    public sealed class WaterCanWorldGauge : MonoBehaviour
+    {
+        private const float BobAmplitude = 0.015f;
+        private const float BobCyclesPerSecond = 1.2f;
+        private Vector2 baseOffset = new Vector2(0f, 0.385f);
+        private RectTransform gaugeRoot;
+        private Image trackImage;
+        private Image fillImage;
+        private Slider slider;
+
+        public void Configure(Sprite trackSprite, Sprite fillSprite, Vector2 offset)
+        {
+            EnsureInterface();
+            baseOffset = offset;
+            gaugeRoot.localPosition = new Vector3(offset.x, offset.y, 0f);
+            trackImage.sprite = trackSprite;
+            fillImage.sprite = fillSprite;
+            trackImage.color = Color.white;
+            fillImage.color = Color.white;
+        }
+
+        public void SetValue(float minimum, float maximum, float current)
+        {
+            EnsureInterface();
+            slider.minValue = minimum;
+            slider.maxValue = Mathf.Max(minimum + 0.0001f, maximum);
+            slider.value = Mathf.Clamp(current, minimum, maximum);
+        }
+
+        public void SetVisible(bool visible)
+        {
+            EnsureInterface();
+            gaugeRoot.gameObject.SetActive(visible);
+            if (!visible)
+                gaugeRoot.localPosition = new Vector3(baseOffset.x, baseOffset.y, 0f);
+        }
+
+        private void Update()
+        {
+            if (gaugeRoot == null || !gaugeRoot.gameObject.activeSelf)
+                return;
+
+            float bob = Mathf.Sin(UnityEngine.Time.time * Mathf.PI * 2f * BobCyclesPerSecond) * BobAmplitude;
+            gaugeRoot.localPosition = new Vector3(baseOffset.x, baseOffset.y + bob, 0f);
+        }
+
+        private void EnsureInterface()
+        {
+            if (gaugeRoot != null)
+                return;
+
+            GameObject canvasObject = new GameObject(
+                "Water Can Gauge", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+            canvasObject.transform.SetParent(transform, false);
+            gaugeRoot = canvasObject.GetComponent<RectTransform>();
+            gaugeRoot.sizeDelta = new Vector2(50f, 6f);
+            gaugeRoot.localScale = Vector3.one * 0.01f;
+            gaugeRoot.pivot = new Vector2(0.5f, 0.5f);
+
+            Canvas canvas = canvasObject.GetComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 1000;
+            CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+            scaler.dynamicPixelsPerUnit = 100f;
+            scaler.referencePixelsPerUnit = 100f;
+
+            GameObject sliderObject = new GameObject("Water", typeof(RectTransform), typeof(Slider));
+            sliderObject.transform.SetParent(canvasObject.transform, false);
+            Stretch(sliderObject.GetComponent<RectTransform>());
+            slider = sliderObject.GetComponent<Slider>();
+            slider.transition = Selectable.Transition.None;
+            slider.interactable = false;
+            slider.direction = Slider.Direction.LeftToRight;
+
+            GameObject trackObject = new GameObject(
+                "Fill Area", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            trackObject.transform.SetParent(sliderObject.transform, false);
+            RectTransform trackRect = trackObject.GetComponent<RectTransform>();
+            Stretch(trackRect);
+            trackImage = trackObject.GetComponent<Image>();
+            trackImage.raycastTarget = false;
+            trackImage.preserveAspect = false;
+
+            GameObject fillObject = new GameObject(
+                "Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            fillObject.transform.SetParent(trackObject.transform, false);
+            RectTransform fillRect = fillObject.GetComponent<RectTransform>();
+            fillRect.anchorMin = new Vector2(0f, 0f);
+            fillRect.anchorMax = new Vector2(1f, 1f);
+            fillRect.pivot = new Vector2(0f, 0.5f);
+            fillRect.offsetMin = new Vector2(0f, 1f);
+            fillRect.offsetMax = new Vector2(0f, -1f);
+            fillRect.localScale = Vector3.one;
+            fillObject.GetComponent<CanvasRenderer>().cullTransparentMesh = true;
+            fillImage = fillObject.GetComponent<Image>();
+            fillImage.raycastTarget = false;
+            fillImage.maskable = true;
+            fillImage.preserveAspect = false;
+            slider.fillRect = fillRect;
+
+            gaugeRoot.gameObject.SetActive(false);
+        }
+
+        private static void Stretch(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = Vector2.zero;
         }
     }
 }

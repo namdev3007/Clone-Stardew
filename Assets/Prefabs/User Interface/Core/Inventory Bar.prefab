@@ -216,6 +216,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1045718169497936
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,7 +284,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -709,8 +710,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -961,6 +962,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1095189521210354
 GameObject:
   m_ObjectHideFlags: 0
@@ -1028,7 +1030,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -2167,8 +2169,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -2305,8 +2307,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -2656,8 +2658,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -2908,6 +2910,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1323882056147642
 GameObject:
   m_ObjectHideFlags: 0
@@ -3291,8 +3294,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -3499,7 +3502,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -3574,7 +3577,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -4020,7 +4023,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -4233,7 +4236,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -4457,6 +4460,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1484256016935248
 GameObject:
   m_ObjectHideFlags: 0
@@ -4893,6 +4897,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1501550108563676
 GameObject:
   m_ObjectHideFlags: 0
@@ -4960,8 +4965,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -5133,8 +5138,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -5370,7 +5375,7 @@ RectTransform:
   m_GameObject: {fileID: 1553793651963354}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 224258076456460708}
@@ -5654,6 +5659,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1635326701905516
 GameObject:
   m_ObjectHideFlags: 0
@@ -5943,7 +5949,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -6018,8 +6024,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -6369,8 +6375,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -6546,6 +6552,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1685894672192488
 GameObject:
   m_ObjectHideFlags: 0
@@ -6652,6 +6659,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1690847961383684
 GameObject:
   m_ObjectHideFlags: 0
@@ -7070,7 +7078,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -7424,6 +7432,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &1759937883434486
 GameObject:
   m_ObjectHideFlags: 0
@@ -7601,7 +7610,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -7841,7 +7850,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: f7d919c91241eba4ca26f3cf02893f89, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -8314,8 +8323,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 22
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d6407900772a2164a98fedf5680bd64c, type: 2}
-  m_sharedMaterial: {fileID: 21046154912644994, guid: d6407900772a2164a98fedf5680bd64c,
+  m_fontAsset: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
+  m_sharedMaterial: {fileID: -1487013403506819521, guid: af4e0f5cdfc541948b4e27e395289c6e,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -8902,6 +8911,7 @@ MonoBehaviour:
     moveItemOnDrag: 0
     slotIndexOffset: -1
     hasSelectionHighlight: 1
+  forcedSlotIndex: -1
 --- !u!1 &352347089934507959
 GameObject:
   m_ObjectHideFlags: 0

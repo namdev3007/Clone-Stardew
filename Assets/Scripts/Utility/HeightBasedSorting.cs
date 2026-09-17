@@ -21,6 +21,8 @@ namespace Utility
         [SerializeField]
         private bool flip;
 
+        private float lastY = float.NaN;
+
         private void OnValidate()
         {
             if (sortingGroup == null)
@@ -36,6 +38,13 @@ namespace Utility
             UpdateOrder();
         }
 
+        private void LateUpdate()
+        {
+            // Also covers teleports and movement code which does not dispatch IMove.
+            if (!Mathf.Approximately(lastY, transform.position.y))
+                UpdateOrder();
+        }
+
         public void OnMove(Vector2 direction, float velocity)
         {
             UpdateOrder();
@@ -45,7 +54,8 @@ namespace Utility
         {
             if (sortingGroup != null)
             {
-                sortingGroup.sortingOrder = (int)(transform.position.y * positionScaling);
+                lastY = transform.position.y;
+                sortingGroup.sortingOrder = Mathf.RoundToInt(lastY * positionScaling);
             }
         }
     }

@@ -17,6 +17,7 @@ MonoBehaviour:
   firstGrowthSeconds: 120
   regrowthSeconds: 30
   maximumHarvests: 3
+  harvestYield: 3
   regrowthStageStart: 4
   growthSprites:
   - {fileID: -5684420211313198665, guid: 82b5e2fa273ef3244acd738be95ae1e9, type: 3}

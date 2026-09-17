@@ -252,7 +252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f24d937e154b6dacf5cc02dc7b62a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hiddenAlpha: 0.35
+  hiddenAlpha: 1
   fadeSpeed: 8
   horizontalCoverage: 0.72
   behindThreshold: 0.03

@@ -22,10 +22,28 @@ MonoBehaviour:
     type: 3}
   skipButton: {fileID: -4358472242703741127, guid: 7f152760febe246498c114f240a76a0f,
     type: 3}
-  textFont: {fileID: 11400000, guid: 974c4748fcff0a7458d6de9b114ddf64, type: 2}
-  playerPortrait: {fileID: 3980469479438065256, guid: 1fa441edc5595bc4991bae3dee393c6f,
+  textFont: {fileID: 11400000, guid: eb26cec8de56cd44098e4e837442691a, type: 2}
+  playerPortrait: {fileID: -6366610561156209924, guid: 15cae1a037f3c4742a1a095bc28e1f4e,
     type: 3}
-  grandpaPortrait: {fileID: 5137486874329215177, guid: 6630973054d1bf24a892087b7479e6b6,
+  grandpaPortrait: {fileID: 991972128030545274, guid: 3a9694e67769e564187102f722d0c686,
     type: 3}
-  sellerPortrait: {fileID: -6095755055776031339, guid: ef5fb95a5779e3d47b5ebe65cb414e48,
+  sellerPortrait: {fileID: -6202418465624162077, guid: 4a76992bf0ae1114fb0f7de551c4c8fa,
     type: 3}
+  playerPortraitFrames:
+  - {fileID: -6366610561156209924, guid: 15cae1a037f3c4742a1a095bc28e1f4e, type: 3}
+  - {fileID: 3280101920172030044, guid: 15cae1a037f3c4742a1a095bc28e1f4e, type: 3}
+  - {fileID: 3288001395163225936, guid: 15cae1a037f3c4742a1a095bc28e1f4e, type: 3}
+  - {fileID: -4848297923941278535, guid: 15cae1a037f3c4742a1a095bc28e1f4e, type: 3}
+  - {fileID: -7262537536840792830, guid: 15cae1a037f3c4742a1a095bc28e1f4e, type: 3}
+  grandpaPortraitFrames:
+  - {fileID: 991972128030545274, guid: 3a9694e67769e564187102f722d0c686, type: 3}
+  - {fileID: -1839418218610460213, guid: 3a9694e67769e564187102f722d0c686, type: 3}
+  - {fileID: -5323717436880333179, guid: 3a9694e67769e564187102f722d0c686, type: 3}
+  - {fileID: -1400505351049946250, guid: 3a9694e67769e564187102f722d0c686, type: 3}
+  - {fileID: 8976558313058308711, guid: 3a9694e67769e564187102f722d0c686, type: 3}
+  sellerPortraitFrames:
+  - {fileID: -6202418465624162077, guid: 4a76992bf0ae1114fb0f7de551c4c8fa, type: 3}
+  - {fileID: 8862321091199274890, guid: 4a76992bf0ae1114fb0f7de551c4c8fa, type: 3}
+  - {fileID: 9183084014003978208, guid: 4a76992bf0ae1114fb0f7de551c4c8fa, type: 3}
+  - {fileID: 4933653780605535594, guid: 4a76992bf0ae1114fb0f7de551c4c8fa, type: 3}
+  - {fileID: -1767629403369710899, guid: 4a76992bf0ae1114fb0f7de551c4c8fa, type: 3}

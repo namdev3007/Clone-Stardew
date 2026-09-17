@@ -26,7 +26,7 @@ public static class SetupNewFarmMap
     private const string DrySpriteGuid = "5b8c2a60f988e3147997330788e4c4ac";
     private const string WetSpriteGuid = "2105b1b2aa988db4ab9ea2383a5109dc";
     private const string MarkerName = "Map Layout Base";
-    private const int CurrentMapVersion = 3;
+    private const int CurrentMapVersion = 4;
 
     [InitializeOnLoadMethod]
     private static void InstallOnceAfterCompile()
@@ -38,15 +38,14 @@ public static class SetupNewFarmMap
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
                 return;
 
-            if (EditorPrefs.GetInt(GetVersionKey(), 0) < CurrentMapVersion)
+            if (MapInstallIsOutOfDate())
                 Install(false);
         };
     }
 
     private static void OnPlayModeChanged(PlayModeStateChange state)
     {
-        if (state == PlayModeStateChange.EnteredEditMode &&
-            EditorPrefs.GetInt(GetVersionKey(), 0) < CurrentMapVersion)
+        if (state == PlayModeStateChange.EnteredEditMode && MapInstallIsOutOfDate())
         {
             EditorApplication.delayCall += () => Install(false);
         }
@@ -61,6 +60,20 @@ public static class SetupNewFarmMap
     private static string GetVersionKey()
     {
         return "Meadom.NewFarmMap." + Application.dataPath.GetHashCode();
+    }
+
+    private static string GetPreviewHashKey()
+    {
+        return GetVersionKey() + ".PreviewHash";
+    }
+
+    private static bool MapInstallIsOutOfDate()
+    {
+        if (EditorPrefs.GetInt(GetVersionKey(), 0) < CurrentMapVersion)
+            return true;
+
+        string currentHash = AssetDatabase.GetAssetDependencyHash(PreviewPath).ToString();
+        return EditorPrefs.GetString(GetPreviewHashKey(), string.Empty) != currentHash;
     }
 
     private static void Install(bool force)
@@ -122,6 +135,8 @@ public static class SetupNewFarmMap
             ConfigureRenderer(water, false, -9001);
             ConfigureRenderer(dirtHole, true, -8900);
             ConfigureRenderer(wet, true, -8800);
+            wet.color = new Color(1f, 1f, 1f, 0.58f);
+            EditorUtility.SetDirty(wet);
 
             SerializedObject serializedManager = new SerializedObject(manager);
             serializedManager.FindProperty("dirtTile").objectReferenceValue = farmableLogicTile;
@@ -140,6 +155,9 @@ public static class SetupNewFarmMap
             EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
             EditorPrefs.SetInt(GetVersionKey(), CurrentMapVersion);
+            EditorPrefs.SetString(
+                GetPreviewHashKey(),
+                AssetDatabase.GetAssetDependencyHash(PreviewPath).ToString());
 
             Debug.Log($"New farm map installed: {mapBase.cellBounds.size.x}x{mapBase.cellBounds.size.y}, " +
                       $"farmable cells={CountOccupiedCells(dirt)}, water cells={CountOccupiedCells(water)}.");

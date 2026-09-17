@@ -17,9 +17,13 @@ MonoBehaviour:
   - speaker: 1
     localizationKey: grandpa.expand_unavailable.001
     english: Let's get the first plot in shape before we clear any more land.
-    vietnamese: 
+    vietnamese: "C\u1EE9 lo cho m\u1EA3nh ru\u1ED9ng \u0111\u1EA7u ti\xEAn \u1ED5n
+      th\u1ECFa \u0111\xE3 r\u1ED3i m\xECnh m\u1EDBi t\xEDnh chuy\u1EC7n khai th\xEAm
+      \u0111\u1EA5t."
   - speaker: 1
     localizationKey: grandpa.expand_unavailable.002
     english: Come back when the village is ready to handle land permits and payments
       again.
-    vietnamese: 
+    vietnamese: "Khi n\xE0o trong l\xE0ng gi\u1EA3i quy\u1EBFt l\u1EA1i \u0111\u01B0\u1EE3c
+      gi\u1EA5y ph\xE9p v\xE0 ti\u1EC1n m\u1EDF \u0111\u1EA5t th\xEC ch\xE1u quay
+      l\u1EA1i nh\xE9."

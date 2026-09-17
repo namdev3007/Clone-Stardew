@@ -7,6 +7,9 @@ namespace User_Interface
 {
     public class ConfirmationWindow : MonoBehaviour
     {
+        private static ConfirmationWindow activeWindow;
+        public static bool AnyOpen => activeWindow != null && activeWindow.gameObject.activeInHierarchy;
+
         [SerializeField]
         private TextMeshProUGUI textQuestion;
 
@@ -46,6 +49,25 @@ namespace User_Interface
             buttonYes?.onClick.AddListener(OnClickYesButton);
             buttonAccept?.onClick.AddListener(OnClickYesButton);
             buttonNo?.onClick.AddListener(OnClickNoButton);
+        }
+
+        private void OnEnable() => activeWindow = this;
+
+        private void OnDisable()
+        {
+            if (activeWindow == this)
+                activeWindow = null;
+        }
+
+        public static bool TryCloseOpen()
+        {
+            if (!AnyOpen)
+                return false;
+            // SetActive(false) runs OnDisable, which clears activeWindow.
+            ConfirmationWindow window = activeWindow;
+            window.gameObject.SetActive(false);
+            window.ClearEvents();
+            return true;
         }
 
         private void OnClickNoButton()

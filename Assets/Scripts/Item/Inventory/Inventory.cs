@@ -9,6 +9,7 @@ using Referencing;
 using Referencing.Scriptable_Assets;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using World.Objects;
 
@@ -141,6 +142,17 @@ namespace Item.Inventory
 
         public int InventorySize { get { return inventorySize; } }
 
+        [Header("Dynamic inventory capacity")]
+        [SerializeField] private bool automaticallyExpand = true;
+        [SerializeField, Min(1)] private int expansionSlotCount = 7;
+        [SerializeField, Min(0)] private int expandWhenFreeSlotsAtOrBelow = 3;
+
+        /// <summary>
+        /// Raised whenever the visible inventory gains more slots. Bag UIs use
+        /// this to append another row without rebuilding the quick slots.
+        /// </summary>
+        public event Action<int> InventorySizeChanged;
+
         [SerializeField]
         private SaveablePrefab droppableItemPrefab = null;
 
@@ -162,7 +174,11 @@ namespace Item.Inventory
             {
                 foreach (InventoryItem item in startingItems.Items)
                 {
-                    AddItem(item.Data, item.Amount);
+                    if (item?.Data == null)
+                        continue;
+
+                    int amount = (!item.Data.CanStack && item.Amount <= 0) ? 1 : item.Amount;
+                    AddItem(item.Data, amount);
                 }
 
                 obtainedStartingItems = true;
@@ -275,6 +291,114 @@ namespace Item.Inventory
 
             index = -1;
             return null;
+        }
+
+        /// <summary>
+        /// Returns the usable quantity of an item, including invisible items such
+        /// as the player's currency. Non-stackable items count as one.
+        /// </summary>
+        public int GetItemAmount(ItemData data)
+        {
+            if (data == null)
+                return 0;
+
+            int index;
+            InventoryItem item = GetItem(data, out index);
+            if (item == null)
+                return 0;
+
+            return data.CanStack ? Mathf.Max(0, item.Amount) : 1;
+        }
+
+        /// <summary>
+        /// Checks whether an item can be added without mutating the inventory.
+        /// Stackable items can reuse their existing slot.
+        /// </summary>
+        public bool CanAddItem(ItemData data, int amount = 1)
+        {
+            if (data == null || amount <= 0)
+                return false;
+
+            if (!data.HasSlot)
+                return true;
+
+            int existingIndex;
+            if (data.CanStack && GetItem(data, out existingIndex) != null)
+                return true;
+
+            // A dynamic player bag can always create another row when needed.
+            if (automaticallyExpand)
+                return true;
+
+            for (int i = 0; i < inventorySize; i++)
+            {
+                if (!items.ContainsKey(i))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Removes a quantity of a specific item. This overload also supports
+        /// invisible resources such as Gold, which intentionally cannot be
+        /// dropped by the player but can still be spent by systems.
+        /// </summary>
+        public bool TryRemoveItemAmount(ItemData data, int amount)
+        {
+            if (data == null || amount <= 0)
+                return false;
+
+            int index;
+            InventoryItem item = GetItem(data, out index);
+            if (item == null)
+                return false;
+
+            if (data.HasSlot)
+                return TryRemoveItemAmount(index, amount);
+
+            if (!data.CanStack || item.Amount < amount)
+                return false;
+
+            item.Amount -= amount;
+            foreach (var dispatcher in eventDispatchers.Values)
+                dispatcher.DispatchItemLoad(-1, data, item.Amount);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Removes a quantity from a visible inventory slot and refreshes every
+        /// registered inventory UI. Non-removable tools cannot be sold/consumed
+        /// through this method.
+        /// </summary>
+        public bool TryRemoveItemAmount(int slotIndex, int amount)
+        {
+            InventoryItem item = GetItem(slotIndex);
+            if (item == null || amount <= 0 || !item.Data.IsRemoveable)
+                return false;
+
+            if (!item.Data.CanStack)
+            {
+                if (amount != 1)
+                    return false;
+
+                RemoveItem(slotIndex);
+                return true;
+            }
+
+            if (item.Amount < amount)
+                return false;
+
+            if (item.Amount == amount)
+                RemoveItem(slotIndex);
+            else
+            {
+                item.Amount -= amount;
+                ReloadItemSlot(slotIndex);
+            }
+
+            return true;
         }
 
         public void MoveItem(int slotIndexOne, int slotIndexTwo, Inventory targetInventory = null)
@@ -431,7 +555,9 @@ namespace Item.Inventory
         {
             GridSelector selector = GetComponent<GridSelector>();
             Crop crop = selector?.GetGridManager()?.GetCrop(selector.GetGridSelectionPosition());
-            if (crop == null || !crop.IsReadyToHarvest)
+            // Fruit trees require the axe. Returning false here lets the axe
+            // action decide whether to harvest ripe fruit or chop the tree.
+            if (crop == null || !crop.IsReadyToHarvest || crop.UsesPerennialFootprint)
                 return false;
 
             StartCoroutine(HarvestSelectedCrop(crop, selector));
@@ -487,6 +613,29 @@ namespace Item.Inventory
                 RefreshHeldItem();
         }
 
+        /// <summary>
+        /// Spends durability from a non-stackable tool and removes it when the
+        /// final use is consumed. Returns false when the slot has no usable tool.
+        /// </summary>
+        public bool TryConsumeToolDurability(int slotIndex, float amount = 1f)
+        {
+            InventoryItem item = GetItem(slotIndex);
+            if (item == null || item.Data == null || !item.Data.HasEnergy || amount <= 0f)
+                return false;
+
+            ItemEnergy energy = item.Energy;
+            if (energy.max <= energy.min || energy.current <= energy.min)
+                return false;
+
+            energy.current = Mathf.Max(energy.min, energy.current - amount);
+            item.Energy = energy;
+            if (energy.current <= energy.min)
+                RemoveItem(slotIndex, true);
+            else
+                ReloadItemSlot(slotIndex);
+            return true;
+        }
+
         public void ReloadAllItemSlots()
         {
             for (int i = 0; i < inventorySize; i++)
@@ -505,6 +654,9 @@ namespace Item.Inventory
         /// <returns></returns>
         public bool AddItem(ItemData data, int amount, int slotIndex = -1, bool scanForStack = true)
         {
+            if (data == null || amount <= 0)
+                return false;
+
             // Is item stackable? Then lets search the inventory first.
             if (scanForStack && data.CanStack)
             {
@@ -526,9 +678,14 @@ namespace Item.Inventory
 
             if (data.HasSlot)
             {
+                if (slotIndex >= inventorySize)
+                    ExpandToInclude(slotIndex);
+
                 // Get an available slot if possible
                 if (slotIndex == -1)
                 {
+                    EnsureRoomForAnotherItem();
+
                     if (data.HasSlot)
                     {
                         // Check if there are any free spaces left within the inventory
@@ -565,6 +722,8 @@ namespace Item.Inventory
                     if (slotIndex == selectedSlotIndex)
                         RefreshHeldItem();
 
+                    MaintainSpareSlots();
+
                     return true;
                 }
             }
@@ -590,6 +749,41 @@ namespace Item.Inventory
             }
 
             return false;
+        }
+
+        private void EnsureRoomForAnotherItem()
+        {
+            if (!automaticallyExpand || items.Count < inventorySize)
+                return;
+
+            GrowInventory(expansionSlotCount);
+        }
+
+        private void MaintainSpareSlots()
+        {
+            if (!automaticallyExpand)
+                return;
+
+            int freeSlots = Mathf.Max(0, inventorySize - items.Count);
+            if (freeSlots <= expandWhenFreeSlotsAtOrBelow)
+                GrowInventory(expansionSlotCount);
+        }
+
+        private void ExpandToInclude(int slotIndex)
+        {
+            if (!automaticallyExpand || slotIndex < inventorySize)
+                return;
+
+            int required = slotIndex - inventorySize + 1;
+            int rows = Mathf.CeilToInt(required / (float)Mathf.Max(1, expansionSlotCount));
+            GrowInventory(rows * Mathf.Max(1, expansionSlotCount));
+        }
+
+        private void GrowInventory(int amount)
+        {
+            int safeAmount = Mathf.Max(1, amount);
+            inventorySize += safeAmount;
+            InventorySizeChanged?.Invoke(inventorySize);
         }
 
         public void RemoveItem(int slotIndex, bool swapItem = false)
@@ -687,6 +881,15 @@ namespace Item.Inventory
 
         public void OnLoad(string data)
         {
+            if (string.IsNullOrWhiteSpace(data))
+            {
+                Debug.LogWarning("Inventory save data was empty. Starting with a clean inventory.");
+                items.Clear();
+                invisibleItems.Clear();
+                AddConfiguredStarterTools();
+                return;
+            }
+
             inventorySaveData = JsonUtility.FromJson<InventorySaveData>(data);
 
             if (inventorySaveData.savedItems == null)
@@ -714,14 +917,49 @@ namespace Item.Inventory
 
                 if (getItemData != null)
                 {
-                    AddItem(getItemData, getSave.amount, getSave.index);
+                    // Older saves store zero as the amount for non-stackable tools.
+                    // AddItem now rejects zero, so normalize it before restoring.
+                    int loadAmount = !getItemData.CanStack && getSave.amount <= 0
+                        ? 1
+                        : getSave.amount;
+                    if (loadAmount <= 0)
+                    {
+                        Debug.LogWarning($"Skipped inventory item with invalid amount: {getItemData.name}");
+                        continue;
+                    }
+
+                    // A damaged/old save can contain duplicate slot indices. Let
+                    // the inventory choose the next free slot instead of failing.
+                    int requestedIndex = getSave.index;
+                    if (getItemData.HasSlot && (requestedIndex < 0 || items.ContainsKey(requestedIndex)))
+                        requestedIndex = -1;
+
+                    if (!AddItem(getItemData, loadAmount, requestedIndex))
+                    {
+                        Debug.LogWarning($"Could not restore inventory item: {getItemData.name}");
+                        continue;
+                    }
 
                     // TODO: Create cleaner way to modify additional data in items.
                     if (getItemData.HasEnergy)
                     {
+                        int restoredIndex = requestedIndex;
+                        InventoryItem restoredItem = restoredIndex >= 0 ? GetItem(restoredIndex) : null;
+
+                        // Stackable data may have merged into an existing slot.
+                        if (restoredItem == null || restoredItem.Data != getItemData)
+                            restoredItem = GetItem(getItemData, out restoredIndex);
+
                         if (!getSave.energy.IsDefault())
-                            GetItem(getSave.index).Energy = getSave.energy;
-                        ReloadItemSlot(getSave.index);
+                        {
+                            if (restoredItem != null)
+                                restoredItem.Energy = getSave.energy;
+                            else
+                                Debug.LogWarning($"Energy data could not be restored for: {getItemData.name}");
+                        }
+
+                        if (restoredIndex >= 0)
+                            ReloadItemSlot(restoredIndex);
                     }
                 }
                 else
@@ -745,8 +983,6 @@ namespace Item.Inventory
             switch (guidString)
             {
                 case "249ef2e3-4402-4c04-be80-39cb272de1be": // Water Can
-                case "eb5780e4-5bc8-4c55-abe7-824cf11e7f69": // Axe
-                case "57c5c861-aaaa-4df8-8acf-b5d0391b75d5": // Hoe (old Shovel)
                 case "928f42f8-0698-4d62-83f6-4c4bb12b3d0d": // Old Pickaxe
                 case "0c929f40-01fa-4065-b3c5-104edd735469": // Old Scythe
                 case "cd3512d2-0a30-42fa-99b2-f112cd0e5272": // Old Sword
@@ -773,7 +1009,8 @@ namespace Item.Inventory
 
                 if (GetItem(data, out _) == null)
                 {
-                    AddItem(data, starterItem.Amount);
+                    int amount = starterItem.Amount > 0 ? starterItem.Amount : 1;
+                    AddItem(data, amount);
                 }
             }
         }

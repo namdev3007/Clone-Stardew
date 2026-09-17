@@ -11,6 +11,8 @@ using UnityEngine.UI;
 public static class SyncBagAmountTextLayout
 {
     private const string PrefabPath = "Assets/Prefabs/User Interface/Core/Pauze Menu.prefab";
+    private const string InventoryBarPrefabPath = "Assets/Prefabs/User Interface/Core/Inventory Bar.prefab";
+    private const string AmountFontPath = "Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset";
 
     [InitializeOnLoadMethod]
     private static void QueueSync()
@@ -37,6 +39,12 @@ public static class SyncBagAmountTextLayout
         SyncOpenSceneBagEnergy(true);
     }
 
+    [MenuItem("Tools/UI/Apply Bag Text Amount Font")]
+    private static void ApplyBagAmountFontFromMenu()
+    {
+        ApplyBagAmountFont(true);
+    }
+
     private static void SyncWhenReady()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -49,6 +57,93 @@ public static class SyncBagAmountTextLayout
 
         AlignOpenSceneAmountTextAreas();
         SyncOpenSceneBagEnergy(false);
+        ApplyBagAmountFont(false);
+    }
+
+    private static void ApplyBagAmountFont(bool logResult)
+    {
+        TMP_FontAsset font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AmountFontPath);
+        if (font == null)
+        {
+            Debug.LogError($"Bag Text_Amount font was not found at {AmountFontPath}.");
+            return;
+        }
+
+        int changedCount = 0;
+        changedCount += ApplyFontToPrefab(PrefabPath, font, IsBagOrQuickSlot);
+        changedCount += ApplyFontToPrefab(InventoryBarPrefabPath, font, slot => true);
+
+        InventorySlot[] sceneSlots = GetOpenSceneSlots();
+        foreach (InventorySlot slot in sceneSlots)
+        {
+            if (!IsBagOrQuickSlot(slot) && !HasAncestorNamed(slot.transform, "Inventory Bar"))
+                continue;
+
+            TextMeshProUGUI amountText = GetAmountText(slot);
+            if (amountText == null || amountText.font == font)
+                continue;
+
+            Undo.RecordObject(amountText, "Apply Bag Text Amount Font");
+            amountText.font = font;
+            EditorUtility.SetDirty(amountText);
+            EditorSceneManager.MarkSceneDirty(slot.gameObject.scene);
+            changedCount++;
+        }
+
+        AssetDatabase.SaveAssets();
+        if (logResult)
+            Debug.Log($"Applied binhthuong nhat' to {changedCount} bag Text_Amount objects.");
+    }
+
+    private static int ApplyFontToPrefab(
+        string prefabPath,
+        TMP_FontAsset font,
+        Func<InventorySlot, bool> shouldApply)
+    {
+        GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
+        int changedCount = 0;
+        try
+        {
+            foreach (InventorySlot slot in root.GetComponentsInChildren<InventorySlot>(true))
+            {
+                if (!shouldApply(slot))
+                    continue;
+
+                TextMeshProUGUI amountText = GetAmountText(slot);
+                if (amountText == null || amountText.font == font)
+                    continue;
+
+                amountText.font = font;
+                EditorUtility.SetDirty(amountText);
+                changedCount++;
+            }
+
+            if (changedCount > 0)
+                PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+
+        return changedCount;
+    }
+
+    private static bool IsBagOrQuickSlot(InventorySlot slot)
+    {
+        return slot.name.StartsWith("Bag Slot ", StringComparison.Ordinal)
+            || slot.name.StartsWith("Quick Slot ", StringComparison.Ordinal);
+    }
+
+    private static bool HasAncestorNamed(Transform transform, string objectName)
+    {
+        for (Transform current = transform; current != null; current = current.parent)
+        {
+            if (current.name == objectName)
+                return true;
+        }
+
+        return false;
     }
 
     private static void AlignOpenSceneAmountTextAreas()

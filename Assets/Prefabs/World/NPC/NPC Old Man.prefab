@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 8266952119720816817}
   - component: {fileID: 4602221622689293860}
   - component: {fileID: 4678518155930634726}
+  - component: {fileID: 859022536915271573}
+  - component: {fileID: 2183542576593938148}
   m_Layer: 0
   m_Name: NPC Old Man
   m_TagString: Untagged
@@ -169,10 +171,10 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.111999996}
+  m_Offset: {x: 0, y: 0.063}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0}
     oldSize: {x: 0.23, y: 0.35}
     newSize: {x: 0.23, y: 0.35}
     adaptiveTilingThreshold: 0.5
@@ -195,8 +197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   role: 0
   englishName: Grandpa
-  portrait: {fileID: 5137486874329215177, guid: 6630973054d1bf24a892087b7479e6b6,
-    type: 3}
+  portrait: {fileID: 991972128030545274, guid: 3a9694e67769e564187102f722d0c686, type: 3}
   visuals: {fileID: 11400000, guid: 99363ac605977694484eaf62ea80ed02, type: 2}
   introduction: {fileID: 11400000, guid: dfb6b42cdbca88f4f853f6dcfd968ed4, type: 2}
   reminder: {fileID: 11400000, guid: 2a1f0dd08f903a349a6c8b6e3cd1cb4a, type: 2}
@@ -212,6 +213,33 @@ MonoBehaviour:
   hoverInteractionEvent: {fileID: 11400000, guid: 956f458aa3cfb5c45ae24917ff8b57a6,
     type: 2}
   interactionDistance: 0.8
+--- !u!210 &859022536915271573
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2324535490468585970}
+  m_Enabled: 1
+  m_SortingLayerID: -1284687703
+  m_SortingLayer: 1
+  m_SortingOrder: 0
+  m_SortAtRoot: 0
+--- !u!114 &2183542576593938148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2324535490468585970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81be0520ef8be7c40aa90cf28e8d0438, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sortingGroup: {fileID: 859022536915271573}
+  positionScaling: -100
+  flip: 0
 --- !u!1 &8667427171213373770
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +266,7 @@ Transform:
   m_GameObject: {fileID: 8667427171213373770}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.29, z: -0.01}
+  m_LocalPosition: {x: 0, y: 0.462, z: 0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -287,7 +315,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: -1
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

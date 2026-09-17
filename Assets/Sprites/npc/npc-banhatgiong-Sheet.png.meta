@@ -1,25 +1,25 @@
 fileFormatVersion: 2
-guid: ec8025506696f794384b6d72ae01ede5
+guid: 59fd51b7a0aa0f2449dc8493f268555e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -155175177020113876
-    second: npc-banhatgiong-Sheet_0
+      213: 4950430765039985783
+    second: npc-banhatgiong-Sheet (1)_0
   - first:
-      213: -7214434699414855344
-    second: npc-banhatgiong-Sheet_1
+      213: 2493980915078759067
+    second: npc-banhatgiong-Sheet (1)_1
   - first:
-      213: 2660160098718716277
-    second: npc-banhatgiong-Sheet_2
+      213: -3598980173320854040
+    second: npc-banhatgiong-Sheet (1)_2
   - first:
-      213: -997104925916360597
-    second: npc-banhatgiong-Sheet_3
+      213: 4510834732353430796
+    second: npc-banhatgiong-Sheet (1)_3
   - first:
-      213: -5295175979433034826
-    second: npc-banhatgiong-Sheet_4
+      213: 738873719452866464
+    second: npc-banhatgiong-Sheet (1)_4
   - first:
-      213: -1132665933351489177
-    second: npc-banhatgiong-Sheet_5
+      213: 7462902595880005379
+    second: npc-banhatgiong-Sheet (1)_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -128,14 +128,14 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: npc-banhatgiong-Sheet_0
+      name: npc-banhatgiong-Sheet (1)_0
       rect:
         serializedVersion: 2
         x: 14
         y: 13
         width: 20
         height: 34
-      alignment: 0
+      alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
@@ -143,21 +143,21 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c2cf1c7aff4b8ddf0800000000000000
-      internalID: -155175177020113876
+      spriteID: 774af536d8673b440800000000000000
+      internalID: 4950430765039985783
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: npc-banhatgiong-Sheet_1
+      name: npc-banhatgiong-Sheet (1)_1
       rect:
         serializedVersion: 2
         x: 62
         y: 13
         width: 20
         height: 32
-      alignment: 0
+      alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
@@ -165,21 +165,21 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 05120265ddd21eb90800000000000000
-      internalID: -7214434699414855344
+      spriteID: b928fd7bd666c9220800000000000000
+      internalID: 2493980915078759067
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: npc-banhatgiong-Sheet_2
+      name: npc-banhatgiong-Sheet (1)_2
       rect:
         serializedVersion: 2
         x: 110
         y: 13
         width: 20
         height: 31
-      alignment: 0
+      alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
@@ -187,21 +187,21 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5711cc10489cae420800000000000000
-      internalID: 2660160098718716277
+      spriteID: 8e5698fb99add0ec0800000000000000
+      internalID: -3598980173320854040
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: npc-banhatgiong-Sheet_3
+      name: npc-banhatgiong-Sheet (1)_3
       rect:
         serializedVersion: 2
         x: 158
         y: 13
         width: 20
         height: 30
-      alignment: 0
+      alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
@@ -209,21 +209,21 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b6096fe4a529922f0800000000000000
-      internalID: -997104925916360597
+      spriteID: c05ab662a44b99e30800000000000000
+      internalID: 4510834732353430796
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: npc-banhatgiong-Sheet_4
+      name: npc-banhatgiong-Sheet (1)_4
       rect:
         serializedVersion: 2
         x: 206
         y: 13
         width: 20
         height: 31
-      alignment: 0
+      alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
@@ -231,21 +231,21 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6bb76b27081c386b0800000000000000
-      internalID: -5295175979433034826
+      spriteID: 0a71cddabb1014a00800000000000000
+      internalID: 738873719452866464
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: npc-banhatgiong-Sheet_5
+      name: npc-banhatgiong-Sheet (1)_5
       rect:
         serializedVersion: 2
         x: 254
         y: 13
         width: 20
         height: 32
-      alignment: 0
+      alignment: 7
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
@@ -253,8 +253,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 761f561b556f740f0800000000000000
-      internalID: -1132665933351489177
+      spriteID: 30fa4ccee5e819760800000000000000
+      internalID: 7462902595880005379
       vertices: []
       indices: 
       edges: []
@@ -273,12 +273,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      npc-banhatgiong-Sheet_0: -155175177020113876
-      npc-banhatgiong-Sheet_1: -7214434699414855344
-      npc-banhatgiong-Sheet_2: 2660160098718716277
-      npc-banhatgiong-Sheet_3: -997104925916360597
-      npc-banhatgiong-Sheet_4: -5295175979433034826
-      npc-banhatgiong-Sheet_5: -1132665933351489177
+      npc-banhatgiong-Sheet (1)_0: 4950430765039985783
+      npc-banhatgiong-Sheet (1)_1: 2493980915078759067
+      npc-banhatgiong-Sheet (1)_2: -3598980173320854040
+      npc-banhatgiong-Sheet (1)_3: 4510834732353430796
+      npc-banhatgiong-Sheet (1)_4: 738873719452866464
+      npc-banhatgiong-Sheet (1)_5: 7462902595880005379
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

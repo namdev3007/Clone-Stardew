@@ -1,0 +1,676 @@
+fileFormatVersion: 2
+guid: 7fb457b4502365d4c806afcb54749573
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2643586955087481971
+    second: slot items- money-ui_0
+  - first:
+      213: 6124154343370785784
+    second: slot items- money-ui_1
+  - first:
+      213: -512589179059633186
+    second: slot items- money-ui_2
+  - first:
+      213: -575998446545598942
+    second: slot items- money-ui_3
+  - first:
+      213: -4186029571854009831
+    second: slot items- money-ui_4
+  - first:
+      213: -7124170421245339814
+    second: slot items- money-ui_5
+  - first:
+      213: -6302065366975282354
+    second: slot items- money-ui_6
+  - first:
+      213: 4794445734387402063
+    second: slot items- money-ui_7
+  - first:
+      213: -2273677583568913593
+    second: slot items- money-ui_8
+  - first:
+      213: 5102147179304554299
+    second: slot items- money-ui_9
+  - first:
+      213: 4662856477617733039
+    second: slot items- money-ui_10
+  - first:
+      213: -2974298801824779740
+    second: slot items- money-ui_11
+  - first:
+      213: -116778338680212159
+    second: slot items- money-ui_12
+  - first:
+      213: -7652473768271869211
+    second: slot items- money-ui_13
+  - first:
+      213: -8168404030550096637
+    second: slot items- money-ui_14
+  - first:
+      213: 5217099325726765025
+    second: slot items- money-ui_15
+  - first:
+      213: 7486296957423304901
+    second: slot items- money-ui_16
+  - first:
+      213: -8609667641659923320
+    second: slot items- money-ui_17
+  - first:
+      213: -1288102622245468071
+    second: slot items- money-ui_18
+  - first:
+      213: 4545778187242842735
+    second: slot items- money-ui_19
+  - first:
+      213: -7325733268400607450
+    second: slot items- money-ui_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: slot items- money-ui_0
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 171
+        width: 113
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37c88de4458efa420800000000000000
+      internalID: 2643586955087481971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_1
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 127
+        width: 113
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f3084a9ded5df450800000000000000
+      internalID: 6124154343370785784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_2
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 82
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed301728bdae2e8f0800000000000000
+      internalID: -512589179059633186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_3
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 82
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2260972f674a108f0800000000000000
+      internalID: -575998446545598942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_4
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 84
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91a7c5e684c38e5c0800000000000000
+      internalID: -4186029571854009831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_5
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 84
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5793525fbcd12d90800000000000000
+      internalID: -7124170421245339814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_6
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 92
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e43852240f09a88a0800000000000000
+      internalID: -6302065366975282354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_7
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 59
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f454c0d4efa498240800000000000000
+      internalID: 4794445734387402063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_8
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 66
+        width: 22
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74b3b91c8464270e0800000000000000
+      internalID: -2273677583568913593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_9
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 59
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3f8536c3d77ec640800000000000000
+      internalID: 5102147179304554299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_10
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 66
+        width: 22
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fadb803f24bc5b040800000000000000
+      internalID: 4662856477617733039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_11
+      rect:
+        serializedVersion: 2
+        x: 353
+        y: 72
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4223d5d8ffa29b6d0800000000000000
+      internalID: -2974298801824779740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_12
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 57
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 145718d38be116ef0800000000000000
+      internalID: -116778338680212159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_13
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 57
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ea092df6a3fcc590800000000000000
+      internalID: -7652473768271869211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_14
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 9
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3054131ffcff3ae80800000000000000
+      internalID: -8168404030550096637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_15
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 9
+        width: 192
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1efafd3023cd66840800000000000000
+      internalID: 5217099325726765025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_16
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 41
+        width: 8
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c0cd4e2b6ba4e760800000000000000
+      internalID: 7486296957423304901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_17
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 41
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8846fa855e0548880800000000000000
+      internalID: -8609667641659923320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_18
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 41
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9584fce5d7dbf1ee0800000000000000
+      internalID: -1288102622245468071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_19
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 41
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6a245e3d29d51f30800000000000000
+      internalID: 4545778187242842735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: slot items- money-ui_20
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 41
+        width: 10
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62f68b1e764c55a90800000000000000
+      internalID: -7325733268400607450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      slot items- money-ui_0: 2643586955087481971
+      slot items- money-ui_1: 6124154343370785784
+      slot items- money-ui_10: 4662856477617733039
+      slot items- money-ui_11: -2974298801824779740
+      slot items- money-ui_12: -116778338680212159
+      slot items- money-ui_13: -7652473768271869211
+      slot items- money-ui_14: -8168404030550096637
+      slot items- money-ui_15: 5217099325726765025
+      slot items- money-ui_16: 7486296957423304901
+      slot items- money-ui_17: -8609667641659923320
+      slot items- money-ui_18: -1288102622245468071
+      slot items- money-ui_19: 4545778187242842735
+      slot items- money-ui_2: -512589179059633186
+      slot items- money-ui_20: -7325733268400607450
+      slot items- money-ui_3: -575998446545598942
+      slot items- money-ui_4: -4186029571854009831
+      slot items- money-ui_5: -7124170421245339814
+      slot items- money-ui_6: -6302065366975282354
+      slot items- money-ui_7: 4794445734387402063
+      slot items- money-ui_8: -2273677583568913593
+      slot items- money-ui_9: 5102147179304554299
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

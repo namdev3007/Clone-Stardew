@@ -14,9 +14,14 @@ MonoBehaviour:
   guid: eb5780e4-5bc8-4c55-abe7-824cf11e7f69
   icon: {fileID: 5013726313369278733, guid: 50ed42e1bd030c245addf9a23bb722e7, type: 3}
   itemName: Axe
-  description: Used to cut wood
+  description: Harvests banana and mango trees. 12 uses.
   canStack: 0
   hasSlot: 1
-  hasEnergy: 0
+  hasEnergy: 1
+  energyStartValue:
+    min: 0
+    max: 12
+    current: 12
   isRemoveable: 0
   action: {fileID: 11400000, guid: 0e51cd814be80e6479dc37584c48f7a4, type: 2}
+  worldDropScale: 1

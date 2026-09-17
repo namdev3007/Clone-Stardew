@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Entity_Components;
 using Entity_Components.Player;
 using TMPro;
+using User_Interface;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ namespace World.NPC
     public sealed class DialogueUIController : MonoBehaviour
     {
         private const float CharactersPerSecond = 48f;
+        private const float PortraitFramesPerSecond = 7f;
 
         private static DialogueUIController instance;
         public static DialogueUIController InstanceOrNull => instance;
@@ -55,8 +57,12 @@ namespace World.NPC
         private System.Action onComplete;
         private Sprite activeNpcPortrait;
         private string activeNpcName;
+        private Image speakingPortrait;
+        private Sprite[] speakingPortraitFrames;
+        private float portraitAnimationTime;
         private Mover frozenMover;
         private GridSelector frozenSelector;
+        private ShopWindowController activeShop;
 
         public static DialogueUIController Ensure(DialogueVisualLibrary library)
         {
@@ -100,11 +106,17 @@ namespace World.NPC
 
         private void Update()
         {
-            if (!dialogueOpen || choiceRoot.activeSelf)
+            // The shop keeps dialogueOpen true so the player remains locked, but
+            // there is no dialogue line to animate while its own window is open.
+            if (!dialogueOpen || activeShop != null || dialogueRoot == null ||
+                !dialogueRoot.activeSelf || (choiceRoot != null && choiceRoot.activeSelf))
                 return;
+
+            UpdatePortraitAnimation();
 
             if (!lineComplete)
             {
+                fullText ??= string.Empty;
                 visibleCharacters += CharactersPerSecond * UnityEngine.Time.unscaledDeltaTime;
                 int count = Mathf.Clamp(Mathf.FloorToInt(visibleCharacters), 0, fullText.Length);
                 bodyText.text = fullText.Substring(0, count);
@@ -112,6 +124,7 @@ namespace World.NPC
                 {
                     lineComplete = true;
                     continueIcon.gameObject.SetActive(true);
+                    ResetSpeakingPortrait();
                 }
             }
 
@@ -162,13 +175,33 @@ namespace World.NPC
 
         public void ShowShopCatalog(NpcShopCatalog catalog, System.Action closed)
         {
+            activeShop = FindFirstObjectByType<ShopWindowController>(FindObjectsInactive.Include);
+            if (activeShop != null)
+            {
+                dialogueOpen = true;
+                dialogueRoot.SetActive(false);
+                choiceRoot.SetActive(false);
+                LockPlayer(true);
+                activeShop.Open(catalog, () =>
+                {
+                    activeShop = null;
+                    dialogueOpen = false;
+                    LockPlayer(false);
+                    closed?.Invoke();
+                });
+                return;
+            }
+
             List<string> labels = new List<string>();
             List<NpcShopCatalog.Entry> visibleEntries = new List<NpcShopCatalog.Entry>();
+            int highestUnlockedCropOrder = TutorialProgressService.Instance.HighestUnlockedCropOrder;
             if (catalog != null)
             {
                 foreach (NpcShopCatalog.Entry entry in catalog.Entries)
                 {
-                    if (entry != null && entry.visible && entry.item != null)
+                    if (entry != null && entry.visible && entry.item != null &&
+                        entry.item.ItemName != "Kale Seed" && entry.item.ItemName != "Water Can" &&
+                        entry.IsUnlocked(highestUnlockedCropOrder))
                     {
                         visibleEntries.Add(entry);
                         labels.Add(entry.item.ItemName);
@@ -177,7 +210,7 @@ namespace World.NPC
             }
             labels.Add("Close");
 
-            ShowChoices("UNCLE HAI'S SHOP\nCatalog preview — purchases will be enabled when coins return.", labels, index =>
+            ShowChoices("UNCLE HAI'S SHOP\nChoose an item to view it.", labels, index =>
             {
                 if (index >= visibleEntries.Count)
                 {
@@ -530,16 +563,71 @@ namespace World.NPC
             dialogueBox = playerSpeaking ? playerDialogueBoxImage : npcDialogueBoxImage;
             namePlate = playerSpeaking ? playerNamePlate : npcNamePlate;
 
-            fullText = line.GetText(false);
+            fullText = line.GetText(SettingsSoundUI.UseVietnamese);
             visibleCharacters = 0f;
             lineComplete = string.IsNullOrEmpty(fullText);
             bodyText.text = string.Empty;
-            nameText.text = playerSpeaking ? "Player" : activeNpcName;
+            nameText.text = playerSpeaking
+                ? (SettingsSoundUI.UseVietnamese ? "Người chơi" : "Player")
+                : GetLocalizedNpcName(activeNpcName);
             npcPortrait.sprite = activeNpcPortrait;
             playerPortrait.sprite = visuals.playerPortrait;
             playerPortrait.color = Color.white;
             npcPortrait.color = Color.white;
             continueIcon.gameObject.SetActive(lineComplete);
+
+            Sprite[] frames = playerSpeaking
+                ? visuals?.playerPortraitFrames
+                : visuals?.GetNpcPortraitFrames(activeNpcName);
+            BeginPortraitAnimation(playerSpeaking ? playerPortrait : npcPortrait, frames,
+                playerSpeaking ? visuals?.playerPortrait : activeNpcPortrait);
+        }
+
+        private static string GetLocalizedNpcName(string englishName)
+        {
+            if (!SettingsSoundUI.UseVietnamese)
+                return englishName;
+
+            if (string.Equals(englishName, "Grandpa", StringComparison.OrdinalIgnoreCase))
+                return "Ông Nội";
+            if (string.Equals(englishName, "Uncle Hai", StringComparison.OrdinalIgnoreCase))
+                return "Chú Hải";
+            return englishName;
+        }
+
+        private void BeginPortraitAnimation(Image portraitImage, Sprite[] frames, Sprite fallback)
+        {
+            speakingPortrait = portraitImage;
+            speakingPortraitFrames = frames;
+            portraitAnimationTime = 0f;
+
+            if (speakingPortrait == null)
+                return;
+
+            speakingPortrait.sprite = frames != null && frames.Length > 0 && frames[0] != null
+                ? frames[0]
+                : fallback;
+        }
+
+        private void UpdatePortraitAnimation()
+        {
+            if (lineComplete || speakingPortrait == null || speakingPortraitFrames == null ||
+                speakingPortraitFrames.Length < 2)
+                return;
+
+            portraitAnimationTime += UnityEngine.Time.unscaledDeltaTime;
+            int frameIndex = Mathf.FloorToInt(portraitAnimationTime * PortraitFramesPerSecond) %
+                             speakingPortraitFrames.Length;
+            Sprite frame = speakingPortraitFrames[frameIndex];
+            if (frame != null)
+                speakingPortrait.sprite = frame;
+        }
+
+        private void ResetSpeakingPortrait()
+        {
+            if (speakingPortrait != null && speakingPortraitFrames != null &&
+                speakingPortraitFrames.Length > 0 && speakingPortraitFrames[0] != null)
+                speakingPortrait.sprite = speakingPortraitFrames[0];
         }
 
         private void Advance()
@@ -552,6 +640,7 @@ namespace World.NPC
                 visibleCharacters = fullText.Length;
                 lineComplete = true;
                 continueIcon.gameObject.SetActive(true);
+                ResetSpeakingPortrait();
                 return;
             }
 
@@ -573,6 +662,8 @@ namespace World.NPC
             dialogueRoot.SetActive(false);
             dialogueOpen = false;
             currentSequence = null;
+            speakingPortrait = null;
+            speakingPortraitFrames = null;
             LockPlayer(false);
             System.Action callback = onComplete;
             onComplete = null;
@@ -581,10 +672,17 @@ namespace World.NPC
 
         public void CloseAll()
         {
+            if (activeShop != null)
+            {
+                activeShop.CloseSilently();
+                activeShop = null;
+            }
             dialogueRoot.SetActive(false);
             choiceRoot.SetActive(false);
             dialogueOpen = false;
             currentSequence = null;
+            speakingPortrait = null;
+            speakingPortraitFrames = null;
             onComplete = null;
             LockPlayer(false);
         }

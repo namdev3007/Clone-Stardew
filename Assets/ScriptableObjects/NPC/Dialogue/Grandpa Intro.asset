@@ -18,37 +18,50 @@ MonoBehaviour:
     localizationKey: grandpa.intro.001
     english: There you are. The sun's already over the treetops. City life taught
       you to sleep this late, did it?
-    vietnamese: 
+    vietnamese: "D\u1EADy r\u1ED3i \u0111\u1EA5y \xE0? N\u1EAFng l\xEAn \u0111\u1EBFn
+      \u0111\u1ECDt c\xE2y r\u1ED3i kia k\xECa. \u1EDE tr\xEAn ph\u1ED1 quen ng\u1EE7
+      n\u01B0\u1EDBng r\u1ED3i ph\u1EA3i kh\xF4ng?"
   - speaker: 0
     localizationKey: grandpa.intro.002
     english: Yeah... I haven't been sleeping well lately. I guess I finally caught
       up.
-    vietnamese: 
+    vietnamese: "D\u1EA1... t\u1EA1i d\u1EA1o n\xE0y ch\xE1u m\u1EA5t ng\u1EE7. L\xE2u
+      l\u1EAFm r\u1ED3i ch\xE1u m\u1EDBi ng\u1EE7 \u0111\u01B0\u1EE3c m\u1ED9t gi\u1EA5c
+      d\xE0i nh\u01B0 v\u1EADy."
   - speaker: 1
     localizationKey: grandpa.intro.003
     english: That country breeze will do it. Still, daylight's wasting, and I've
       got a small job for you.
-    vietnamese: 
+    vietnamese: "Gi\xF3 qu\xEA m\xE1t n\xEAn d\u1EC5 ng\u1EE7 \u0111\u1EA5y. Nh\u01B0ng
+      th\xF4i, tr\u1EDDi s\xE1ng l\xE2u r\u1ED3i, \xF4ng c\xF3 ch\xFAt vi\u1EC7c
+      cho ch\xE1u \u0111\xE2y."
   - speaker: 1
     localizationKey: grandpa.intro.004
     english: "Here. Take this hat, this hoe, and a packet of seeds. Keep the hat
       on\u2014the sun out here is harsher than you remember."
-    vietnamese: 
+    vietnamese: "N\xE0y, c\u1EA7m l\u1EA5y c\xE1i n\xF3n, c\xE1i cu\u1ED1c v\xE0
+      b\u1ECBch h\u1EA1t gi\u1ED1ng n\xE0y. Nh\u1EDB \u0111\u1ED9i n\xF3n v\xE0o,
+      n\u1EAFng ngo\xE0i n\xE0y g\u1EAFt h\u01A1n ch\xE1u nh\u1EDB \u0111\u1EA5y."
   - speaker: 0
     localizationKey: grandpa.intro.005
     english: You want me to start right now?
-    vietnamese: 
+    vietnamese: "L\xE0m lu\xF4n b\xE2y gi\u1EDD h\u1EA3 \xF4ng?"
   - speaker: 1
     localizationKey: grandpa.intro.006
     english: Would you rather wait until noon and roast out there?
-    vietnamese: 
+    vietnamese: "Ch\u1EE9 ch\xE1u mu\u1ED1n \u0111\u1EE3i \u0111\u1EBFn tr\u01B0a
+      n\u1EAFng chang chang m\u1EDBi l\xE0m \xE0?"
   - speaker: 1
     localizationKey: grandpa.intro.007
     english: The weeds have taken over the plot beside the house. Clear a little
       ground and loosen the soil for me.
-    vietnamese: 
+    vietnamese: "C\u1ECF d\u1EA1i m\u1ECDc l\u1EA5n h\u1EBFt m\u1EA3nh \u0111\u1EA5t
+      b\xEAn h\xF4ng nh\xE0 r\u1ED3i. Ch\xE1u d\u1ECDn b\u1EDBt c\u1ECF v\xE0 x\u1EDBi
+      \u0111\u1EA5t cho t\u01A1i ra nh\xE9."
   - speaker: 1
     localizationKey: grandpa.intro.008
     english: Plant the blade firmly, then pull it back toward you. Don't overthink
       it. Try three patches first.
-    vietnamese: 
+    vietnamese: "C\u1EAFm ch\u1EAFc l\u01B0\u1EE1i cu\u1ED1c xu\u1ED1ng r\u1ED3i
+      k\xE9o ng\u01B0\u1EE3c v\u1EC1 ph\xEDa m\xECnh. \u0110\u1EEBng ngh\u0129 nhi\u1EC1u,
+      tr\u01B0\u1EDBc m\u1EAFt cu\u1ED1c th\u1EED ba \xF4 \u0111\u1EA5t \u0111i."

@@ -17,12 +17,14 @@ MonoBehaviour:
   - speaker: 1
     localizationKey: grandpa.farming_advice.001
     english: Prepare the soil, plant your seeds, and give them time.
-    vietnamese: 
+    vietnamese: "C\u1EA3i t\u1EA1o \u0111\u1EA5t tr\u01B0\u1EDBc, gieo h\u1EA1t xu\u1ED1ng
+      r\u1ED3i ki\xEAn nh\u1EABn ch\u1EDD c\xE2y l\u1EDBn."
   - speaker: 1
     localizationKey: grandpa.farming_advice.002
     english: Good care helps, but patience does most of the work.
-    vietnamese: 
+    vietnamese: "Ch\u0103m s\xF3c t\u1ED1t l\xE0 c\u1EA7n, nh\u01B0ng ki\xEAn nh\u1EABn
+      m\u1EDBi l\xE0 vi\u1EC7c quan tr\u1ECDng nh\u1EA5t."
   - speaker: 0
     localizationKey: grandpa.farming_advice.003
     english: Got it, Grandpa.
-    vietnamese: 
+    vietnamese: "D\u1EA1, ch\xE1u nh\u1EDB r\u1ED3i \xF4ng."

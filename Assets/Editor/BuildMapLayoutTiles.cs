@@ -18,11 +18,14 @@ public static class BuildMapLayoutTiles
     // Resolve by GUID so the Vietnamese filename remains safe across editor/code-page settings.
     private const string SourceGuid = "bbee6d042639dbd439e0e6914966acf4";
     private const string PondSourceGuid = "099d84ace1b1504499fbd5dd16001d7a";
+    private const string DecorationSourceGuid = "73bc7bf2dad523e41bbd9338d0358be2";
     private static string SourcePath => AssetDatabase.GUIDToAssetPath(SourceGuid);
     private static string PondSourcePath => AssetDatabase.GUIDToAssetPath(PondSourceGuid);
+    private static string DecorationSourcePath => AssetDatabase.GUIDToAssetPath(DecorationSourceGuid);
     private const string OutputRoot = "Assets/Tiles/Map Layout";
     private const string TileFolder = OutputRoot + "/Unique Tiles";
     private const string PondTileFolder = OutputRoot + "/Pond Tiles";
+    private const string DecorationTileFolder = OutputRoot + "/Decoration Tiles";
     private const string PalettePath = OutputRoot + "/Map Layout Palette.prefab";
     private const string PreviewPath = OutputRoot + "/Map Layout Preview.prefab";
     private const int CellSize = 16;
@@ -35,8 +38,11 @@ public static class BuildMapLayoutTiles
             bool paletteNeedsUpgrade = !AssetDatabase.LoadAllAssetsAtPath(PalettePath)
                 .Any(asset => asset is GridPalette);
             bool pondTilesMissing = AssetDatabase.LoadAssetAtPath<Tile>(PondTileFolder + "/PondTile_076.asset") == null;
+            bool decorationTilesMissing = AssetDatabase.LoadAssetAtPath<Tile>(
+                DecorationTileFolder + "/DecorationTile_9378.asset") == null;
             if (!EditorApplication.isPlayingOrWillChangePlaymode &&
-                (AssetDatabase.LoadAssetAtPath<GameObject>(PreviewPath) == null || paletteNeedsUpgrade || pondTilesMissing))
+                (AssetDatabase.LoadAssetAtPath<GameObject>(PreviewPath) == null || paletteNeedsUpgrade ||
+                 pondTilesMissing || decorationTilesMissing))
             {
                 Build(false);
             }
@@ -61,6 +67,7 @@ public static class BuildMapLayoutTiles
         EnsureFolder(OutputRoot);
         EnsureFolder(TileFolder);
         EnsureFolder(PondTileFolder);
+        EnsureFolder(DecorationTileFolder);
 
         bool restoreReadable = !importer.isReadable;
         try
@@ -130,7 +137,10 @@ public static class BuildMapLayoutTiles
             Tile[] tiles = CreateOrUpdateTiles(representativeSprites, force);
             Sprite[] pondSprites = LoadNumberedSprites(PondSourcePath);
             Tile[] pondTiles = CreateOrUpdateNamedTiles(pondSprites, PondTileFolder, "PondTile", force);
-            CreatePalettePrefab(tiles, pondTiles);
+            Sprite[] decorationSprites = SliceAndLoadEveryCell(DecorationSourcePath);
+            Tile[] decorationTiles = CreateOrUpdateNamedTiles(
+                decorationSprites, DecorationTileFolder, "DecorationTile", force);
+            CreatePalettePrefab(tiles, pondTiles, decorationTiles);
             // The preview is the designer-authored map after its first build. Do
             // not overwrite later pond/detail painting when refreshing the tile
             // library or palette.
@@ -140,7 +150,7 @@ public static class BuildMapLayoutTiles
             AssetDatabase.Refresh();
 
             Debug.Log($"Map layout tiles ready: {expectedCells} cells, {tiles.Length} unique tiles, " +
-                      $"{pondTiles.Length} pond tiles. " +
+                      $"{pondTiles.Length} pond tiles, {decorationTiles.Length} decoration tiles (duplicates kept). " +
                       $"Palette: {PalettePath}; Preview: {PreviewPath}");
         }
         catch (Exception exception)
@@ -209,7 +219,69 @@ public static class BuildMapLayoutTiles
             .ToArray();
     }
 
-    private static void CreatePalettePrefab(TileBase[] tiles, TileBase[] pondTiles)
+    private static Sprite[] SliceAndLoadEveryCell(string path)
+    {
+        TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (importer == null || texture == null)
+            throw new InvalidOperationException($"Decoration tile sheet was not found: {path}");
+        if (texture.width % CellSize != 0 || texture.height % CellSize != 0)
+            throw new InvalidOperationException(
+                $"Decoration sheet must be divisible by {CellSize}px, but is {texture.width}x{texture.height}.");
+
+        int columns = texture.width / CellSize;
+        int rows = texture.height / CellSize;
+        int expectedCells = columns * rows;
+        Sprite[] existing = LoadNumberedSprites(path);
+
+        bool correctlySliced = existing.Length == expectedCells &&
+                               existing.All(sprite => Mathf.RoundToInt(sprite.rect.width) == CellSize &&
+                                                      Mathf.RoundToInt(sprite.rect.height) == CellSize);
+        if (!correctlySliced)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.mipmapEnabled = false;
+            importer.filterMode = FilterMode.Point;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.spritePixelsPerUnit = 100f;
+
+            SpriteMetaData[] metadata = new SpriteMetaData[expectedCells];
+            string baseName = Path.GetFileNameWithoutExtension(path);
+            int index = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                int y = texture.height - (row + 1) * CellSize;
+                for (int column = 0; column < columns; column++)
+                {
+                    metadata[index] = new SpriteMetaData
+                    {
+                        name = $"{baseName}_{index}",
+                        rect = new Rect(column * CellSize, y, CellSize, CellSize),
+                        alignment = (int)SpriteAlignment.Center,
+                        pivot = new Vector2(0.5f, 0.5f)
+                    };
+                    index++;
+                }
+            }
+
+#pragma warning disable CS0618
+            importer.spritesheet = metadata;
+#pragma warning restore CS0618
+            importer.SaveAndReimport();
+            existing = LoadNumberedSprites(path);
+        }
+
+        if (existing.Length != expectedCells)
+            throw new InvalidOperationException(
+                $"Expected {expectedCells} decoration sprites after slicing, but found {existing.Length}.");
+        return existing;
+    }
+
+    private static void CreatePalettePrefab(
+        TileBase[] tiles,
+        TileBase[] pondTiles,
+        TileBase[] decorationTiles)
     {
         // A normal Grid prefab is not enough: Tile Palette only lists prefabs which
         // also contain Unity's GridPalette settings sub-asset.
@@ -225,7 +297,7 @@ public static class BuildMapLayoutTiles
                 OutputRoot,
                 "Map Layout Palette",
                 GridLayout.CellLayout.Rectangle,
-                (GridPalette.CellSizing)0,
+                GridPalette.CellSizing.Manual,
                 new Vector3(0.16f, 0.16f, 0f),
                 GridLayout.CellSwizzle.XYZ);
         }
@@ -247,6 +319,18 @@ public static class BuildMapLayoutTiles
         int pondStartY = -Mathf.CeilToInt(tiles.Length / (float)paletteColumns) - 1;
         for (int i = 0; i < pondTiles.Length; i++)
             tilemap.SetTile(new Vector3Int(i % pondColumns, pondStartY - (i / pondColumns), 0), pondTiles[i]);
+
+        // Append the complete decoration sheet as its original 113 x 83 grid.
+        // Deliberately keep repeated and empty-looking cells so the palette is a
+        // faithful copy of the source and the designer can choose every variant.
+        const int decorationColumns = 113;
+        int pondRows = Mathf.CeilToInt(pondTiles.Length / (float)pondColumns);
+        int decorationStartY = pondStartY - pondRows - 1;
+        for (int i = 0; i < decorationTiles.Length; i++)
+            tilemap.SetTile(new Vector3Int(
+                i % decorationColumns,
+                decorationStartY - (i / decorationColumns),
+                0), decorationTiles[i]);
         tilemap.CompressBounds();
         PrefabUtility.SaveAsPrefabAsset(root, PalettePath);
         PrefabUtility.UnloadPrefabContents(root);

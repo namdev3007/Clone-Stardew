@@ -17,6 +17,7 @@ MonoBehaviour:
   firstGrowthSeconds: 300
   regrowthSeconds: 120
   maximumHarvests: 2147483647
+  harvestYield: 3
   regrowthStageStart: 4
   perennialTree: 1
   growthSprites:

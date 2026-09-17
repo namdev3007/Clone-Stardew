@@ -11,27 +11,63 @@ namespace Item.Inventory
     public class InventorySlotCollection : MonoBehaviour, ILoadItem, IUseItem, IRemoveItem, ISelectItem, IInventoryLoaded
     {
         private Dictionary<int, InventorySlot> slots = new Dictionary<int, InventorySlot>();
-        private bool initialized = false;
+        private Inventory inventory;
+        private DynamicBagSlotGrid dynamicBagGrid;
 
         public void OnInventoryLoaded(Inventory inventory)
         {
-            if (!initialized)
+            if (this.inventory != inventory)
             {
-                InventorySlot[] getSlots = GetComponentsInChildren<InventorySlot>(true);
-                slots.Clear();
+                if (this.inventory != null)
+                    this.inventory.InventorySizeChanged -= OnInventorySizeChanged;
 
-                for (int i = 0; i < getSlots.Length; i++)
-                {
-                    int slotIndex = getSlots[i].GetSlotIndex();
-                    slots[slotIndex] = getSlots[i];
-                }
-                initialized = true;
+                this.inventory = inventory;
+                if (this.inventory != null)
+                    this.inventory.InventorySizeChanged += OnInventorySizeChanged;
             }
+
+            if (dynamicBagGrid == null)
+                dynamicBagGrid = GetComponent<DynamicBagSlotGrid>();
+            if (dynamicBagGrid == null && transform.Find("Bag Slots") != null)
+                dynamicBagGrid = gameObject.AddComponent<DynamicBagSlotGrid>();
+
+            dynamicBagGrid?.EnsureCapacity(inventory.InventorySize);
+            RebuildSlotLookup();
 
             foreach (InventorySlot slot in slots.Values)
             {
                 slot.OnInventoryInitialized(inventory);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (inventory != null)
+                inventory.InventorySizeChanged -= OnInventorySizeChanged;
+        }
+
+        private void OnInventorySizeChanged(int newSize)
+        {
+            dynamicBagGrid?.EnsureCapacity(newSize);
+            RebuildSlotLookup();
+
+            foreach (InventorySlot slot in slots.Values)
+                slot.OnInventoryInitialized(inventory);
+
+            inventory?.ReloadAllItemSlots();
+        }
+
+        private void RebuildSlotLookup()
+        {
+            InventorySlot[] getSlots = GetComponentsInChildren<InventorySlot>(true);
+            slots.Clear();
+
+            for (int i = 0; i < getSlots.Length; i++)
+            {
+                int slotIndex = getSlots[i].GetSlotIndex();
+                slots[slotIndex] = getSlots[i];
+            }
+
         }
 
         public void OnItemLoaded(int index, ItemData data, int amount)

@@ -17,4 +17,6 @@ MonoBehaviour:
   - speaker: 1
     localizationKey: hai.revisit.005.001
     english: Farming's simple until the weather decides it has other plans.
-    vietnamese: 
+    vietnamese: "L\xE0m n\xF4ng th\xEC t\u01B0\u1EDFng \u0111\u01A1n gi\u1EA3n, cho
+      \u0111\u1EBFn khi th\u1EDDi ti\u1EBFt t\u1EF1 d\u01B0ng \u0111\u1ED5i \xFD
+      \u0111\u1EA5y."

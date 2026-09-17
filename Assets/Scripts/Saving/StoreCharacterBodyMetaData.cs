@@ -34,18 +34,30 @@ namespace Saving
 
         private void OnDestroy()
         {
+            if (bodySpriteSwappers == null || bodySpriteSwappers.Length == 0)
+                return;
+
             SaveData data = new SaveData();
         
             foreach (var item in bodySpriteSwappers)
             {
+                // The full-body player no longer uses the old modular body
+                // renderers, so legacy prefab arrays can contain missing entries.
+                if (item == null)
+                    continue;
+
+                Transform parent = item.transform.parent;
                 data.bodyInfo.Add(new BodyData()
                 {
                     data = item.OnSave(),
-                    saveId = string.Format("{0}/{1}",item.transform.parent.name,item.name)
+                    saveId = string.Format("{0}/{1}", parent != null ? parent.name : item.transform.root.name, item.name)
                 });
             }
 
-            SaveMaster.SetMetaData("character", JsonUtility.ToJson(data));
+            // Do not overwrite existing character metadata with an empty legacy
+            // payload during scene changes or an Editor domain reload.
+            if (data.bodyInfo.Count > 0)
+                SaveMaster.SetMetaData("character", JsonUtility.ToJson(data));
         }
     }
 }

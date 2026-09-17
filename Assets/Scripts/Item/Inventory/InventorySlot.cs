@@ -1,7 +1,9 @@
 using Item.Inventory.Interfaces;
+using Item.Actions;
 using Referencing.Scriptable_Reference;
 using System.Collections.Generic;
 using TMPro;
+using User_Interface;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -71,7 +73,19 @@ namespace Item.Inventory
 
         private void Awake()
         {
+            KeepItemIconAspectRatio();
             Initialize();
+        }
+
+        private void OnValidate()
+        {
+            KeepItemIconAspectRatio();
+        }
+
+        private void KeepItemIconAspectRatio()
+        {
+            if (references != null && references.Icon != null)
+                references.Icon.preserveAspect = true;
         }
 
         private void Initialize()
@@ -222,7 +236,7 @@ namespace Item.Inventory
                     references.AmountText.text = amount.ToString();
                 }
 
-                if (data.HasEnergy)
+                if (data.HasEnergy && !(data.Action is ItemAction_WaterCan))
                 {
                     UpdateEnergySlider(index);
                 }
@@ -246,6 +260,7 @@ namespace Item.Inventory
                 if (data.Icon != null)
                 {
                     references.Icon.sprite = data.Icon;
+                    references.Icon.preserveAspect = true;
                     references.Icon.gameObject.SetActive(true);
                 }
                 else
@@ -253,7 +268,7 @@ namespace Item.Inventory
                     references.Icon.gameObject.SetActive(false);
                 }
 
-                if (data.HasEnergy)
+                if (data.HasEnergy && !(data.Action is ItemAction_WaterCan))
                 {
                     hasEnergySlider = true;
                     references.energySlider.gameObject.SetActive(true);
@@ -313,6 +328,9 @@ namespace Item.Inventory
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (IsBlockedGameplayBarSlot())
+                return;
+
             if (settings.equipItemOnClick)
             {
                 if (references.Inventory != null)
@@ -326,6 +344,9 @@ namespace Item.Inventory
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (IsBlockedGameplayBarSlot())
+                return;
+
             if (settings.moveItemOnDrag)
             {
                 if (isDragging == false)
@@ -356,6 +377,13 @@ namespace Item.Inventory
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (IsBlockedGameplayBarSlot())
+            {
+                if (isDragging)
+                    OnDragStop();
+                return;
+            }
+
             if (isDragging)
             {
                 OnDragStop();
@@ -413,6 +441,9 @@ namespace Item.Inventory
 
         public void OnRecieveItemIcon(int index, Inventory sourceInventory)
         {
+            if (IsBlockedGameplayBarSlot())
+                return;
+
             // In case the source inventory does not match this inventory.
             // Tell the source to move it to the inventory linked to this one.
             if (sourceInventory != references.Inventory)
@@ -427,6 +458,9 @@ namespace Item.Inventory
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if (IsBlockedGameplayBarSlot())
+                return;
+
             if (settings.hasSelectionHighlight)
                 SetHighlighted(true);
             ShowItemDescription();
@@ -438,6 +472,25 @@ namespace Item.Inventory
                 SetHighlighted(isSelected);
 
             GetDescriptionPanel()?.ClearIfNotPinned(slotIndex);
+        }
+
+        /// <summary>
+        /// The HUD toolbar stays visible behind the bag, but must not receive UI
+        /// pointer events through it. Bag/Quick slots inside Window_Inventory are
+        /// deliberately not blocked so item rearranging continues to work.
+        /// </summary>
+        private bool IsBlockedGameplayBarSlot()
+        {
+            if (!BagWindow.AnyOpen)
+                return false;
+
+            for (Transform current = transform; current != null; current = current.parent)
+            {
+                if (current.name == "InventoryBar" || current.name == "Inventory Bar")
+                    return true;
+            }
+
+            return false;
         }
 
         private void ShowItemDescription()

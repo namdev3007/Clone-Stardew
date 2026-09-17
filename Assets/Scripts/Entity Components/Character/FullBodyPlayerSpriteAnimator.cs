@@ -31,7 +31,7 @@ namespace Entity_Components.Character
         [SerializeField] private DirectionSet holdWalk;
         [SerializeField] private Vector2 heldItemOffset = new Vector2(0f, 0.21f);
         [SerializeField, Min(0.01f), Tooltip("Maximum world-space width/height of the item above the player.")]
-        private float heldItemMaxSize = 0.14f;
+        private float heldItemMaxSize = 0.196f;
 
         private Vector2 direction = Vector2.down;
         private float velocity;
@@ -47,7 +47,12 @@ namespace Entity_Components.Character
             EnsureHeldItemRenderer();
             heldItemRenderer.sprite = itemSprite;
             heldItemRenderer.enabled = itemSprite != null && action == ActionType.None;
-            elapsed = 0f;
+
+            // Reloading the selected inventory slot (for example after consuming
+            // watering-can energy) refreshes the held item midway through an
+            // action. Do not restart the active action animation in that case.
+            if (action == ActionType.None)
+                elapsed = 0f;
         }
 
         public void SetMovement(Vector2 newDirection, float newVelocity)
