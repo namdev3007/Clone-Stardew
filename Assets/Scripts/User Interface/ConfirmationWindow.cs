@@ -7,6 +7,7 @@ namespace User_Interface
 {
     public class ConfirmationWindow : MonoBehaviour
     {
+        private static readonly Color32 QuestionColor = new Color32(0xF7, 0xCA, 0x92, 0xFF);
         private static ConfirmationWindow activeWindow;
         public static bool AnyOpen => activeWindow != null && activeWindow.gameObject.activeInHierarchy;
 
@@ -46,6 +47,31 @@ namespace User_Interface
 
         private void Awake()
         {
+            if (textQuestion != null)
+                textQuestion.color = QuestionColor;
+            WireButtons();
+        }
+
+        /// <summary>
+        /// Wires a window that was built at runtime instead of authored in a
+        /// prefab, so gameplay dialogs can reuse this window's behaviour.
+        /// </summary>
+        public void Initialize(TextMeshProUGUI question, Button yes, Button no, Button accept)
+        {
+            textQuestion = question;
+            if (textQuestion != null)
+                textQuestion.color = QuestionColor;
+            buttonYes = yes;
+            buttonNo = no;
+            buttonAccept = accept;
+            WireButtons();
+        }
+
+        private void WireButtons()
+        {
+            buttonYes?.onClick.RemoveListener(OnClickYesButton);
+            buttonAccept?.onClick.RemoveListener(OnClickYesButton);
+            buttonNo?.onClick.RemoveListener(OnClickNoButton);
             buttonYes?.onClick.AddListener(OnClickYesButton);
             buttonAccept?.onClick.AddListener(OnClickYesButton);
             buttonNo?.onClick.AddListener(OnClickNoButton);

@@ -9549,7 +9549,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   window: {fileID: 1549485936145786}
-  toggleKey: 9
+  toggleKey: 98
   windowScale: 2.535
   pauzeEvent: {fileID: 11400000, guid: 1e3ec68e4386ae34899c1744b5844ae8, type: 2}
   displayPauzeMenu: {fileID: 11400000, guid: 01fe2d5dc3945044cb4bf43f1287cdaf, type: 2}
@@ -20225,6 +20225,7 @@ RectTransform:
   - {fileID: 224088981822569226}
   - {fileID: 224789392195312868}
   - {fileID: 4850094746443584438}
+  - {fileID: 2794687154302797362}
   m_Father: {fileID: 224578907860743578}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -27736,6 +27737,8 @@ MonoBehaviour:
     type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
+  englishSize: {x: 0, y: 0}
+  vietnameseSize: {x: 0, y: 0}
 --- !u!1 &668580349819503065
 GameObject:
   m_ObjectHideFlags: 0
@@ -28600,6 +28603,8 @@ MonoBehaviour:
   vietnameseSelected: {fileID: -6030662768401094711, guid: a93a34f2c0cabf6488170f5985458bb4,
     type: 3}
   useNativeSize: 1
+  englishSize: {x: 0, y: 0}
+  vietnameseSize: {x: 0, y: 0}
 --- !u!1 &2961524759262084029
 GameObject:
   m_ObjectHideFlags: 0
@@ -28844,6 +28849,8 @@ MonoBehaviour:
   vietnameseSelected: {fileID: 2327797889756346128, guid: fdddf3d128e407144b5db1646ae140b8,
     type: 3}
   useNativeSize: 1
+  englishSize: {x: 0, y: 0}
+  vietnameseSize: {x: 0, y: 0}
 --- !u!1 &3166204710206950867
 GameObject:
   m_ObjectHideFlags: 0
@@ -28916,7 +28923,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -116, y: 48}
-  m_SizeDelta: {x: 50, y: 10}
+  m_SizeDelta: {x: 54.444443, y: 14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6621085545220185959
 CanvasRenderer:
@@ -28946,8 +28953,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7584038206697324126, guid: 180ceeda16a0b9a4da83a6a0a94a9a6f,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3fc67695acb4ace45aedbc7c65ec1411, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -28974,10 +28980,11 @@ MonoBehaviour:
   englishNormal: {fileID: -7584038206697324126, guid: 180ceeda16a0b9a4da83a6a0a94a9a6f,
     type: 3}
   englishSelected: {fileID: 0}
-  vietnameseNormal: {fileID: 4737318990198802969, guid: 3fc67695acb4ace45aedbc7c65ec1411,
-    type: 3}
+  vietnameseNormal: {fileID: 21300000, guid: 3fc67695acb4ace45aedbc7c65ec1411, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
+  englishSize: {x: 66.5, y: 14}
+  vietnameseSize: {x: 54.444443, y: 14}
 --- !u!1 &3308439082493685830
 GameObject:
   m_ObjectHideFlags: 0
@@ -29664,7 +29671,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 116, y: 48}
-  m_SizeDelta: {x: 56, y: 10}
+  m_SizeDelta: {x: 63.538464, y: 14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6235226252831114084
 CanvasRenderer:
@@ -29694,7 +29701,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 249710623914301023, guid: 53cf69104b4c26443b8d620203654093, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d0d7909311fe69f4f9f30f162accbe46, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -29721,10 +29728,11 @@ MonoBehaviour:
   englishNormal: {fileID: 249710623914301023, guid: 53cf69104b4c26443b8d620203654093,
     type: 3}
   englishSelected: {fileID: 0}
-  vietnameseNormal: {fileID: 5718195632549783693, guid: d0d7909311fe69f4f9f30f162accbe46,
-    type: 3}
+  vietnameseNormal: {fileID: 21300000, guid: d0d7909311fe69f4f9f30f162accbe46, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
+  englishSize: {x: 90, y: 14}
+  vietnameseSize: {x: 63.538464, y: 14}
 --- !u!1 &4341521315895039401
 GameObject:
   m_ObjectHideFlags: 0
@@ -30311,10 +30319,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 224108211326092540}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 28, y: -24}
-  m_SizeDelta: {x: 42, y: 26}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -320, y: 143}
+  m_SizeDelta: {x: 54, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1284281454523752905
 CanvasRenderer:
@@ -30673,7 +30681,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 68}
-  m_SizeDelta: {x: 84, y: 16}
+  m_SizeDelta: {x: 53.333336, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2381289508679226430
 CanvasRenderer:
@@ -30703,8 +30711,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1403220015711988177, guid: 3cd87c61b5e658a45b49fd4cd0a04979,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8d1430088d2bb274fb865c2f146fdd1a, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -30731,10 +30738,11 @@ MonoBehaviour:
   englishNormal: {fileID: 1403220015711988177, guid: 3cd87c61b5e658a45b49fd4cd0a04979,
     type: 3}
   englishSelected: {fileID: 0}
-  vietnameseNormal: {fileID: -1897634282283947426, guid: 8d1430088d2bb274fb865c2f146fdd1a,
-    type: 3}
+  vietnameseNormal: {fileID: 21300000, guid: 8d1430088d2bb274fb865c2f146fdd1a, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
+  englishSize: {x: 106.95652, y: 20}
+  vietnameseSize: {x: 53.333336, y: 20}
 --- !u!1 &5773623211348715269
 GameObject:
   m_ObjectHideFlags: 0
@@ -31322,6 +31330,8 @@ MonoBehaviour:
   vietnameseSelected: {fileID: 4167592287277162578, guid: 82a6e25ca7c15d346a3e738060d080e3,
     type: 3}
   useNativeSize: 1
+  englishSize: {x: 0, y: 0}
+  vietnameseSize: {x: 0, y: 0}
 --- !u!1 &6189823488897706255
 GameObject:
   m_ObjectHideFlags: 0
@@ -31533,7 +31543,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 48}
-  m_SizeDelta: {x: 62, y: 10}
+  m_SizeDelta: {x: 64.666664, y: 14}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6851267577795949785
 CanvasRenderer:
@@ -31563,8 +31573,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2290266534107211199, guid: 943ee5b0691d67d4f92002407f2b72c0,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7e3206a324a9c72489f6d0fa07480872, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -31591,10 +31600,11 @@ MonoBehaviour:
   englishNormal: {fileID: -2290266534107211199, guid: 943ee5b0691d67d4f92002407f2b72c0,
     type: 3}
   englishSelected: {fileID: 0}
-  vietnameseNormal: {fileID: 8214793885568328995, guid: 7e3206a324a9c72489f6d0fa07480872,
-    type: 3}
+  vietnameseNormal: {fileID: 21300000, guid: 7e3206a324a9c72489f6d0fa07480872, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
+  englishSize: {x: 90, y: 14}
+  vietnameseSize: {x: 64.666664, y: 14}
 --- !u!1 &7296460493740164633
 GameObject:
   m_ObjectHideFlags: 0
@@ -32606,8 +32616,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 0.25882354, g: 0.14509805, b: 0.06666667, a: 1}
+    rgba: 4287810295
+  m_fontColor: {r: 0.96862745, g: 0.7921569, b: 0.57254905, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -32669,6 +32679,168 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &9047775759734328140
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2794687154302797362}
+  - component: {fileID: 1061944326741582477}
+  - component: {fileID: 9065351913785745748}
+  - component: {fileID: 6992605788750419788}
+  - component: {fileID: 1568615572013782432}
+  m_Layer: 5
+  m_Name: Button OK
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2794687154302797362
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9047775759734328140}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 224108211326092540}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 315, y: -143}
+  m_SizeDelta: {x: 54, y: 32}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1061944326741582477
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9047775759734328140}
+  m_CullTransparentMesh: 1
+--- !u!114 &9065351913785745748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9047775759734328140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 8075344645023097461, guid: b5bfb87b27301424289044422cf26a61,
+    type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6992605788750419788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9047775759734328140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 2
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: -1993964145974865246, guid: b5bfb87b27301424289044422cf26a61,
+      type: 3}
+    m_PressedSprite: {fileID: -1993964145974865246, guid: b5bfb87b27301424289044422cf26a61,
+      type: 3}
+    m_SelectedSprite: {fileID: -1993964145974865246, guid: b5bfb87b27301424289044422cf26a61,
+      type: 3}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 9065351913785745748}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8664825716146117397}
+        m_TargetAssemblyTypeName: User_Interface.PauseGameMenuController, Assembly-CSharp
+        m_MethodName: ApplySettingsAndReturn
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1568615572013782432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9047775759734328140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96e8413038ae4c8e90af8d29734290cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetImage: {fileID: 9065351913785745748}
+  targetButton: {fileID: 6992605788750419788}
+  englishNormal: {fileID: 8851489139641355192, guid: 36e738f823451be4380a62876510c6ac,
+    type: 3}
+  englishSelected: {fileID: -2693574193439578283, guid: 36e738f823451be4380a62876510c6ac,
+    type: 3}
+  vietnameseNormal: {fileID: 8075344645023097461, guid: b5bfb87b27301424289044422cf26a61,
+    type: 3}
+  vietnameseSelected: {fileID: -1993964145974865246, guid: b5bfb87b27301424289044422cf26a61,
+    type: 3}
+  useNativeSize: 0
+  englishSize: {x: 54, y: 32}
+  vietnameseSize: {x: 54, y: 32}
 --- !u!1 &9096879477041291002
 GameObject:
   m_ObjectHideFlags: 0
@@ -32844,6 +33016,8 @@ MonoBehaviour:
   vietnameseSelected: {fileID: -5403347172651063007, guid: bf63b47e1312b504f98538cbbdd5fe63,
     type: 3}
   useNativeSize: 1
+  englishSize: {x: 0, y: 0}
+  vietnameseSize: {x: 0, y: 0}
 --- !u!1 &9198026430395746840
 GameObject:
   m_ObjectHideFlags: 0
@@ -33019,3 +33193,5 @@ MonoBehaviour:
   vietnameseSelected: {fileID: -4873107854624663999, guid: 6bd0326b73aeabc45ab3f3b8a7046d98,
     type: 3}
   useNativeSize: 1
+  englishSize: {x: 0, y: 0}
+  vietnameseSize: {x: 0, y: 0}

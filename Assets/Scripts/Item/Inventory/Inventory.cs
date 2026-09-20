@@ -212,6 +212,26 @@ namespace Item.Inventory
             UseItem(selectedSlotIndex);
         }
 
+        /// <summary>
+        /// Consumes a secondary click while the hoe is equipped. Unlike hoeing,
+        /// cancelling a plot is immediate and does not spend tool durability.
+        /// </summary>
+        public bool TryCancelSelectedHoeCell()
+        {
+            if (!(GetItem(selectedSlotIndex)?.Data?.Action is ItemAction_DigHole))
+                return false;
+
+            if (isMovementFrozen)
+                return true;
+
+            GridSelector selector = GetComponent<GridSelector>();
+            World.GridManager gridManager = selector?.GetGridManager();
+            if (gridManager != null)
+                gridManager.TryCancelHoedCell(selector.GetGridSelectionPosition());
+
+            return true;
+        }
+
         public void SelectItemByIndex(int slotIndex)
         {
             if (slotIndex < 0 || slotIndex > inventorySize || slotIndex == selectedSlotIndex)
@@ -576,13 +596,21 @@ namespace Item.Inventory
             for (int i = 0; i < animators.Length; i++)
                 animators[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Harvest, 1f);
 
-            yield return new WaitForSeconds(0.25f);
-            if (crop != null)
-                crop.Harvest();
-            yield return new WaitForSeconds(0.25f);
-
-            mover?.FreezeMovement(false);
-            selector.SetFrozen(false);
+            // Freezing without a guaranteed release would lock the player out of
+            // moving and using items if this routine is ever interrupted.
+            try
+            {
+                yield return new WaitForSeconds(0.25f);
+                if (crop != null)
+                    crop.Harvest();
+                yield return new WaitForSeconds(0.25f);
+            }
+            finally
+            {
+                mover?.FreezeMovement(false);
+                if (selector != null)
+                    selector.SetFrozen(false);
+            }
         }
 
         /// <summary>

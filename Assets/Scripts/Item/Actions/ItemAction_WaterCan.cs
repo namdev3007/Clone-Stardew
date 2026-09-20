@@ -1,4 +1,4 @@
-using Entity_Components;
+﻿using Entity_Components;
 using Entity_Components.Character;
 using Entity_Components.Player;
 using Item.Inventory;
@@ -125,52 +125,60 @@ namespace Item.Actions
 
                 gridSelector.SetFrozen(true);
 
-                yield return new WaitForSeconds(animationTime * 0.5f);
-
-                if (!gridManager.CanRefillWaterAt(location))
+                // The release sits in a finally block: an interrupted watering
+                // must never leave the player frozen.
+                try
                 {
-                    Crop crop = gridManager.GetCrop(location);
-                    cropNeedsWater = crop != null && crop.NeedsWater;
-                    dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
 
-                    if (gridManager.HasDirtHole(location) && (cropNeedsWater || dryFarmGround))
+                    yield return new WaitForSeconds(animationTime * 0.5f);
+
+                    if (!gridManager.CanRefillWaterAt(location))
                     {
-                        ItemEnergy currentItemEnergy = getInventoryItem.Energy;
+                        Crop crop = gridManager.GetCrop(location);
+                        cropNeedsWater = crop != null && crop.NeedsWater;
+                        dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
 
-                        if (FarmingCheats.InfiniteWater || currentItemEnergy.current >= energyCost)
+                        if (gridManager.HasDirtHole(location) && (cropNeedsWater || dryFarmGround))
                         {
-                            if (!gridManager.HasWateredDirt(location))
-                                gridManager.SetWateredDirtTile(location);
+                            ItemEnergy currentItemEnergy = getInventoryItem.Energy;
 
-                            crop?.TryWater();
-
-                            float newEnergy = FarmingCheats.InfiniteWater
-                                ? currentItemEnergy.max
-                                : currentItemEnergy.current - energyCost;
-                            if (!FarmingCheats.InfiniteWater && newEnergy < energyCost)
+                            if (FarmingCheats.InfiniteWater || currentItemEnergy.current >= energyCost)
                             {
-                                newEnergy = 0;
+                                if (!gridManager.HasWateredDirt(location))
+                                    gridManager.SetWateredDirtTile(location);
+
+                                crop?.TryWater();
+
+                                float newEnergy = FarmingCheats.InfiniteWater
+                                    ? currentItemEnergy.max
+                                    : currentItemEnergy.current - energyCost;
+                                if (!FarmingCheats.InfiniteWater && newEnergy < energyCost)
+                                {
+                                    newEnergy = 0;
+                                }
+
+                                getInventoryItem.Energy = new ItemEnergy()
+                                {
+                                    min = currentItemEnergy.min,
+                                    max = currentItemEnergy.max,
+                                    current = newEnergy
+                                };
+
+                                OnWateredGround.Invoke();
+
+                                UpdateWorldGauge(userInventory, getInventoryItem.Energy, true);
+                                userInventory.ReloadItemSlot(itemIndex);
                             }
-
-                            getInventoryItem.Energy = new ItemEnergy()
-                            {
-                                min = currentItemEnergy.min,
-                                max = currentItemEnergy.max,
-                                current = newEnergy
-                            };
-
-                            OnWateredGround.Invoke();
-
-                            UpdateWorldGauge(userInventory, getInventoryItem.Energy, true);
-                            userInventory.ReloadItemSlot(itemIndex);
                         }
                     }
+                    yield return new WaitForSeconds(animationTime * 0.5f);
                 }
-                yield return new WaitForSeconds(animationTime * 0.5f);
-
-                getMover.FreezeMovement(false);
-                gridSelector.SetFrozen(false);
-
+                finally
+                {
+                    getMover?.FreezeMovement(false);
+                    if (gridSelector != null)
+                        gridSelector.SetFrozen(false);
+                }
             }
         }
 

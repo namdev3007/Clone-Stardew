@@ -38,17 +38,24 @@ namespace World
             for (int i = 0; i < generated.Length; i++)
             {
                 MapRegionGeneratedProp source = generated[i];
-                if (source == null || !orchard.Contains(source.SourceCell))
+                if (source == null)
+                    continue;
+                Vector3Int placementCell = GetPlacementCell(source);
+                if (!orchard.Contains(placementCell))
+                    continue;
+                SpriteRenderer renderer = source.GetComponentInChildren<SpriteRenderer>();
+                if (!IsRemovableVegetation(renderer?.sprite?.name ?? source.gameObject.name))
                     continue;
                 ClearableOrchardProp clearable = source.GetComponent<ClearableOrchardProp>() ??
                                                 source.gameObject.AddComponent<ClearableOrchardProp>();
-                clearable.Configure(source, progressService);
+                clearable.Configure(source, placementCell, progressService);
             }
         }
 
-        private void Configure(MapRegionGeneratedProp source, SpecialCropProgressService progressService)
+        private void Configure(MapRegionGeneratedProp source, Vector3Int placementCell,
+            SpecialCropProgressService progressService)
         {
-            cell = source.SourceCell;
+            cell = placementCell;
             SpriteRenderer renderer = GetComponentInChildren<SpriteRenderer>();
             string spriteName = renderer?.sprite?.name ?? gameObject.name;
             requiredHits = DetermineRequiredHits(spriteName, renderer);
@@ -56,6 +63,13 @@ namespace World
             progress = progressService;
             Register();
             RefreshState();
+        }
+
+        private static Vector3Int GetPlacementCell(MapRegionGeneratedProp source)
+        {
+            // Reference-map props preserve their original source-image cell separately;
+            // region ownership and gameplay always use the actual target map cell.
+            return source.TargetCell != default ? source.TargetCell : source.SourceCell;
         }
 
         private void OnEnable() => Register();
@@ -101,11 +115,31 @@ namespace World
         private static int DetermineRequiredHits(string sourceName, SpriteRenderer renderer)
         {
             string name = (sourceName ?? string.Empty).ToLowerInvariant();
+
+            // Exact gameplay rules for removable props inside the unlocked home orchard.
             if (name.Contains("banana") || name.Contains("chuoi") || name.Contains("chu\u1ed1i")) return 3;
-            if (name.Contains("flower") || name.Contains("hoa") || name.Contains("bush") || name.Contains("bui")) return 2;
-            if (name.Contains("grass") || name.Contains("weed") || name.Contains("co") || name.Contains("c\u1ecf")) return 1;
+            if (name.Contains("cay-lon") || name.Contains("cây-lớn") || name.Contains("cay lon")) return 6;
+            if (name.Contains("cay-nho") || name.Contains("cây-nhỏ") || name.Contains("cay nho") ||
+                name.Contains("cay-vua") || name.Contains("cây-vừa") || name.Contains("cay vua")) return 4;
+            if (name.Contains("co-cao") || name.Contains("cỏ-cao") || name.Contains("long-grass") ||
+                name.Contains("grass-row")) return 2;
+            if (name.Contains("bui-cay") || name.Contains("bụi-cây") || name.Contains("flower") ||
+                name.Contains("hoa") || name.Contains("bush") || name.Contains("bui") || name.Contains("bụi")) return 2;
+            if (name.Contains("co-nho") || name.Contains("cỏ-nhỏ") || name.Contains("grass") ||
+                name.Contains("weed") || name.Contains("cỏ")) return 1;
+
+            // Compatibility fallback for any older decoration sprites without standard names.
             float height = renderer != null ? renderer.bounds.size.y : 0f;
             return height >= 0.9f ? 6 : 4;
+        }
+
+        private static bool IsRemovableVegetation(string sourceName)
+        {
+            string name = (sourceName ?? string.Empty).ToLowerInvariant();
+            return name.Contains("banana") || name.Contains("chuoi") || name.Contains("chu\u1ed1i") ||
+                   name.Contains("cay-") || name.Contains("cây-") ||
+                   name.Contains("co-") || name.Contains("cỏ-") ||
+                   name.Contains("bui-") || name.Contains("bụi-");
         }
     }
 }

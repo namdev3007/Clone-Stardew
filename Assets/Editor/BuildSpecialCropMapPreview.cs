@@ -77,10 +77,12 @@ public static class BuildSpecialCropMapPreview
             SceneManager.MoveGameObjectToScene(root, scene);
             root.AddComponent<SpecialCropEditorPreview>();
 
+            ConfigureAuthoredCucumberState(scene, false);
+
             BuildArea(root.transform, "Cucumber Trellis", cucumber, gridManager,
-                cucumberLock, First(config.cucumberStages), Array.Empty<Sprite>(), lockSign);
+                cucumberLock, First(config.cucumberStages), Array.Empty<Sprite>(), false, lockSign);
             BuildArea(root.transform, "Dragon Fruit Field", dragon, gridManager,
-                dragonLock, First(config.dragonFruitStages), Array.Empty<Sprite>(), lockSign);
+                dragonLock, First(config.dragonFruitStages), config.dragonFruitBrokenSprites, true, lockSign);
             BuildNamedRegionColliders(scene, config.regions, gridManager);
             BuildNamedRegionContent(scene, config.regions, gridManager);
 
@@ -182,7 +184,8 @@ public static class BuildSpecialCropMapPreview
 
         MoveNpcToNamedRegion(scene, collection, grid, "\u00f4ng n\u1ed9i \u0111\u1ee9ng", "NPC Old Man Test");
         MoveNpcToNamedRegion(scene, collection, grid, "\u00f4ng b\u00e1n h\u1ea1t gi\u1ed1ng", "NPC Seed Seller Test");
-        BuildDecorativeBananas(root.transform, collection, grid);
+        // Do not rebuild decorative banana trees. Banana crops planted by the player are
+        // managed by the farming system and are not part of this Edit Mode preview root.
         // The dense forest region is intentionally left empty (trees removed).
         // Wells are no longer generated here; they are placed by hand in the scene.
         EditorUtility.SetDirty(root);
@@ -196,8 +199,29 @@ public static class BuildSpecialCropMapPreview
         if (region == null || npc == null)
             return;
 
-        npc.position = grid.GetWorldLocation(region.MinCell);
+        Vector3 position = grid.GetWorldLocation(region.MinCell);
+        position.z = 0f;
+        npc.position = position;
+        npc.rotation = Quaternion.identity;
+        npc.localScale = Vector3.one;
         EditorUtility.SetDirty(npc);
+    }
+
+    private static void ConfigureAuthoredCucumberState(Scene scene, bool repaired)
+    {
+        Transform authoredRoot = FindRoot(scene, "ruộng dưa chuột");
+        if (authoredRoot == null)
+            return;
+
+        foreach (Transform child in authoredRoot)
+        {
+            bool isBroken = child.name.IndexOf("brokenfence_200", StringComparison.OrdinalIgnoreCase) >= 0;
+            // The authored fence/posts are permanent map geometry. Only the
+            // broken trellis overlay changes when the plot is repaired.
+            child.gameObject.SetActive(isBroken ? !repaired : true);
+            EditorUtility.SetDirty(child.gameObject);
+        }
+        EditorUtility.SetDirty(authoredRoot);
     }
 
     private static void BuildDecorativeBananas(Transform parent, MapRegionCollection collection, GridManager grid)
@@ -303,7 +327,7 @@ public static class BuildSpecialCropMapPreview
 
     private static void BuildArea(Transform parent, string name, MapRegionDefinition region,
         GridManager grid, MapRegionDefinition lockRegion, Sprite emptyPost,
-        IReadOnlyList<Sprite> brokenSprites, Sprite lockSprite)
+        IReadOnlyList<Sprite> brokenSprites, bool fillEveryBrokenSlot, Sprite lockSprite)
     {
         GameObject area = new GameObject(name + " [" + region.RegionName + "]");
         area.transform.SetParent(parent, false);
@@ -317,6 +341,12 @@ public static class BuildSpecialCropMapPreview
         for (int i = 0; i < slots.Count; i++)
         {
             Vector3Int cell = slots[i];
+            // Trellis planting cells are permanently tilled, including the
+            // locked Edit Mode preview. Runtime enforces the same invariant.
+            grid.EnsureDirtTile(cell);
+            if (!grid.HasDirtHole(cell))
+                grid.SetDirtHoleTile(cell);
+
             GameObject post = new GameObject($"Planting Post {i + 1} [{cell.x},{cell.y}]");
             post.transform.SetParent(slotsRoot.transform, false);
             post.transform.position = grid.GetWorldLocation(cell);
@@ -330,15 +360,18 @@ public static class BuildSpecialCropMapPreview
 
         GameObject brokenRoot = new GameObject("Broken State Visuals");
         brokenRoot.transform.SetParent(area.transform, false);
-        if (brokenSprites != null)
+        if (brokenSprites != null && brokenSprites.Count > 0)
         {
-            for (int i = 0; i < brokenSprites.Count; i++)
+            int pieceCount = fillEveryBrokenSlot ? slots.Count : brokenSprites.Count;
+            for (int i = 0; i < pieceCount; i++)
             {
-                Sprite sprite = brokenSprites[i];
+                Sprite sprite = brokenSprites[i % brokenSprites.Count];
                 if (sprite == null)
                     continue;
-                Vector3Int cell = slots[Mathf.Min(i * 2, slots.Count - 1)];
-                GameObject piece = new GameObject("Broken Piece " + (i + 1));
+                Vector3Int cell = fillEveryBrokenSlot
+                    ? slots[i]
+                    : slots[Mathf.Min(i * 2, slots.Count - 1)];
+                GameObject piece = new GameObject($"Broken Post {i + 1} [{cell.x},{cell.y}]");
                 piece.transform.SetParent(brokenRoot.transform, false);
                 piece.transform.position = grid.GetWorldLocation(cell);
                 AddSprite(piece.transform, "Visual", sprite, 0.5f);

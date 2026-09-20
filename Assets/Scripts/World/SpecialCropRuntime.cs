@@ -199,6 +199,16 @@ namespace World
             return area != null && area.IsRepaired && area.IsPlantingSlot(cell);
         }
 
+        /// <summary>
+        /// Post cells of either trellis, repaired or not. These stay hoed for the
+        /// whole game and must never be reset back to ordinary ground.
+        /// </summary>
+        public static bool IsPermanentTilledCell(Vector3Int cell)
+        {
+            SpecialCropAreaController area = FindArea(cell);
+            return area != null && area.IsPlantingSlot(cell);
+        }
+
         public static bool CanPlant(Vector3Int cell, CropDefinition definition)
         {
             if (definition == null)
@@ -237,7 +247,11 @@ namespace World
         private SpecialCropProgressService progress;
         private SpecialCropRuntimeConfig config;
         private GameObject repairedRoot;
+        private GameObject brokenRoot;
         private GameObject lockRoot;
+        private GameObject authoredBrokenVisual;
+        private readonly List<GameObject> authoredRepairedVisuals = new List<GameObject>(8);
+        private bool useAuthoredRepairedVisuals;
         private static ConfirmationWindow spawnedWindow;
         private float nextVisualRefresh;
 
@@ -261,6 +275,8 @@ namespace World
             progress = progressService;
             config = runtimeConfig;
             BuildEightSlots();
+            EnsurePermanentTilledGround();
+            FindAuthoredStateVisuals();
             BuildVisuals();
             progress.StateChanged += RefreshState;
             SpecialCropRuntime.Register(this);
@@ -275,10 +291,13 @@ namespace World
 
         private void Update()
         {
-            if (!IsRepaired || UnityEngine.Time.unscaledTime < nextVisualRefresh)
+            if (UnityEngine.Time.unscaledTime < nextVisualRefresh)
                 return;
             nextVisualRefresh = UnityEngine.Time.unscaledTime + 0.2f;
-            EnsureRepairedGround();
+            EnsurePermanentTilledGround();
+            if (!IsRepaired)
+                return;
+
             for (int i = 0; i < slots.Count; i++)
             {
                 if (emptyPostRenderers[i] != null)
@@ -300,9 +319,13 @@ namespace World
             int maxX = region.MaxCell.x - (region.Width > 2 ? 1 : 0);
             int minY = region.MinCell.y + (region.Height > 2 ? 1 : 0);
             int maxY = region.MaxCell.y - (region.Height > 2 ? 1 : 0);
+            // Rows are listed from the top down. Both rows must remain inside the
+            // marked trellis region; the old cucumber offset placed its second row
+            // one cell too low.
+            int lowerRowY = minY;
             for (int row = 0; row < 2; row++)
             {
-                int y = Mathf.RoundToInt(Mathf.Lerp(minY, maxY, row));
+                int y = row == 0 ? maxY : lowerRowY;
                 for (int column = 0; column < 4; column++)
                 {
                     int x = Mathf.RoundToInt(Mathf.Lerp(minX, maxX, column / 3f));
@@ -313,8 +336,10 @@ namespace World
 
         private void BuildVisuals()
         {
-            // Locked areas are plain soil with only the repair sign. The posts
-            // (stage 0 sprite) exist only after the area has been unlocked.
+            // The authored cucumber layout has two visual states: one broken
+            // trellis before repair, and the eight aligned posts after repair.
+            // Runtime posts remain as planting/collision anchors, but do not
+            // duplicate the authored post art.
             repairedRoot = new GameObject("Repaired - 8 planting posts");
             repairedRoot.transform.SetParent(transform, false);
             repairedRoot.SetActive(false);
@@ -322,7 +347,9 @@ namespace World
             Sprite[] stages = areaId == SpecialCropAreaId.CucumberTrellis
                 ? config.cucumberStages
                 : config.dragonFruitStages;
-            Sprite emptyPost = stages != null && stages.Length > 0 ? stages[0] : null;
+            Sprite emptyPost = !useAuthoredRepairedVisuals && stages != null && stages.Length > 0
+                ? stages[0]
+                : null;
             for (int i = 0; i < slots.Count; i++)
             {
                 GameObject post = new GameObject($"Planting Post {i + 1} [{slots[i].x},{slots[i].y}]");
@@ -336,7 +363,160 @@ namespace World
                 collider.offset = new Vector2(0f, 0.035f);
             }
 
+            BuildRepairedFenceRows();
+            BuildFallbackBrokenVisuals();
+
             BuildLockInteraction();
+        }
+
+        /// <summary>
+        /// One intact trellis sprite per row of posts, shown only after repair.
+        /// It is scenery behind the crops, so it uses the trellis background order.
+        /// Only the cucumber area has a trellis; dragon fruit grows on bare posts.
+        /// </summary>
+        private void BuildRepairedFenceRows()
+        {
+            if (areaId != SpecialCropAreaId.CucumberTrellis)
+                return;
+
+            Sprite fence = config.cucumberRepairedFence;
+            if (fence == null || slots.Count == 0)
+                return;
+
+            float cellSize = gridManager.Grid.cellSize.x;
+            const int columnsPerRow = 4;
+            for (int row = 0; row * columnsPerRow < slots.Count; row++)
+            {
+                int first = row * columnsPerRow;
+                int last = Mathf.Min(first + columnsPerRow, slots.Count) - 1;
+                Vector3 firstPost = gridManager.GetWorldLocation(slots[first]);
+                Vector3 lastPost = gridManager.GetWorldLocation(slots[last]);
+
+                // The two authored row positions are stored in the config so the
+                // repaired trellis matches the editor reference in both Play Mode
+                // and future runs. Keep the post-derived position as a fallback.
+                float targetWidth = Mathf.Abs(lastPost.x - firstPost.x) + cellSize;
+                float scale = fence.bounds.size.x > 0f ? targetWidth / fence.bounds.size.x : 1f;
+                Vector2 authoredPosition = row == 0
+                    ? config.cucumberUpperFencePosition
+                    : config.cucumberLowerFencePosition;
+                bool hasAuthoredPosition = authoredPosition != Vector2.zero;
+                Vector3 fencePosition = hasAuthoredPosition
+                    ? new Vector3(authoredPosition.x, authoredPosition.y, 0f)
+                    : new Vector3((firstPost.x + lastPost.x) * 0.5f, firstPost.y, 0f);
+                Vector2 authoredScale = config.cucumberFenceScale;
+                Vector3 fenceScale = authoredScale.x > 0f && authoredScale.y > 0f
+                    ? new Vector3(authoredScale.x, authoredScale.y, 1f)
+                    : new Vector3(scale, scale, 1f);
+
+                GameObject fenceObject = new GameObject($"Repaired Trellis Row {row + 1}");
+                fenceObject.transform.SetParent(repairedRoot.transform, false);
+                fenceObject.transform.position = fencePosition;
+                fenceObject.transform.localScale = fenceScale;
+
+                SpriteRenderer renderer = fenceObject.AddComponent<SpriteRenderer>();
+                renderer.sprite = fence;
+                renderer.color = Color.white;
+                renderer.sortingLayerName = MapPropSorting.SortingLayer;
+                renderer.sortingOrder = MapPropSorting.TrellisBackgroundOrder;
+            }
+        }
+
+        private void FindAuthoredStateVisuals()
+        {
+            authoredBrokenVisual = null;
+            authoredRepairedVisuals.Clear();
+            useAuthoredRepairedVisuals = false;
+
+            if (gridManager == null)
+                return;
+
+            string rootName = areaId == SpecialCropAreaId.CucumberTrellis
+                ? "ruộng dưa chuột"
+                : "ruộng thanh long";
+            GameObject authoredRoot = FindSceneObject(gridManager.gameObject.scene, rootName);
+            if (authoredRoot == null)
+                return;
+
+            PushTrellisToBackground(authoredRoot);
+
+            if (areaId != SpecialCropAreaId.CucumberTrellis)
+                return;
+
+            foreach (Transform child in authoredRoot.transform)
+            {
+                string childName = child.name;
+                if (childName.IndexOf("brokenfence_200", StringComparison.OrdinalIgnoreCase) >= 0)
+                    authoredBrokenVisual = child.gameObject;
+                else
+                    authoredRepairedVisuals.Add(child.gameObject);
+            }
+
+            useAuthoredRepairedVisuals = authoredRepairedVisuals.Count > 0;
+        }
+
+        /// <summary>
+        /// The authored trellis frame is a backdrop: crops planted on its posts
+        /// and the player walking past must always be drawn in front of it.
+        /// </summary>
+        private static void PushTrellisToBackground(GameObject authoredRoot)
+        {
+            SpriteRenderer[] renderers = authoredRoot.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                renderers[i].sortingLayerName = MapPropSorting.SortingLayer;
+                renderers[i].sortingOrder = MapPropSorting.TrellisBackgroundOrder;
+            }
+        }
+
+        private void BuildFallbackBrokenVisuals()
+        {
+            if (authoredBrokenVisual != null || config == null)
+                return;
+
+            Sprite[] brokenSprites = areaId == SpecialCropAreaId.CucumberTrellis
+                ? config.cucumberBrokenSprites
+                : config.dragonFruitBrokenSprites;
+            if (brokenSprites == null || brokenSprites.Length == 0)
+                return;
+
+            bool fillEverySlot = areaId == SpecialCropAreaId.DragonFruitTrellis;
+            int pieceCount = fillEverySlot ? slots.Count : brokenSprites.Length;
+            brokenRoot = new GameObject(areaId == SpecialCropAreaId.CucumberTrellis
+                ? "Broken cucumber trellis"
+                : "Broken dragon fruit posts - 8 columns");
+            brokenRoot.transform.SetParent(transform, false);
+            for (int i = 0; i < pieceCount; i++)
+            {
+                Sprite sprite = brokenSprites[i % brokenSprites.Length];
+                if (sprite == null)
+                    continue;
+
+                Vector3Int cell = fillEverySlot
+                    ? slots[i]
+                    : slots[Mathf.Min(i * 2, slots.Count - 1)];
+                GameObject piece = new GameObject($"Broken Post {i + 1} [{cell.x},{cell.y}]");
+                piece.transform.SetParent(brokenRoot.transform, false);
+                piece.transform.position = gridManager.GetWorldLocation(cell);
+                CreateAnchoredSprite(piece.transform, "Visual", sprite, 0.5f);
+                BoxCollider2D collider = piece.AddComponent<BoxCollider2D>();
+                collider.size = new Vector2(0.14f, 0.10f);
+                collider.offset = new Vector2(0f, 0.05f);
+            }
+        }
+
+        private static GameObject FindSceneObject(Scene scene, string objectName)
+        {
+            if (!scene.IsValid() || !scene.isLoaded)
+                return null;
+
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                if (string.Equals(root.name, objectName, StringComparison.OrdinalIgnoreCase))
+                    return root;
+            }
+
+            return null;
         }
 
         private void BuildLockInteraction()
@@ -452,16 +632,25 @@ namespace World
         }
 
         /// <summary>
-        /// Gameplay scenes have no confirmation window of their own (it only
-        /// exists in the start menu), so spawn one from the config on demand.
+        /// The repair prompt uses the pause menu's quit-confirmation art, built
+        /// on demand. The old start-menu window is only a fallback for configs
+        /// that have no dialog art assigned yet.
         /// </summary>
         private static ConfirmationWindow GetConfirmationWindow(SpecialCropRuntimeConfig runtimeConfig)
         {
             if (spawnedWindow != null)
                 return spawnedWindow;
-            spawnedWindow = FindFirstObjectByType<ConfirmationWindow>(FindObjectsInactive.Include);
-            if (spawnedWindow != null || runtimeConfig == null || runtimeConfig.confirmationWindowPrefab == null)
+            if (runtimeConfig == null)
+                return null;
+
+            spawnedWindow = YesNoDialogFactory.Create("Repair Confirmation UI", runtimeConfig.dialogPanel,
+                runtimeConfig.dialogYesButton, runtimeConfig.dialogNoButton, runtimeConfig.dialogFont);
+            if (spawnedWindow != null)
                 return spawnedWindow;
+
+            Debug.LogWarning("Repair dialog art is missing; falling back to the old confirmation window.");
+            if (runtimeConfig.confirmationWindowPrefab == null)
+                return null;
 
             GameObject instance = Instantiate(runtimeConfig.confirmationWindowPrefab);
             instance.SetActive(false);
@@ -490,8 +679,18 @@ namespace World
         private void RefreshState()
         {
             bool repaired = IsRepaired;
+            if (authoredBrokenVisual != null)
+                authoredBrokenVisual.SetActive(!repaired);
+            if (brokenRoot != null)
+                brokenRoot.SetActive(!repaired);
+            for (int i = 0; i < authoredRepairedVisuals.Count; i++)
+            {
+                if (authoredRepairedVisuals[i] != null)
+                    authoredRepairedVisuals[i].SetActive(true);
+            }
             if (repairedRoot != null)
                 repairedRoot.SetActive(repaired);
+            EnsurePermanentTilledGround();
             if (!repaired)
                 return;
 
@@ -501,20 +700,23 @@ namespace World
                 Destroy(lockRoot);
                 lockRoot = null;
             }
-            EnsureRepairedGround();
         }
 
-        private void EnsureRepairedGround()
+        private void EnsurePermanentTilledGround()
         {
-            if (gridManager == null || region == null)
+            if (gridManager == null)
                 return;
 
-            // Unlocking replaces the whole marked rectangle with ordinary
-            // soil. The area is never hoed; seeds are planted straight onto the
-            // eight post cells (see CanPlant and GridManager.TryBeginPlanting).
-            for (int y = region.MinCell.y; y <= region.MaxCell.y; y++)
-            for (int x = region.MinCell.x; x <= region.MaxCell.x; x++)
-                gridManager.EnsureDirtTile(new Vector3Int(x, y, 0));
+            // The eight trellis cells are authored farm plots. They are hoed
+            // from the beginning and must never fall back to ordinary ground,
+            // regardless of repair, watering, harvesting, reset, or save load.
+            for (int i = 0; i < slots.Count; i++)
+            {
+                Vector3Int cell = slots[i];
+                gridManager.EnsureDirtTile(cell);
+                if (!gridManager.HasDirtHole(cell))
+                    gridManager.SetDirtHoleTile(cell);
+            }
         }
     }
 
@@ -522,16 +724,29 @@ namespace World
     {
         [SerializeField] private Vector3Int[] refillCells = Array.Empty<Vector3Int>();
         private GridManager gridManager;
+        public IReadOnlyList<Vector3Int> RefillCells => refillCells;
 
         public void Configure(GridManager grid, IEnumerable<Vector3Int> cells)
         {
+            if (Application.isPlaying)
+                Unregister();
             gridManager = grid;
             refillCells = cells != null ? new List<Vector3Int>(cells).ToArray() : Array.Empty<Vector3Int>();
-            Register();
+            if (Application.isPlaying)
+                Register();
         }
 
-        private void OnEnable() => Register();
-        private void OnDisable() => Unregister();
+        private void OnEnable()
+        {
+            if (Application.isPlaying)
+                Register();
+        }
+
+        private void OnDisable()
+        {
+            if (Application.isPlaying)
+                Unregister();
+        }
 
         private void Register()
         {

@@ -13,6 +13,9 @@ namespace User_Interface
         [SerializeField] private Sprite vietnameseNormal;
         [SerializeField] private Sprite vietnameseSelected;
         [SerializeField] private bool useNativeSize;
+        [Header("Optional per-language size (zero keeps the authored size)")]
+        [SerializeField] private Vector2 englishSize;
+        [SerializeField] private Vector2 vietnameseSize;
 
         public void Configure(Image image, Button button, Sprite enNormal, Sprite enSelected,
             Sprite viNormal, Sprite viSelected, bool resize)
@@ -26,6 +29,33 @@ namespace User_Interface
             useNativeSize = resize;
             Apply(SettingsSoundUI.UseVietnamese);
         }
+
+        /// <summary>
+        /// Sizes for artwork whose two language versions have different
+        /// proportions, so neither of them ends up stretched.
+        /// </summary>
+        public void ConfigureSizes(Vector2 english, Vector2 vietnamese)
+        {
+            englishSize = english;
+            vietnameseSize = vietnamese;
+            Apply(SettingsSoundUI.UseVietnamese);
+        }
+
+        public void ConfigureHeaderSizesIfUnset(Vector2 authoredEnglishSize)
+        {
+            if (englishSize.x > 0f && englishSize.y > 0f &&
+                vietnameseSize.x > 0f && vietnameseSize.y > 0f)
+                return;
+
+            englishSize = authoredEnglishSize;
+            float height = Mathf.Max(1f, authoredEnglishSize.y);
+            vietnameseSize = vietnameseNormal != null && vietnameseNormal.rect.height > 0f
+                ? new Vector2(height * vietnameseNormal.rect.width / vietnameseNormal.rect.height, height)
+                : authoredEnglishSize;
+            Apply(SettingsSoundUI.UseVietnamese);
+        }
+
+        public void RefreshLanguage() => Apply(SettingsSoundUI.UseVietnamese);
 
         private void Awake()
         {
@@ -63,6 +93,13 @@ namespace User_Interface
                 state.selectedSprite = selected != null ? selected : normal;
                 state.pressedSprite = selected != null ? selected : normal;
                 targetButton.spriteState = state;
+            }
+
+            Vector2 languageSize = vietnamese ? vietnameseSize : englishSize;
+            if (!useNativeSize && languageSize.x > 0f && languageSize.y > 0f &&
+                targetImage.rectTransform != null)
+            {
+                targetImage.rectTransform.sizeDelta = languageSize;
             }
 
             if (useNativeSize && normal != null && targetImage.rectTransform != null)

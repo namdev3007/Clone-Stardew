@@ -29,6 +29,11 @@ public static class SetupSettingsSoundUI
     private const string EnglishButtonPath = "Assets/Sprites/Buttons/tieng-anh/english.png";
     private const string SoundActionPath = "Assets/Content/Actions/Action Play Sound.asset";
     private const int LayoutVersion = 14;
+    /// <summary>
+    /// The Sounds/Language/Controls panels are drawn slightly larger than their
+    /// layout rect. Set here because the layout sync resets local scale.
+    /// </summary>
+    private const float SectionBackgroundScale = 1.25f;
 
     [InitializeOnLoadMethod]
     private static void InstallAfterCompile()
@@ -271,6 +276,7 @@ public static class SetupSettingsSoundUI
         if (localized == null)
             localized = image.gameObject.AddComponent<LocalizedSpriteButton>();
         localized.Configure(image, null, english, null, vietnamese, null, false);
+        localized.ConfigureHeaderSizesIfUnset(image.rectTransform.sizeDelta);
     }
 
     private static void ConfigureOpenSceneHeaders(Sprite background, Sprite settings, Sprite sounds,
@@ -312,6 +318,9 @@ public static class SetupSettingsSoundUI
             ConfigureSceneHeader(soundsSection, "Title Sounds", sounds, soundsVi);
             ConfigureSceneHeader(languageSection, "Title Language", language, languageVi);
             ConfigureSceneHeader(controlsSection, "Title Controls", controls, controlsVi);
+            Transform backButton = panel.parent != null ? panel.parent.Find("Button Back To Pause") : null;
+            if (backButton != null)
+                backButton.gameObject.SetActive(true);
             EnsureSceneLanguageButton(languageSection, "Language Vietnamese", vietnameseButton, new Vector2(0f, 13f));
             EnsureSceneLanguageButton(languageSection, "Language English", englishButton, new Vector2(0f, -30f));
 
@@ -397,6 +406,7 @@ public static class SetupSettingsSoundUI
         background.preserveAspect = false;
         background.raycastTarget = false;
         SetRect(background.rectTransform, Vector2.one * 0.5f, position, size);
+        background.rectTransform.localScale = Vector3.one * SectionBackgroundScale;
         background.transform.SetAsFirstSibling();
     }
 
@@ -424,6 +434,7 @@ public static class SetupSettingsSoundUI
     {
         Image background = CreateImage(parent, name, sprite);
         SetRect(background.rectTransform, Vector2.one * 0.5f, position, size);
+        background.rectTransform.localScale = Vector3.one * SectionBackgroundScale;
         background.type = Image.Type.Sliced;
         background.preserveAspect = false;
         background.raycastTarget = false;

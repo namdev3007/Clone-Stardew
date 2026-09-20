@@ -157,7 +157,7 @@ namespace Main_Menu
 
             playerName.Value = enteredName;
             worldName.Value = enteredName;
-            newGameAction.Execute();
+            newGameAction.Execute(enteredName);
         }
     }
 }

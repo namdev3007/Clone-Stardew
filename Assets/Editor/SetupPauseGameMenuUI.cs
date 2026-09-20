@@ -149,9 +149,12 @@ public static class SetupPauseGameMenuUI
 
     private static void ConfigureLocalizedVisuals(Transform panel)
     {
+        // The Vietnamese title art is wider (224x80 against 176x80), so it gets
+        // a taller box to keep its proportions inside the same 155 wide slot.
         ConfigureLocalizedVisual(panel, "Title Pause",
             LoadSprite(ButtonSpriteFolder + "pause.png", "pause_0"), null,
-            LoadSprite("Assets/Sprites/Buttons/tieng-viet/tam-dung.png", "tam-dung_0"), null, false);
+            LoadSprite("Assets/Sprites/Buttons/tieng-viet/tam-dung.png", "tam-dung_0"), null, false,
+            new Vector2(155f, 50f), new Vector2(155f, 55f));
         ConfigureLocalizedVisual(panel, "Button Continue",
             LoadSprite(ButtonSpriteFolder + "continue.png", "continue_0"),
             LoadSprite(ButtonSpriteFolder + "continue.png", "continue_1", false),
@@ -180,7 +183,8 @@ public static class SetupPauseGameMenuUI
     }
 
     private static void ConfigureLocalizedVisual(Transform panel, string childName, Sprite englishNormal,
-        Sprite englishSelected, Sprite vietnameseNormal, Sprite vietnameseSelected, bool nativeSize)
+        Sprite englishSelected, Sprite vietnameseNormal, Sprite vietnameseSelected, bool nativeSize,
+        Vector2 englishSize = default, Vector2 vietnameseSize = default)
     {
         Transform child = panel.Find(childName);
         if (child == null)
@@ -191,6 +195,8 @@ public static class SetupPauseGameMenuUI
             localizer = child.gameObject.AddComponent<LocalizedSpriteButton>();
         localizer.Configure(child.GetComponent<Image>(), child.GetComponent<Button>(), englishNormal,
             englishSelected, vietnameseNormal, vietnameseSelected, nativeSize);
+        localizer.ConfigureSizes(englishSize, vietnameseSize);
+        EditorUtility.SetDirty(localizer);
     }
 
     private static void SetChildPosition(Transform parent, string childName, Vector2 position)

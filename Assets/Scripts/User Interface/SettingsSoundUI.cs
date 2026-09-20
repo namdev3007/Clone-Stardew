@@ -162,6 +162,14 @@ namespace User_Interface
 
         private void ApplyLanguageVisuals(bool vietnamese, bool notify)
         {
+            foreach (LocalizedSpriteButton title in GetComponentsInChildren<LocalizedSpriteButton>(true))
+            {
+                Image titleImage = title.GetComponent<Image>();
+                if (titleImage != null && title.name.StartsWith("Title ", System.StringComparison.Ordinal))
+                    title.ConfigureHeaderSizesIfUnset(titleImage.rectTransform.sizeDelta);
+                title.RefreshLanguage();
+            }
+
             Color selected = new Color32(255, 232, 145, 255);
             Color normal = new Color32(40, 27, 18, 255);
             if (vietnameseButtonImage != null)

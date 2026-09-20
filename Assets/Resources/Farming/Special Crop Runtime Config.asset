@@ -38,8 +38,22 @@ MonoBehaviour:
   - {fileID: -2062003219898376686, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
   - {fileID: 4821437798414693900, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
   - {fileID: 2983786636311293438, guid: 7317f4cc8ebb3ee4399aed503f393494, type: 3}
+  dragonFruitBrokenSprites:
+  - {fileID: 3537693992586539950, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
+  - {fileID: 5945726643352455649, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
+  - {fileID: -8564440145278846475, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
+  - {fileID: 2623760060342323582, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
+  cucumberRepairedFence: {fileID: 6673256488409564741, guid: 423e07858d05d394ca651923d5f8cac5,
+    type: 3}
+  cucumberUpperFencePosition: {x: -2.6473, y: 3.3}
+  cucumberLowerFencePosition: {x: -2.6473, y: 2.983}
+  cucumberFenceScale: {x: 0.4990512, y: 0.544553}
   lockSign: {fileID: -2232192959912990605, guid: b87daf26be0da3f4fad301209afa3f4d, type: 3}
   currencyItem: {fileID: 11400000, guid: 01f8d174962102c4d8c5cf00c70f82e5, type: 2}
   confirmationWindowPrefab: {fileID: 1676738617491330, guid: e971388e6414fe24ba70867c684f42bd,
     type: 2}
+  dialogPanel: {fileID: -3209791489997393647, guid: 4609923cf8b3e3c46a43e81e7e2e26cd, type: 3}
+  dialogYesButton: {fileID: 2184659078434181301, guid: bcbe0507b2d54c142b322d1d7083ce5d, type: 3}
+  dialogNoButton: {fileID: -1645900057180936319, guid: e1de87e0080b68e46b887242491bf96b, type: 3}
+  dialogFont: {fileID: 11400000, guid: af4e0f5cdfc541948b4e27e395289c6e, type: 2}
   mouseInteractionEvent: {fileID: 11400000, guid: 956f458aa3cfb5c45ae24917ff8b57a6, type: 2}

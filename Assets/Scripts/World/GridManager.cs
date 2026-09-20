@@ -413,15 +413,16 @@ namespace World
             ReleasePerennialFootprint(location);
             crops.Remove(location);
 
-            // Fruit trees are planted directly on hoeable ground. Once chopped,
-            // restore that cell to ordinary ground instead of leaving behind a
-            // phantom farm plot/status marker.
-            if (wasPerennialPlot)
+            // Ordinary soil must be hoed again after the crop's final harvest.
+            // Trellis post cells are the sole exception: they remain tilled.
+            if (!SpecialCropRuntime.IsPermanentTilledCell(location))
             {
-                farmPlots.Remove(location);
-                RemoveFarmPlotIndicator(location);
+                ClearOrdinaryFarmPlot(location);
                 return;
             }
+
+            if (wasPerennialPlot)
+                return;
 
             RegisterFarmPlot(location);
             FarmPlotData plot = farmPlots[location];
@@ -429,6 +430,32 @@ namespace World
             plot.fertilized = false;
             plot.status = FarmPlotStatus.Fertilize;
             RefreshFarmPlotIndicator(plot);
+        }
+
+        /// <summary>Right-click with the hoe removes an ordinary hoed cell and any crop on it.</summary>
+        public bool TryCancelHoedCell(Vector3Int location)
+        {
+            Initialize();
+            if (SpecialCropRuntime.IsPermanentTilledCell(location) || !HasDirtHole(location))
+                return false;
+
+            if (crops.TryGetValue(location, out Crop crop) && crop != null)
+            {
+                crops.Remove(location);
+                ReleasePerennialFootprint(location);
+                Destroy(crop.gameObject);
+            }
+
+            ClearOrdinaryFarmPlot(location);
+            return true;
+        }
+
+        private void ClearOrdinaryFarmPlot(Vector3Int location)
+        {
+            RemoveCheatTile(wateredDirtTileMap, location);
+            RemoveCheatTile(dirtHoleTileMap, location);
+            farmPlots.Remove(location);
+            RemoveFarmPlotIndicator(location);
         }
 
         private bool CanPlantPerennialTree(Vector3Int center)
@@ -835,7 +862,10 @@ namespace World
 
             foreach (Vector3Int location in locations)
             {
-                RemoveCheatTile(dirtHoleTileMap, location);
+                // Trellis post cells are permanently tilled, so the reset leaves
+                // their hoed ground alone and only clears the watering.
+                if (!SpecialCropRuntime.IsPermanentTilledCell(location))
+                    RemoveCheatTile(dirtHoleTileMap, location);
                 RemoveCheatTile(wateredDirtTileMap, location);
 
                 if (farmPlotIndicators.TryGetValue(location, out SpriteRenderer indicator) && indicator != null)

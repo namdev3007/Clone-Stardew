@@ -114,6 +114,15 @@ namespace World.NPC
             Commit();
         }
 
+        /// <summary>Developer shortcut used by the hidden in-game cheat panel.</summary>
+        public void CheatUnlockAllCrops()
+        {
+            EnsureLoaded();
+            data.metSeller = true;
+            data.highestUnlockedCropOrder = 7;
+            Commit();
+        }
+
         public void RecordCropHarvested(string cropName)
         {
             EnsureLoaded();

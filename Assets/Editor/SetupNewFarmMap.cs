@@ -26,7 +26,9 @@ public static class SetupNewFarmMap
     private const string DrySpriteGuid = "5b8c2a60f988e3147997330788e4c4ac";
     private const string WetSpriteGuid = "2105b1b2aa988db4ab9ea2383a5109dc";
     private const string MarkerName = "Map Layout Base";
-    private const int CurrentMapVersion = 4;
+    private const int CurrentMapVersion = 5;
+    private const int AuthoredMapOriginX = -56;
+    private const int AuthoredMapOriginY = -38;
 
     [InitializeOnLoadMethod]
     private static void InstallOnceAfterCompile()
@@ -53,6 +55,11 @@ public static class SetupNewFarmMap
 
     [MenuItem("Tools/Map/Install New Map Into Level Farm")]
     private static void InstallFromMenu()
+    {
+        InstallCurrentLayout();
+    }
+
+    public static void InstallCurrentLayout()
     {
         Install(true);
     }
@@ -211,8 +218,14 @@ public static class SetupNewFarmMap
     {
         destination.ClearAllTiles();
         BoundsInt sourceBounds = source.cellBounds;
-        int offsetX = -(sourceBounds.xMin + sourceBounds.size.x / 2);
-        int offsetY = -(sourceBounds.yMin + sourceBounds.size.y / 2);
+
+        // Keep the original 113x77 layout anchored to the same world cells.
+        // The authored preview is now 83 cells tall; centering by the current
+        // size would move all existing tiles down by three cells and make every
+        // NPC, prop, region and collider appear three cells too high. New rows
+        // must extend the map without changing the established world origin.
+        int offsetX = AuthoredMapOriginX - sourceBounds.xMin;
+        int offsetY = AuthoredMapOriginY - sourceBounds.yMin;
         foreach (Vector3Int cell in sourceBounds.allPositionsWithin)
         {
             TileBase tile = source.GetTile(cell);

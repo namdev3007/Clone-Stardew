@@ -240,6 +240,8 @@ MonoBehaviour:
   sortingGroup: {fileID: 859022536915271573}
   positionScaling: -100
   flip: 0
+  groundAnchorRenderer: {fileID: 0}
+  useRendererBottom: 0
 --- !u!1 &8667427171213373770
 GameObject:
   m_ObjectHideFlags: 0

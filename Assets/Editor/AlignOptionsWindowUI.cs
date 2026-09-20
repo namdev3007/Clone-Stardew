@@ -1,0 +1,205 @@
+#if UNITY_EDITOR
+using System.Linq;
+using UnityEditor;
+using UnityEditor.Events;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using User_Interface;
+
+public static class AlignOptionsWindowUI
+{
+    private const string PrefabPath = "Assets/Prefabs/User Interface/Core/Pauze Menu.prefab";
+    private const string ScenePath = "Assets/MainScenes/Core 1.unity";
+    private const string BackPath = "Assets/Sprites/Buttons/other-button/back-lùi về.png";
+    private const string OkPath = "Assets/Sprites/Buttons/tieng-anh/ok.png";
+    private const string ConfirmPath = "Assets/Sprites/Buttons/tieng-viet/xac-nhan.png";
+    private const string TitlesPath = "Assets/Sprites/settings-loadgame-ui/text-dùng cho ui-settings/";
+    private const int Version = 1;
+
+    private static string VersionKey => "Meadom.AlignOptionsWindow." + Application.dataPath.GetHashCode();
+
+    [InitializeOnLoadMethod]
+    private static void QueueInstall()
+    {
+        EditorApplication.delayCall += () =>
+        {
+            if (!EditorApplication.isPlayingOrWillChangePlaymode && EditorPrefs.GetInt(VersionKey, 0) < Version)
+                Install();
+        };
+    }
+
+    [MenuItem("Tools/UI/Align Options Window")]
+    private static void InstallFromMenu() => Install();
+
+    private static void Install()
+    {
+        GameObject prefab = PrefabUtility.LoadPrefabContents(PrefabPath);
+        try
+        {
+            Align(prefab);
+            PrefabUtility.SaveAsPrefabAsset(prefab, PrefabPath);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(prefab);
+        }
+
+        Scene scene = SceneManager.GetSceneByPath(ScenePath);
+        bool opened = !scene.IsValid() || !scene.isLoaded;
+        if (opened)
+            scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+        try
+        {
+            foreach (GameObject root in scene.GetRootGameObjects())
+                Align(root);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+        finally
+        {
+            if (opened && scene.IsValid() && scene.isLoaded)
+                EditorSceneManager.CloseScene(scene, true);
+        }
+
+        AssetDatabase.SaveAssets();
+        EditorPrefs.SetInt(VersionKey, Version);
+        Debug.Log("Window_Options: Back, OK and localized title positions aligned in prefab and Core 1 scene.");
+    }
+
+    private static void Align(GameObject root)
+    {
+        Transform window = root.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(child => child.name == "Window_Options");
+        PauseGameMenuController pause = root.GetComponentInChildren<PauseGameMenuController>(true);
+        if (window == null || pause == null)
+            return;
+
+        Transform panel = window.GetComponentsInChildren<Transform>(true)
+            .FirstOrDefault(child => child.name == "Sound Settings - Redesigned");
+        if (panel == null)
+            return;
+
+        EnsureBack(window, pause);
+        EnsureOk(window, pause);
+        AlignTitle(panel, "Title Settings", "text-settings.png", "text-cài đặt.png",
+            new Vector2(0f, 68f), 20f, 125f);
+        AlignTitle(panel, "Title Sounds", "text-sounds.png", "text-âm thanh.png",
+            new Vector2(-116f, 48f), 14f, 90f);
+        AlignTitle(panel, "Title Language", "text-language.png", "text-ngôn ngữ.png",
+            new Vector2(0f, 48f), 14f, 90f);
+        AlignTitle(panel, "Title Controls", "text-controls.png", "text-điều khiển.png",
+            new Vector2(116f, 48f), 14f, 90f);
+    }
+
+    private static void EnsureBack(Transform window, PauseGameMenuController pause)
+    {
+        Transform found = window.Find("Button Back To Pause");
+        if (found == null)
+        {
+            GameObject created = new GameObject("Button Back To Pause", typeof(RectTransform),
+                typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            created.layer = LayerMask.NameToLayer("UI");
+            created.transform.SetParent(window, false);
+            found = created.transform;
+        }
+
+        Image image = found.GetComponent<Image>() ?? found.gameObject.AddComponent<Image>();
+        image.sprite = SpriteAt(BackPath);
+        image.preserveAspect = true;
+        image.raycastTarget = true;
+        Button button = found.GetComponent<Button>() ?? found.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        SetPosition((RectTransform)found, new Vector2(-320f, 143f), new Vector2(54f, 32f));
+        button.onClick.RemoveAllListeners();
+        ClearPersistent(button);
+        UnityEventTools.AddPersistentListener(button.onClick, pause.ShowPauseMenu);
+        found.gameObject.SetActive(true);
+        found.SetAsLastSibling();
+    }
+
+    private static void EnsureOk(Transform window, PauseGameMenuController pause)
+    {
+        Transform found = window.Find("Button OK");
+        if (found == null)
+        {
+            GameObject created = new GameObject("Button OK", typeof(RectTransform),
+                typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(LocalizedSpriteButton));
+            created.layer = LayerMask.NameToLayer("UI");
+            created.transform.SetParent(window, false);
+            found = created.transform;
+        }
+
+        Image image = found.GetComponent<Image>() ?? found.gameObject.AddComponent<Image>();
+        image.preserveAspect = true;
+        image.raycastTarget = true;
+        Button button = found.GetComponent<Button>() ?? found.gameObject.AddComponent<Button>();
+        button.targetGraphic = image;
+        button.transition = Selectable.Transition.SpriteSwap;
+        SetPosition((RectTransform)found, new Vector2(315f, -143f), new Vector2(54f, 32f));
+        LocalizedSpriteButton localized = found.GetComponent<LocalizedSpriteButton>() ??
+                                          found.gameObject.AddComponent<LocalizedSpriteButton>();
+        localized.Configure(image, button, SpriteAt(OkPath, "ok_0"), SpriteAt(OkPath, "ok_1"),
+            SpriteAt(ConfirmPath, "xac-nhan_0"), SpriteAt(ConfirmPath, "xac-nhan_1"), false);
+        localized.ConfigureSizes(new Vector2(54f, 32f), new Vector2(54f, 32f));
+        button.onClick.RemoveAllListeners();
+        ClearPersistent(button);
+        UnityEventTools.AddPersistentListener(button.onClick, pause.ApplySettingsAndReturn);
+        found.gameObject.SetActive(true);
+        found.SetAsLastSibling();
+    }
+
+    private static void AlignTitle(Transform panel, string name, string englishFile, string vietnameseFile,
+        Vector2 position, float height, float maxWidth)
+    {
+        Transform found = panel.GetComponentsInChildren<Transform>(true).FirstOrDefault(child => child.name == name);
+        if (found == null)
+            return;
+
+        Sprite english = SpriteAt(TitlesPath + englishFile);
+        Sprite vietnamese = SpriteAt(TitlesPath + vietnameseFile);
+        Image image = found.GetComponent<Image>();
+        if (image == null || english == null || vietnamese == null)
+            return;
+
+        Vector2 englishSize = SizeFor(english, height, maxWidth);
+        Vector2 vietnameseSize = SizeFor(vietnamese, height, maxWidth);
+        SetPosition((RectTransform)found, position, englishSize);
+        image.preserveAspect = true;
+        image.raycastTarget = false;
+        LocalizedSpriteButton localized = found.GetComponent<LocalizedSpriteButton>() ??
+                                          found.gameObject.AddComponent<LocalizedSpriteButton>();
+        localized.Configure(image, null, english, null, vietnamese, null, false);
+        localized.ConfigureSizes(englishSize, vietnameseSize);
+    }
+
+    private static Vector2 SizeFor(Sprite sprite, float height, float maxWidth)
+    {
+        float aspect = sprite.rect.width / Mathf.Max(1f, sprite.rect.height);
+        return new Vector2(Mathf.Min(height * aspect, maxWidth), height);
+    }
+
+    private static void SetPosition(RectTransform rect, Vector2 position, Vector2 size)
+    {
+        rect.anchorMin = Vector2.one * 0.5f;
+        rect.anchorMax = Vector2.one * 0.5f;
+        rect.pivot = Vector2.one * 0.5f;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+        rect.localScale = Vector3.one;
+    }
+
+    private static Sprite SpriteAt(string path, string name = null)
+    {
+        Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().ToArray();
+        return sprites.FirstOrDefault(sprite => sprite.name == name) ?? sprites.FirstOrDefault();
+    }
+
+    private static void ClearPersistent(Button button)
+    {
+        for (int i = button.onClick.GetPersistentEventCount() - 1; i >= 0; i--)
+            UnityEventTools.RemovePersistentListener(button.onClick, i);
+    }
+}
+#endif

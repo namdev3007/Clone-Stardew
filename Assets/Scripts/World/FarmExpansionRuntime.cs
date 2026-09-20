@@ -25,6 +25,9 @@ namespace World
             progress = progressService;
             initialFarm = initialFarmRegion;
             homeOrchard = homeOrchardRegion;
+            // A scene load cancels any reveal that was still running. The flag is
+            // static, and leaving it on would block pause, the bag and dialogue.
+            IsRevealActive = false;
         }
 
         public static bool CanHoe(Vector3Int cell)
@@ -73,15 +76,26 @@ namespace World
 
         public static void BeginReveal(MonoBehaviour host, System.Action completed = null)
         {
-            if (host == null || grid == null || progress == null || homeOrchard == null || IsRevealActive)
+            if (grid == null || progress == null || homeOrchard == null || IsRevealActive)
             {
                 completed?.Invoke();
                 return;
             }
-            host.StartCoroutine(RevealRoutine(completed));
+
+            // Run on an own object instead of the NPC: if the NPC is disabled or
+            // destroyed mid-sequence the coroutine dies, and the player would be
+            // left with the camera locked and every input blocked.
+            GameObject runner = new GameObject("Home Orchard Reveal");
+            Object.DontDestroyOnLoad(runner);
+            runner.AddComponent<RevealRunner>().StartCoroutine(RevealRoutine(completed, runner));
         }
 
-        private static IEnumerator RevealRoutine(System.Action completed)
+        /// <summary>Host for the reveal coroutine; nothing else in the scene owns it.</summary>
+        private sealed class RevealRunner : MonoBehaviour
+        {
+        }
+
+        private static IEnumerator RevealRoutine(System.Action completed, GameObject runner)
         {
             IsRevealActive = true;
             Vector3 min = grid.GetWorldLocation(homeOrchard.MinCell);
@@ -95,40 +109,53 @@ namespace World
             List<Behaviour> suspended = SuspendCinemachineCameras();
             GameObject markers = BuildCornerMarkers(min, max);
 
-            if (mainCamera != null)
+            // Whatever happens in between, the camera, the cameras' scripts and the
+            // input-blocking flag are always restored.
+            try
             {
-                float revealSize = Mathf.Max((max.y - min.y) * 0.6f,
-                    (max.x - min.x) / Mathf.Max(0.1f, mainCamera.aspect) * 0.6f);
-                float elapsed = 0f;
-                while (elapsed < 0.7f)
+                if (mainCamera != null)
                 {
-                    elapsed += UnityEngine.Time.unscaledDeltaTime;
-                    float p = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / 0.7f));
-                    mainCamera.transform.position = Vector3.Lerp(oldPosition, target, p);
-                    mainCamera.orthographicSize = Mathf.Lerp(oldSize, revealSize, p);
+                    float revealSize = Mathf.Max((max.y - min.y) * 0.6f,
+                        (max.x - min.x) / Mathf.Max(0.1f, mainCamera.aspect) * 0.6f);
+                    float elapsed = 0f;
+                    while (elapsed < 0.7f)
+                    {
+                        elapsed += UnityEngine.Time.unscaledDeltaTime;
+                        float p = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / 0.7f));
+                        mainCamera.transform.position = Vector3.Lerp(oldPosition, target, p);
+                        mainCamera.orthographicSize = Mathf.Lerp(oldSize, revealSize, p);
+                        yield return null;
+                    }
+                }
+
+                float flashTime = 0f;
+                while (flashTime < 5f)
+                {
+                    flashTime += UnityEngine.Time.unscaledDeltaTime;
+                    if (markers != null)
+                        markers.SetActive(Mathf.Repeat(flashTime, 0.6f) < 0.4f);
                     yield return null;
                 }
+
+                progress.UnlockHomeOrchard();
+            }
+            finally
+            {
+                if (mainCamera != null)
+                {
+                    mainCamera.transform.position = oldPosition;
+                    mainCamera.orthographicSize = oldSize;
+                }
+                for (int i = 0; i < suspended.Count; i++)
+                    if (suspended[i] != null)
+                        suspended[i].enabled = true;
+                if (markers != null)
+                    Object.Destroy(markers);
+                if (runner != null)
+                    Object.Destroy(runner);
+                IsRevealActive = false;
             }
 
-            float flashTime = 0f;
-            while (flashTime < 5f)
-            {
-                flashTime += UnityEngine.Time.unscaledDeltaTime;
-                markers.SetActive(Mathf.Repeat(flashTime, 0.6f) < 0.4f);
-                yield return null;
-            }
-
-            progress.UnlockHomeOrchard();
-            if (mainCamera != null)
-            {
-                mainCamera.transform.position = oldPosition;
-                mainCamera.orthographicSize = oldSize;
-            }
-            for (int i = 0; i < suspended.Count; i++)
-                if (suspended[i] != null)
-                    suspended[i].enabled = true;
-            Object.Destroy(markers);
-            IsRevealActive = false;
             completed?.Invoke();
         }
 

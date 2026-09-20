@@ -34,7 +34,7 @@ namespace Main_Menu
 
         private void Awake()
         {
-            saveSlotDisplayers = saveSlotContainer?.GetComponentsInChildren<UISaveSlotDisplayer>();
+            saveSlotDisplayers = saveSlotContainer?.GetComponentsInChildren<UISaveSlotDisplayer>(true);
 
             buttonTabRight?.onClick.AddListener(OnSwitchTabRight);
             buttonTabLeft?.onClick.AddListener(OnSwitchTabLeft);
@@ -47,7 +47,17 @@ namespace Main_Menu
 
         public void RefreshSaveSlots()
         {
-            saveGames = SaveFileUtility.GetUsedSlots().ToList();
+            saveGames = SaveFileUtility.GetUsedSlots().OrderBy(slot => slot).ToList();
+
+            // This screen uses a ScrollRect rather than the old tab buttons. Grow
+            // the list to match every used save so newly-created slots are not
+            // hidden behind the two scene-authored template rows.
+            if (buttonTabLeft == null && buttonTabRight == null)
+            {
+                EnsureDisplayerCapacity(saveGames.Count);
+                LoadScrollableSlots();
+                return;
+            }
 
             if (saveGames.Count == 0)
             {
@@ -59,6 +69,47 @@ namespace Main_Menu
             }
 
             LoadSlots(currentTabIndex);
+        }
+
+        private void EnsureDisplayerCapacity(int requiredCount)
+        {
+            if (saveSlotContainer == null)
+                return;
+
+            if (saveSlotDisplayers == null)
+                saveSlotDisplayers = saveSlotContainer.GetComponentsInChildren<UISaveSlotDisplayer>(true);
+            if (saveSlotDisplayers.Length == 0 || requiredCount <= saveSlotDisplayers.Length)
+                return;
+
+            List<UISaveSlotDisplayer> expanded = saveSlotDisplayers.ToList();
+            UISaveSlotDisplayer template = saveSlotDisplayers[saveSlotDisplayers.Length - 1];
+            while (expanded.Count < requiredCount)
+            {
+                UISaveSlotDisplayer clone = Instantiate(template, saveSlotContainer.transform);
+                clone.name = $"UI Save Slot Displayer ({expanded.Count + 1})";
+                clone.transform.localScale = Vector3.one;
+                expanded.Add(clone);
+            }
+
+            saveSlotDisplayers = expanded.ToArray();
+        }
+
+        private void LoadScrollableSlots()
+        {
+            if (saveSlotDisplayers == null)
+                return;
+
+            for (int i = 0; i < saveSlotDisplayers.Length; i++)
+            {
+                bool hasSave = i < saveGames.Count;
+                saveSlotDisplayers[i].gameObject.SetActive(hasSave);
+                if (hasSave)
+                    saveSlotDisplayers[i].LoadSlot(saveGames[i]);
+            }
+
+            currentTabIndex = 0;
+            if (saveSlotContainer != null && saveSlotContainer.transform is RectTransform content)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(content);
         }
 
         private void LoadSlots(int offset)

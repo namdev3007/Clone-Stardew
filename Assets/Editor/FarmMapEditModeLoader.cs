@@ -1,9 +1,12 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using Utility;
 
 /// <summary>
 /// Keeps Level_Farm loaded additively whenever Core 1 is being edited, so the
@@ -14,6 +17,19 @@ public static class FarmMapEditModeLoader
 {
     private const string CoreScenePath = "Assets/MainScenes/Core 1.unity";
     private const string FarmScenePath = "Assets/Scenes/Levels/OutDoors/Level_Farm.unity";
+    private const string PreserveAuthoredFenceOrderName = "hàng rào_0 (1)";
+    private static readonly string[] FarmAuthoredRootNames =
+    {
+        "ruộng dưa chuột",
+        "Ruộng thanh long",
+        "NPC house",
+        "Rào ruộng thường",
+        "house-Sheet_0",
+        "NPC house-Sheet_0",
+        "giếng_0",
+        "giếng_0 (1)"
+    };
+    private static readonly string[] WellRootNames = { "giếng_0", "giếng_0 (1)" };
     private static bool loadQueued;
 
     static FarmMapEditModeLoader()
@@ -31,6 +47,29 @@ public static class FarmMapEditModeLoader
     private static void ShowFromMenu()
     {
         EnsureVisible(true);
+    }
+
+    [MenuItem("Tools/Map/Sync Authored Farm Props And Wells")]
+    private static void SyncAuthoredPropsFromMenu()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning("Stop Play Mode before syncing authored farm props and wells.");
+            return;
+        }
+
+        Scene coreScene = SceneManager.GetSceneByPath(CoreScenePath);
+        Scene farmScene = SceneManager.GetSceneByPath(FarmScenePath);
+        if (!coreScene.IsValid() || !coreScene.isLoaded ||
+            !farmScene.IsValid() || !farmScene.isLoaded)
+        {
+            Debug.LogWarning("Open Core 1 and Level_Farm additively before syncing farm props and wells.");
+            return;
+        }
+
+        MoveAuthoredMapObjectsToFarm(coreScene, farmScene);
+        ConfigureFarmWells(farmScene);
+        SceneView.RepaintAll();
     }
 
     private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
@@ -91,7 +130,219 @@ public static class FarmMapEditModeLoader
         foreach (GameObject root in farmScene.GetRootGameObjects())
             SceneVisibilityManager.instance.Show(root, true);
 
+        MoveAuthoredMapObjectsToFarm(coreScene, farmScene);
+        ConfigureFarmWells(farmScene);
+        ConfigureFarmFenceSorting(farmScene);
+
         SceneView.RepaintAll();
+    }
+
+    /// <summary>
+    /// These objects are map geometry authored while Core 1 was the active
+    /// scene. Keep them in Level_Farm so their coordinates, visibility and
+    /// lifetime follow the map instead of the persistent UI/system scene.
+    /// </summary>
+    private static void MoveAuthoredMapObjectsToFarm(Scene coreScene, Scene farmScene)
+    {
+        if (!coreScene.IsValid() || !coreScene.isLoaded ||
+            !farmScene.IsValid() || !farmScene.isLoaded)
+            return;
+
+        bool movedAny = false;
+        GameObject[] coreRoots = coreScene.GetRootGameObjects();
+
+        foreach (string rootName in FarmAuthoredRootNames)
+        {
+            GameObject mapRoot = FindRoot(coreRoots, rootName);
+            if (mapRoot == null)
+                continue;
+
+            ConfigureFenceSorting(mapRoot);
+            SceneManager.MoveGameObjectToScene(mapRoot, farmScene);
+            movedAny = true;
+        }
+
+        if (!movedAny)
+            return;
+
+        EditorSceneManager.MarkSceneDirty(coreScene);
+        EditorSceneManager.MarkSceneDirty(farmScene);
+        EditorSceneManager.SaveScene(farmScene);
+        EditorSceneManager.SaveScene(coreScene);
+        Debug.Log("Moved authored farm objects to Level_Farm. World positions were preserved.");
+    }
+
+    private static void ConfigureFarmWells(Scene farmScene)
+    {
+        GameObject[] roots = farmScene.GetRootGameObjects();
+        World.GridManager gridManager = null;
+        foreach (GameObject root in roots)
+        {
+            gridManager = root.GetComponentInChildren<World.GridManager>(true);
+            if (gridManager != null)
+                break;
+        }
+
+        if (gridManager == null || gridManager.Grid == null)
+            return;
+
+        bool changed = false;
+        foreach (string wellName in WellRootNames)
+        {
+            GameObject well = FindRoot(roots, wellName);
+            if (well == null)
+                continue;
+
+            SpriteRenderer sprite = well.GetComponent<SpriteRenderer>();
+            if (sprite == null || sprite.sprite == null)
+                continue;
+
+            // Every cell touched by the visible well can be clicked with a
+            // watering can. This keeps the refill target aligned with the art.
+            Bounds bounds = sprite.bounds;
+            const float inset = 0.001f;
+            Vector3Int min = gridManager.Grid.WorldToCell(bounds.min + new Vector3(inset, inset, 0));
+            Vector3Int max = gridManager.Grid.WorldToCell(bounds.max - new Vector3(inset, inset, 0));
+            List<Vector3Int> cells = new List<Vector3Int>();
+            for (int y = min.y; y <= max.y; y++)
+            for (int x = min.x; x <= max.x; x++)
+                cells.Add(new Vector3Int(x, y, 0));
+
+            World.WaterRefillSource source = well.GetComponent<World.WaterRefillSource>();
+            bool needsUpdate = source == null;
+            if (source == null)
+                source = Undo.AddComponent<World.WaterRefillSource>(well);
+
+            if (!needsUpdate)
+            {
+                IReadOnlyList<Vector3Int> current = source.RefillCells;
+                needsUpdate = current == null || current.Count != cells.Count;
+                for (int i = 0; !needsUpdate && i < cells.Count; i++)
+                    needsUpdate = current[i] != cells[i];
+            }
+
+            if (!needsUpdate)
+                continue;
+
+            source.Configure(gridManager, cells);
+            EditorUtility.SetDirty(source);
+            changed = true;
+        }
+
+        if (!changed)
+            return;
+
+        EditorSceneManager.MarkSceneDirty(farmScene);
+        EditorSceneManager.SaveScene(farmScene);
+        Debug.Log("Configured both authored wells as watering-can refill sources in Level_Farm.");
+    }
+
+    private static GameObject FindRoot(GameObject[] roots, string objectName)
+    {
+        foreach (GameObject root in roots)
+        {
+            if (root != null && string.Equals(root.name, objectName, StringComparison.Ordinal))
+                return root;
+        }
+
+        return null;
+    }
+
+    private static bool ConfigureFenceSorting(GameObject mapRoot)
+    {
+        bool changed = false;
+        SpriteRenderer[] renderers = mapRoot.GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (SpriteRenderer renderer in renderers)
+        {
+            if (renderer == null)
+                continue;
+
+            string objectName = renderer.gameObject.name;
+            bool isFence = objectName.IndexOf("hàng rào", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                           objectName.IndexOf("rào", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                           objectName.IndexOf("fence", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (!isFence)
+                continue;
+
+            // This single authored fence is intentionally kept below trees.
+            if (objectName.IndexOf("layer thấp hơn cây", StringComparison.OrdinalIgnoreCase) >= 0)
+                continue;
+
+            // The upright post has an authored renderer order that controls how
+            // it overlaps the neighbouring fence pieces. Never replace that
+            // value with a Y-derived order. A SortingGroup supplies a separate
+            // external order for player-vs-post occlusion at runtime.
+            if (string.Equals(objectName, PreserveAuthoredFenceOrderName, StringComparison.Ordinal))
+            {
+                if (renderer.sortingLayerName != World.MapPropSorting.SortingLayer)
+                {
+                    renderer.sortingLayerName = World.MapPropSorting.SortingLayer;
+                    EditorUtility.SetDirty(renderer);
+                    changed = true;
+                }
+
+                SortingGroup sortingGroup = renderer.GetComponent<SortingGroup>();
+                if (sortingGroup == null)
+                {
+                    sortingGroup = Undo.AddComponent<SortingGroup>(renderer.gameObject);
+                    changed = true;
+                }
+
+                if (sortingGroup.sortingLayerName != World.MapPropSorting.SortingLayer)
+                {
+                    sortingGroup.sortingLayerName = World.MapPropSorting.SortingLayer;
+                    EditorUtility.SetDirty(sortingGroup);
+                    changed = true;
+                }
+
+                HeightBasedSorting heightSorting = renderer.GetComponent<HeightBasedSorting>();
+                if (heightSorting == null)
+                {
+                    heightSorting = Undo.AddComponent<HeightBasedSorting>(renderer.gameObject);
+                    changed = true;
+                }
+
+                heightSorting.ConfigureGroundAnchor(renderer);
+                EditorUtility.SetDirty(heightSorting);
+                continue;
+            }
+
+            // Use the bottom of the visible fence as its ground contact point,
+            // matching the -Y depth rule used by trees and the player.
+            int targetOrder = Mathf.RoundToInt(-renderer.bounds.min.y * 100f);
+            if (renderer.sortingLayerName == World.MapPropSorting.SortingLayer && renderer.sortingOrder == targetOrder)
+                continue;
+
+            renderer.sortingLayerName = World.MapPropSorting.SortingLayer;
+            renderer.sortingOrder = targetOrder;
+            EditorUtility.SetDirty(renderer);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static void ConfigureFarmFenceSorting(Scene farmScene)
+    {
+        if (!farmScene.IsValid() || !farmScene.isLoaded)
+            return;
+
+        bool changed = false;
+        GameObject[] roots = farmScene.GetRootGameObjects();
+        foreach (string rootName in FarmAuthoredRootNames)
+        {
+            GameObject root = FindRoot(roots, rootName);
+            if (root == null)
+                continue;
+
+            changed |= ConfigureFenceSorting(root);
+        }
+
+        if (changed)
+        {
+            EditorSceneManager.MarkSceneDirty(farmScene);
+            EditorSceneManager.SaveScene(farmScene);
+        }
     }
 }
 #endif

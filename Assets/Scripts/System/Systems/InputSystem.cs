@@ -60,6 +60,7 @@ namespace GameSystem.Systems
 
         private new UnityEngine.Camera camera;
         private EventSystem eventSystem;
+        private Item.Inventory.Inventory playerInventory;
 
         public override void OnLoadSystem()
         {
@@ -78,6 +79,16 @@ namespace GameSystem.Systems
 
         public override void OnFixedTick()
         {
+            if (RuntimeCheatPanel.AnyOpen)
+            {
+                if (isMoving)
+                {
+                    isMoving = false;
+                    events.movement?.Invoke(Vector2.zero);
+                }
+                return;
+            }
+
             if (!gamePauzed && !World.FarmExpansionRuntime.IsRevealActive)
             {
                 Vector2 movementVector;
@@ -106,6 +117,7 @@ namespace GameSystem.Systems
             bool foregroundWindowOpen = BagWindow.AnyOpen || ShopWindowController.AnyOpen ||
                                         DialogueUIController.IsDialogueOpen ||
                                         ConfirmationWindow.AnyOpen ||
+                                        RuntimeCheatPanel.AnyOpen ||
                                         World.FarmExpansionRuntime.IsRevealActive;
 
             if (!gamePauzed && !foregroundWindowOpen)
@@ -193,7 +205,14 @@ namespace GameSystem.Systems
                     {
                         if (!IsPointerBlockedByUI())
                         {
-                            events.rightMouseClick?.Invoke(camera.ScreenToWorldPoint(Input.mousePosition));
+                            if (playerInventory == null)
+                            {
+                                GameObject player = GameObject.FindGameObjectWithTag("Player");
+                                playerInventory = player != null ? player.GetComponent<Item.Inventory.Inventory>() : null;
+                            }
+
+                            if (playerInventory == null || !playerInventory.TryCancelSelectedHoeCell())
+                                events.rightMouseClick?.Invoke(camera.ScreenToWorldPoint(Input.mousePosition));
                         }
                     }
                 }
@@ -206,7 +225,8 @@ namespace GameSystem.Systems
                         return;
                     // Foreground windows own Escape. Pause is only allowed when
                     // there is no bag or shop to close first.
-                    if (!ConfirmationWindow.TryCloseOpen() &&
+                    if (!RuntimeCheatPanel.TryCloseOpen() &&
+                        !ConfirmationWindow.TryCloseOpen() &&
                         !ShopWindowController.TryCloseOpen() && !BagWindow.TryCloseOpen())
                         events.pauze?.Invoke();
                 }

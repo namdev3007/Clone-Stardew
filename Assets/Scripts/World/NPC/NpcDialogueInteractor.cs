@@ -145,7 +145,7 @@ namespace World.NPC
                 return;
             }
 
-            ShowGrandpaMenu();
+            PlayGrandpaFollowup();
         }
 
         private DialogueSequence GetHomeOrchardDialogue()
@@ -165,42 +165,12 @@ namespace World.NPC
             return homeOrchardDialogue;
         }
 
-        private void ShowGrandpaMenu()
+        private void PlayGrandpaFollowup()
         {
-            DialogueUIController ui = DialogueUIController.Ensure(visuals);
-            bool canReplayOrchard = FarmExpansionRuntime.HomeOrchardUnlocked;
-            bool vietnamese = SettingsSoundUI.UseVietnamese;
-            ui.ShowChoices(vietnamese ? "Cháu cần ông giúp gì?" : "What can I help you with?", new[]
-            {
-                vietnamese ? "Nhắc lại việc cháu cần làm" : "Remind me what to do",
-                vietnamese ? "Kể cháu nghe về việc làm vườn" : "Tell me about farming",
-                canReplayOrchard
-                    ? (vietnamese ? "Chỉ lại khu đất sau nhà" : "Show me the backyard plot again")
-                    : (vietnamese ? "Mở rộng khu vườn" : "Expand the farm"),
-                vietnamese ? "Thôi, không có gì ạ" : "Never mind"
-            }, selected =>
-            {
-                switch (selected)
-                {
-                    case 0:
-                        Play(reminder, () => status?.ShowEllipsis());
-                        break;
-                    case 1:
-                        Play(farmingAdvice, () => status?.ShowEllipsis());
-                        break;
-                    case 2:
-                        if (canReplayOrchard)
-                            Play(GetHomeOrchardDialogue(), () =>
-                                FarmExpansionRuntime.BeginReveal(this, () => status?.ShowEllipsis()));
-                        else
-                            Play(expansionUnavailable, () => status?.ShowEllipsis());
-                        break;
-                    default:
-                        ui.CloseAll();
-                        status?.ShowEllipsis();
-                        break;
-                }
-            });
+            // There is no separate choice screen anymore. Like Uncle Hai, the
+            // NPC speaks a short follow-up sequence and then returns control.
+            DialogueSequence sequence = farmingAdvice != null ? farmingAdvice : reminder;
+            Play(sequence, () => status?.ShowEllipsis());
         }
 
         private void InteractWithSeller()

@@ -118,6 +118,8 @@ MonoBehaviour:
   sortingGroup: {fileID: 4798521517272763073}
   positionScaling: -100
   flip: 0
+  groundAnchorRenderer: {fileID: 0}
+  useRendererBottom: 0
 --- !u!50 &8879481886391436958
 Rigidbody2D:
   serializedVersion: 5

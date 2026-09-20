@@ -95,39 +95,44 @@ namespace Item.Actions
 
             getMover.FreezeMovement(true);
 
-            yield return new WaitForSeconds(animationTime * 0.5f);
-
-            if (isCropAxe)
+            // The release sits in a finally block: an interrupted swing must
+            // never leave the player frozen.
+            try
             {
-                bool hitAccepted = orchardPropTarget != null
-                    ? orchardPropTarget.TryHit()
-                    : axeTarget != null && axeTarget.TryUseAxe();
-                if (hitAccepted)
-                    userInventory.TryConsumeToolDurability(itemIndex);
+                yield return new WaitForSeconds(animationTime * 0.5f);
+
+                if (isCropAxe)
+                {
+                    bool hitAccepted = orchardPropTarget != null
+                        ? orchardPropTarget.TryHit()
+                        : axeTarget != null && axeTarget.TryUseAxe();
+                    if (hitAccepted)
+                        userInventory.TryConsumeToolDurability(itemIndex);
+
+                    yield return new WaitForSeconds(animationTime * 0.5f);
+                    yield break;
+                }
+
+                GameObject damageVolume = damageVolumePool.Retrieve(attackLocation, new Quaternion());
+
+                damageVolume.GetComponent<DamageVolume>().Configure(new DamageVolumeConfiguration()
+                {
+                    Damage = damage,
+                    Owner = userInventory.gameObject,
+                    ActiveTime = 0.5f,
+                    TargetTags = targetTags,
+                    AllowDuplicateDamage = true,
+                    CanDamageMultiple = hitMultipleTargets,
+                    Size = new Vector2(0.10f, 0.10f)
+                });
 
                 yield return new WaitForSeconds(animationTime * 0.5f);
-                getMover.FreezeMovement(false);
-                yield break;
+                yield return null;
             }
-
-            GameObject damageVolume = damageVolumePool.Retrieve(attackLocation, new Quaternion());
-
-            damageVolume.GetComponent<DamageVolume>().Configure(new DamageVolumeConfiguration()
+            finally
             {
-                Damage = damage,
-                Owner = userInventory.gameObject,
-                ActiveTime = 0.5f,
-                TargetTags = targetTags,
-                AllowDuplicateDamage = true,
-                CanDamageMultiple = hitMultipleTargets,
-                Size = new Vector2(0.10f, 0.10f)
-            });
-
-            yield return new WaitForSeconds(animationTime * 0.5f);
-
-            getMover.FreezeMovement(false);
-
-            yield return null;
+                getMover?.FreezeMovement(false);
+            }
         }
 
         public override void ItemAcquisitionAction(Inventory.Inventory userInventory, int itemIndex)

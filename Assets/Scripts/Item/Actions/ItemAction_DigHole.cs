@@ -77,31 +77,38 @@ namespace Item.Actions
 
                 gridSelector.SetFrozen(true);
 
-                yield return new WaitForSeconds(animationTime * 0.5f);
-
-                if (gridManager.CanHoeCell(selectionLocation) &&
-                    !gridManager.HasDirtHole(selectionLocation) &&
-                    !gridManager.HasWater(selectionLocation) &&
-                    gridManager.HasDirt(selectionLocation))
+                // The release below sits in a finally block: an interrupted hoe
+                // swing must never leave the player frozen.
+                try
                 {
-                    gridManager.SetDirtHoleTile(selectionLocation);
-                    gridManager.RegisterFarmPlot(selectionLocation);
-                    TutorialProgressService.Instance.RecordHoedCell(selectionLocation);
+                    yield return new WaitForSeconds(animationTime * 0.5f);
 
-                    if (currentWeather == EWeather.Rainy)
+                    if (gridManager.CanHoeCell(selectionLocation) &&
+                        !gridManager.HasDirtHole(selectionLocation) &&
+                        !gridManager.HasWater(selectionLocation) &&
+                        gridManager.HasDirt(selectionLocation))
                     {
-                        gridManager.SetWateredDirtTile(selectionLocation);
+                        gridManager.SetDirtHoleTile(selectionLocation);
+                        gridManager.RegisterFarmPlot(selectionLocation);
+                        TutorialProgressService.Instance.RecordHoedCell(selectionLocation);
+
+                        if (currentWeather == EWeather.Rainy)
+                        {
+                            gridManager.SetWateredDirtTile(selectionLocation);
+                        }
+
+                        onSuccess.Invoke();
+                        userInventory.TryConsumeToolDurability(itemIndex);
                     }
 
-                    onSuccess.Invoke();
-                    userInventory.TryConsumeToolDurability(itemIndex);
+                    yield return new WaitForSeconds(animationTime * 0.5f);
                 }
-
-                yield return new WaitForSeconds(animationTime * 0.5f);
-
-                getMover.FreezeMovement(false);
-                gridSelector.SetFrozen(false);
-
+                finally
+                {
+                    getMover?.FreezeMovement(false);
+                    if (gridSelector != null)
+                        gridSelector.SetFrozen(false);
+                }
             }
         }
 

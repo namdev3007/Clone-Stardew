@@ -331,3 +331,5 @@ MonoBehaviour:
   sortingGroup: {fileID: 7806223303114143235}
   positionScaling: -100
   flip: 0
+  groundAnchorRenderer: {fileID: 0}
+  useRendererBottom: 0

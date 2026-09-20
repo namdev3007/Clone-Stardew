@@ -54,22 +54,42 @@ namespace GameSystem.Systems
             }
 
             SaveMaster.GetMetaData("savedata", out string saveJson);
+            bool pendingNewGame = SaveMaster.GetMetaData("new-game-pending", out string pendingValue) &&
+                                  pendingValue == "1";
 
-            if (string.IsNullOrEmpty(saveJson))
+            if (string.IsNullOrEmpty(saveJson) || pendingNewGame)
             {
                 isNewGame = true;
                 string synchronizedName = !string.IsNullOrWhiteSpace(farmName.Value)
                     ? farmName.Value.Trim()
                     : playerName.Value?.Trim() ?? string.Empty;
+
+                SaveData preparedData = !string.IsNullOrEmpty(saveJson)
+                    ? JsonUtility.FromJson<SaveData>(saveJson)
+                    : null;
+                if (string.IsNullOrWhiteSpace(synchronizedName) && preparedData != null)
+                    synchronizedName = !string.IsNullOrWhiteSpace(preparedData.farmName)
+                        ? preparedData.farmName
+                        : preparedData.playerName;
+
                 SetReferenceValue(playerName, synchronizedName);
                 SetReferenceValue(farmName, synchronizedName);
+                string initialSceneName = initialScene != null ? initialScene.Value : string.Empty;
+                if (string.IsNullOrWhiteSpace(initialSceneName) && preparedData != null)
+                    initialSceneName = preparedData.lastScene;
+                if (string.IsNullOrWhiteSpace(initialSceneName))
+                    initialSceneName = "Level_Farm";
+
                 cachedSaveData = new SaveData {
-                    lastScene = initialScene.Value,
+                    lastScene = initialSceneName,
                     playerName = synchronizedName,
                     farmName = synchronizedName,
-                    creationDate = DateTime.Now.ToString("O", CultureInfo.InvariantCulture)
+                    creationDate = preparedData != null && !string.IsNullOrWhiteSpace(preparedData.creationDate)
+                        ? preparedData.creationDate
+                        : DateTime.Now.ToString("O", CultureInfo.InvariantCulture)
                 };
                 SaveMaster.SetMetaData("savedata", JsonUtility.ToJson(cachedSaveData));
+                SaveMaster.SetMetaData("new-game-pending", "0");
             }
             else
             {

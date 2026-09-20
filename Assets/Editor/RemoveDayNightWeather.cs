@@ -198,7 +198,7 @@ public static class RemoveDayNightWeather
         label.alignment = TextAlignmentOptions.TopRight;
         label.color = Color.white;
         label.raycastTarget = false;
-        label.enableWordWrapping = false;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
 
         SimpleGameClockUI clockUI = canvasObject.AddComponent<SimpleGameClockUI>();
         SerializedObject serializedClock = new SerializedObject(clockUI);

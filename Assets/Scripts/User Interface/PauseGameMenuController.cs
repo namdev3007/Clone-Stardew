@@ -125,6 +125,12 @@ namespace User_Interface
             }
         }
 
+        public void ApplySettingsAndReturn()
+        {
+            PlayerPrefs.Save();
+            ShowPauseMenu();
+        }
+
         public void QuitToMenu()
         {
             ShowQuitConfirmation(false);
@@ -156,9 +162,12 @@ namespace User_Interface
         {
             quitToDesktopPending = desktop;
             if (quitConfirmationText != null)
+            {
+                quitConfirmationText.color = new Color32(0xF7, 0xCA, 0x92, 0xFF);
                 quitConfirmationText.text = desktop
                     ? "DO YOU WANT TO QUIT THE GAME?"
                     : "DO YOU WANT TO RETURN TO MENU?";
+            }
 
             if (settingsRoot != null)
                 settingsRoot.SetActive(false);

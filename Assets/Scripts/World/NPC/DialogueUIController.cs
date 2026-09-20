@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Entity_Components;
 using Entity_Components.Player;
 using TMPro;
@@ -14,6 +13,8 @@ namespace World.NPC
     {
         private const float CharactersPerSecond = 48f;
         private const float PortraitFramesPerSecond = 7f;
+        private static readonly Color32 SpeakerNameColor = new Color32(0xF7, 0xCA, 0x92, 0xFF);
+        private static readonly Vector2 SpeakerNamePlateSize = new Vector2(375f, 107.5f);
 
         private static DialogueUIController instance;
         public static DialogueUIController InstanceOrNull => instance;
@@ -23,7 +24,6 @@ namespace World.NPC
         [SerializeField] private DialogueVisualLibrary visuals;
         [SerializeField] private Canvas canvas;
         [SerializeField] private GameObject dialogueRoot;
-        [SerializeField] private GameObject choiceRoot;
         [SerializeField] private GameObject npcDialogueGroup;
         [SerializeField] private GameObject playerDialogueGroup;
         [SerializeField] private Image npcDialogueBoxImage;
@@ -44,8 +44,6 @@ namespace World.NPC
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private TextMeshProUGUI nameText;
         [SerializeField] private TextMeshProUGUI objectiveText;
-        [SerializeField] private TextMeshProUGUI choicePrompt;
-        [SerializeField] private RectTransform choiceList;
         [SerializeField, HideInInspector] private int editorLayoutVersion;
 
         private DialogueSequence currentSequence;
@@ -98,8 +96,7 @@ namespace World.NPC
             DontDestroyOnLoad(gameObject);
             if (dialogueRoot != null)
                 dialogueRoot.SetActive(false);
-            if (choiceRoot != null)
-                choiceRoot.SetActive(false);
+            RemoveLegacyChoiceInterface(false);
 
             BindRuntimeButtons();
         }
@@ -109,7 +106,7 @@ namespace World.NPC
             // The shop keeps dialogueOpen true so the player remains locked, but
             // there is no dialogue line to animate while its own window is open.
             if (!dialogueOpen || activeShop != null || dialogueRoot == null ||
-                !dialogueRoot.activeSelf || (choiceRoot != null && choiceRoot.activeSelf))
+                !dialogueRoot.activeSelf)
                 return;
 
             UpdatePortraitAnimation();
@@ -147,30 +144,8 @@ namespace World.NPC
             onComplete = completed;
             dialogueOpen = true;
             dialogueRoot.SetActive(true);
-            choiceRoot.SetActive(false);
             LockPlayer(true);
             ShowLine();
-        }
-
-        public void ShowChoices(string prompt, IReadOnlyList<string> choices, System.Action<int> selected)
-        {
-            dialogueOpen = true;
-            dialogueRoot.SetActive(false);
-            choiceRoot.SetActive(true);
-            choicePrompt.text = prompt;
-            ClearChoiceButtons();
-            LockPlayer(true);
-
-            for (int i = 0; i < choices.Count; i++)
-            {
-                int selectedIndex = i;
-                Button button = CreateChoiceButton(choices[i]);
-                button.onClick.AddListener(() =>
-                {
-                    choiceRoot.SetActive(false);
-                    selected?.Invoke(selectedIndex);
-                });
-            }
         }
 
         public void ShowShopCatalog(NpcShopCatalog catalog, System.Action closed)
@@ -180,7 +155,6 @@ namespace World.NPC
             {
                 dialogueOpen = true;
                 dialogueRoot.SetActive(false);
-                choiceRoot.SetActive(false);
                 LockPlayer(true);
                 activeShop.Open(catalog, () =>
                 {
@@ -192,46 +166,10 @@ namespace World.NPC
                 return;
             }
 
-            List<string> labels = new List<string>();
-            List<NpcShopCatalog.Entry> visibleEntries = new List<NpcShopCatalog.Entry>();
-            int highestUnlockedCropOrder = TutorialProgressService.Instance.HighestUnlockedCropOrder;
-            if (catalog != null)
-            {
-                foreach (NpcShopCatalog.Entry entry in catalog.Entries)
-                {
-                    if (entry != null && entry.visible && entry.item != null &&
-                        entry.item.ItemName != "Kale Seed" && entry.item.ItemName != "Water Can" &&
-                        entry.IsUnlocked(highestUnlockedCropOrder))
-                    {
-                        visibleEntries.Add(entry);
-                        labels.Add(entry.item.ItemName);
-                    }
-                }
-            }
-            labels.Add("Close");
-
-            ShowChoices("UNCLE HAI'S SHOP\nChoose an item to view it.", labels, index =>
-            {
-                if (index >= visibleEntries.Count)
-                {
-                    CloseAll();
-                    closed?.Invoke();
-                    return;
-                }
-
-                NpcShopCatalog.Entry entry = visibleEntries[index];
-                ShowChoices(entry.item.ItemName + "\n" + entry.item.Description,
-                    new[] { "Back to catalog", "Close" }, detailChoice =>
-                    {
-                        if (detailChoice == 0)
-                            ShowShopCatalog(catalog, closed);
-                        else
-                        {
-                            CloseAll();
-                            closed?.Invoke();
-                        }
-                    });
-            });
+            Debug.LogError("Shop UI is missing. Dialogue Choices fallback has been removed.");
+            dialogueOpen = false;
+            LockPlayer(false);
+            closed?.Invoke();
         }
 
         public void RefreshTutorialObjective()
@@ -256,9 +194,13 @@ namespace World.NPC
             if (visuals == null)
                 visuals = library;
             if (canvas != null)
+            {
+                ConfigureSpeakerVisuals();
                 return;
+            }
 
             BuildInterface();
+            ConfigureSpeakerVisuals();
             BindRuntimeButtons();
             if (Application.isPlaying)
                 RefreshTutorialObjective();
@@ -297,15 +239,12 @@ namespace World.NPC
         {
             if (visuals == null)
                 visuals = library;
+            RemoveLegacyChoiceInterface(true);
             if (canvas != null && (npcDialogueGroup == null || playerDialogueGroup == null))
             {
                 if (dialogueRoot != null)
                     DestroyImmediate(dialogueRoot);
-                if (choiceRoot != null)
-                    DestroyImmediate(choiceRoot);
                 dialogueRoot = null;
-                choiceRoot = null;
-                choiceList = null;
             }
             BuildInterface();
             if (editorLayoutVersion < 2)
@@ -313,7 +252,7 @@ namespace World.NPC
                 ApplyCompactSpeakerLayout();
                 editorLayoutVersion = 2;
             }
-            DisablePreserveAspect();
+            ConfigureSpeakerVisuals();
             if (objectiveText != null)
                 objectiveText.gameObject.SetActive(false);
             if (dialogueRoot != null)
@@ -322,8 +261,6 @@ namespace World.NPC
                 npcDialogueGroup.SetActive(true);
             if (playerDialogueGroup != null)
                 playerDialogueGroup.SetActive(false);
-            if (choiceRoot != null)
-                choiceRoot.SetActive(false);
 
             // Keep the complete dialogue canvas hidden in the authored scene.
             // Ensure() activates it when an NPC interaction needs it at runtime.
@@ -358,10 +295,14 @@ namespace World.NPC
                     new Vector2(340f, 175f), new Vector2(54f, 44f), new Vector2(0.5f, 0.5f));
         }
 
-        private void DisablePreserveAspect()
+        private void ConfigureSpeakerVisuals()
         {
-            if (playerPortrait != null) playerPortrait.preserveAspect = false;
-            if (npcPortrait != null) npcPortrait.preserveAspect = false;
+            if (playerPortrait != null) playerPortrait.preserveAspect = true;
+            if (npcPortrait != null) npcPortrait.preserveAspect = true;
+            if (playerNamePlate != null) playerNamePlate.rectTransform.sizeDelta = SpeakerNamePlateSize;
+            if (npcNamePlate != null) npcNamePlate.rectTransform.sizeDelta = SpeakerNamePlateSize;
+            ConfigureSpeakerName(playerNameText);
+            ConfigureSpeakerName(npcNameText);
             if (playerDialogueBoxImage != null) playerDialogueBoxImage.preserveAspect = false;
             if (npcDialogueBoxImage != null) npcDialogueBoxImage.preserveAspect = false;
             if (playerNamePlate != null) playerNamePlate.preserveAspect = false;
@@ -374,6 +315,17 @@ namespace World.NPC
                 if (skip != null && skip.TryGetComponent(out Image skipImage))
                     skipImage.preserveAspect = false;
             }
+        }
+
+        private static void ConfigureSpeakerName(TextMeshProUGUI text)
+        {
+            if (text == null)
+                return;
+
+            text.color = SpeakerNameColor;
+            text.fontSize = 50f;
+            text.margin = new Vector4(20f, 10f, 20f, 10f);
+            text.alignment = TextAlignmentOptions.Center;
         }
 
         private void BuildInterface()
@@ -426,11 +378,7 @@ namespace World.NPC
                 playerDialogueGroup.SetActive(false);
             }
 
-            if (choiceRoot == null)
-                BuildChoiceInterface();
-
             dialogueRoot.SetActive(false);
-            choiceRoot.SetActive(false);
         }
 
         private void BuildNpcDialogueGroup()
@@ -455,7 +403,7 @@ namespace World.NPC
                 new Vector2(-250f, 360f), new Vector2(300f, 86f), new Vector2(0.5f, 0.5f));
             npcNameText = CreateText("NPC Name", npcNamePlate.transform, 28f, TextAlignmentOptions.Center);
             Stretch(npcNameText.rectTransform);
-            npcNameText.color = new Color(0.22f, 0.12f, 0.06f, 1f);
+            npcNameText.color = SpeakerNameColor;
 
             npcBodyText = CreateText("NPC Dialogue Text", npcDialogueGroup.transform, 31f, TextAlignmentOptions.TopLeft);
             SetRect(npcBodyText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
@@ -489,7 +437,7 @@ namespace World.NPC
                 new Vector2(250f, 360f), new Vector2(300f, 86f), new Vector2(0.5f, 0.5f));
             playerNameText = CreateText("Player Name", playerNamePlate.transform, 28f, TextAlignmentOptions.Center);
             Stretch(playerNameText.rectTransform);
-            playerNameText.color = new Color(0.22f, 0.12f, 0.06f, 1f);
+            playerNameText.color = SpeakerNameColor;
 
             playerBodyText = CreateText("Player Dialogue Text", playerDialogueGroup.transform, 31f, TextAlignmentOptions.TopLeft);
             SetRect(playerBodyText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
@@ -505,49 +453,6 @@ namespace World.NPC
         {
             text.color = new Color(0.19f, 0.1f, 0.055f, 1f);
             text.textWrappingMode = TextWrappingModes.Normal;
-        }
-
-        private void BuildChoiceInterface()
-        {
-            choiceRoot = new GameObject("Dialogue Choices", typeof(RectTransform));
-            choiceRoot.transform.SetParent(transform, false);
-            Stretch(choiceRoot.GetComponent<RectTransform>());
-
-            Image panel = CreateImage("Panel", choiceRoot.transform, visuals?.npcDialogueBox);
-            panel.type = Image.Type.Sliced;
-            SetRect(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(760f, 620f), new Vector2(0.5f, 0.5f));
-
-            choicePrompt = CreateText("Prompt", panel.transform, 30f, TextAlignmentOptions.TopLeft);
-            SetRect(choicePrompt.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -85f), new Vector2(620f, 130f), new Vector2(0.5f, 0.5f));
-            choicePrompt.color = new Color(0.2f, 0.1f, 0.05f, 1f);
-
-            GameObject list = new GameObject("Choice List", typeof(RectTransform), typeof(VerticalLayoutGroup));
-            list.transform.SetParent(panel.transform, false);
-            choiceList = list.GetComponent<RectTransform>();
-            SetRect(choiceList, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -65f), new Vector2(590f, 330f), new Vector2(0.5f, 0.5f));
-            VerticalLayoutGroup layout = list.GetComponent<VerticalLayoutGroup>();
-            layout.spacing = 12f;
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.childControlHeight = true;
-            layout.childForceExpandHeight = false;
-        }
-
-        private Button CreateChoiceButton(string label)
-        {
-            Image image = CreateImage("Choice " + label, choiceList, visuals?.namePlate);
-            image.type = Image.Type.Sliced;
-            LayoutElement element = image.gameObject.AddComponent<LayoutElement>();
-            element.preferredHeight = 62f;
-            element.minHeight = 62f;
-            Button button = image.gameObject.AddComponent<Button>();
-            TextMeshProUGUI text = CreateText("Label", image.transform, 25f, TextAlignmentOptions.Center);
-            Stretch(text.rectTransform);
-            text.color = new Color(0.2f, 0.1f, 0.05f, 1f);
-            text.text = label;
-            return button;
         }
 
         private void ShowLine()
@@ -632,7 +537,7 @@ namespace World.NPC
 
         private void Advance()
         {
-            if (!dialogueOpen || choiceRoot.activeSelf)
+            if (!dialogueOpen)
                 return;
             if (!lineComplete)
             {
@@ -678,7 +583,6 @@ namespace World.NPC
                 activeShop = null;
             }
             dialogueRoot.SetActive(false);
-            choiceRoot.SetActive(false);
             dialogueOpen = false;
             currentSequence = null;
             speakingPortrait = null;
@@ -699,10 +603,16 @@ namespace World.NPC
             frozenSelector?.SetFrozen(locked);
         }
 
-        private void ClearChoiceButtons()
+        private void RemoveLegacyChoiceInterface(bool immediate)
         {
-            for (int i = choiceList.childCount - 1; i >= 0; i--)
-                Destroy(choiceList.GetChild(i).gameObject);
+            Transform legacy = transform.Find("Dialogue Choices");
+            if (legacy == null)
+                return;
+
+            if (immediate || !Application.isPlaying)
+                DestroyImmediate(legacy.gameObject);
+            else
+                Destroy(legacy.gameObject);
         }
 
         private static Image CreateImage(string name, Transform parent, Sprite sprite)

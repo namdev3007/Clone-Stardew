@@ -26,7 +26,7 @@ public static class SetupNewGameNameUI
     private const string WorldNamePath = "Assets/ScriptableObjects/Variables/New Game Configuration/Farm Name.asset";
     private const string NewGameActionPath = "Assets/ScriptableObjects/Actions/Action New Game.asset";
     private const string SaveSlotPrefabPath = "Assets/Prefabs/User Interface/Start Menu/UI Save Slot Displayer.prefab";
-    private const int LayoutVersion = 3;
+    private const int LayoutVersion = 4;
 
     private static string VersionKey => "Meadom.NewGameNameUI." + Application.dataPath.GetHashCode();
 
@@ -110,26 +110,31 @@ public static class SetupNewGameNameUI
             background.preserveAspect = false;
             background.raycastTarget = true;
 
-            TextMeshProUGUI title = CreateText(screen.transform, "Title", font,
+            GameObject content = new GameObject("Content Center", typeof(RectTransform));
+            content.transform.SetParent(screen.transform, false);
+            SetRect(content.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f),
+                Vector2.zero, new Vector2(1300f, 400f));
+
+            TextMeshProUGUI title = CreateText(content.transform, "Title", font,
                 "Welcome to Meadow!", 58f, TextAlignmentOptions.Center);
-            SetRect(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 355f), new Vector2(1000f, 90f));
+            SetRect(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 110f), new Vector2(1000f, 90f));
 
-            TextMeshProUGUI prompt = CreateText(screen.transform, "Prompt", font,
+            TextMeshProUGUI prompt = CreateText(content.transform, "Prompt", font,
                 "What's your name?", 38f, TextAlignmentOptions.Center);
-            SetRect(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 265f), new Vector2(800f, 65f));
+            SetRect(prompt.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(800f, 65f));
 
-            TMP_InputField input = CreateInputField(screen.transform, font);
+            TMP_InputField input = CreateInputField(content.transform, font);
             SetRect(input.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f),
-                new Vector2(-170f, 135f), new Vector2(900f, 105f));
+                new Vector2(-170f, -100f), new Vector2(900f, 105f));
 
-            Button confirm = CreateConfirmButton(screen.transform,
+            Button confirm = CreateConfirmButton(content.transform,
                 confirmEnglishSprites[0], confirmEnglishSprites[1], confirmSprites[0], confirmSprites[1]);
             SetRect(confirm.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f),
-                new Vector2(465f, 135f), new Vector2(339f, 99f));
+                new Vector2(465f, -100f), new Vector2(339f, 99f));
 
             Button back = CreateBackButton(screen.transform, backSprite);
             SetRect(back.GetComponent<RectTransform>(), new Vector2(0f, 1f),
-                new Vector2(82f, -52f), new Vector2(132f, 66f));
+                new Vector2(176f, -60f), new Vector2(339f, 99f));
 
             NewGameNameScreen controller = screen.GetComponent<NewGameNameScreen>();
             controller.Configure(input, confirm, back, title, prompt,
@@ -215,7 +220,7 @@ public static class SetupNewGameNameUI
         root.transform.SetParent(parent, false);
         Image image = root.GetComponent<Image>();
         image.sprite = englishNormal;
-        image.preserveAspect = true;
+        image.preserveAspect = false;
         image.color = Color.white;
 
         Button button = root.GetComponent<Button>();
@@ -239,7 +244,7 @@ public static class SetupNewGameNameUI
         root.transform.SetParent(parent, false);
         Image image = root.GetComponent<Image>();
         image.sprite = sprite;
-        image.preserveAspect = true;
+        image.preserveAspect = false;
         image.color = Color.white;
         Button button = root.GetComponent<Button>();
         button.targetGraphic = image;

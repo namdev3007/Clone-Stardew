@@ -14,7 +14,7 @@ using UnityEngine;
 public static class ExportMapPropSprites
 {
     private const string VersionKey = "Meadom.MapProps.ExportedIndividualSprites";
-    private const int Version = 1;
+    private const int Version = 2;
 
     private sealed class ExportSet
     {
@@ -40,6 +40,16 @@ public static class ExportMapPropSprites
             source = "Assets/Sprites/props-items/ụ lúa.png",
             outputFolder = "Assets/Sprites/props-items/ụ lúa-tách riêng",
             names = new[] { "u-lua-vang", "u-lua-xanh" }
+        },
+        new ExportSet
+        {
+            source = "Assets/Sprites/cây trồng/cây lâu năm/banana/bananatree_200.png",
+            outputFolder = "Assets/Sprites/cây trồng/cây lâu năm/banana/bananatree_200-tách riêng",
+            names = new[]
+            {
+                "bananatree_200_0", "bananatree_200_1", "bananatree_200_2", "bananatree_200_3",
+                "bananatree_200_4", "bananatree_200_5", "bananatree_200_6", "bananatree_200_7"
+            }
         }
     };
 

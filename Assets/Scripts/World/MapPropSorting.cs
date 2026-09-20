@@ -1,5 +1,8 @@
 using System;
+using Utility;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 
 namespace World
 {
@@ -15,6 +18,12 @@ namespace World
         /// <summary>Lowest order on the Dynamic layer, below every Y-sorted object.</summary>
         public const int GrassSortingOrder = short.MinValue;
 
+        /// <summary>
+        /// Trellis frames are scenery the crops grow in front of: above grass,
+        /// but below every crop, prop and character that sorts by its Y.
+        /// </summary>
+        public const int TrellisBackgroundOrder = short.MinValue + 1000;
+
         /// <summary>Grass decoration sprites are exported as co-cao, co-nho-1, co-nho-2.</summary>
         public static bool IsGrass(Sprite sprite)
         {
@@ -25,6 +34,59 @@ namespace World
         public static int GetSortingOrder(Sprite sprite, float groundY)
         {
             return IsGrass(sprite) ? GrassSortingOrder : Mathf.RoundToInt(-groundY * 100f);
+        }
+    }
+
+    /// <summary>
+    /// Installs depth sorting on the two authored upright fence posts without
+    /// changing their SpriteRenderer Order in Layer. This also covers play mode
+    /// when the farm scene is loaded after Core 1.
+    /// </summary>
+    public static class AuthoredFenceDepthInstaller
+    {
+        private const string TargetName = "hàng rào_0 (1)";
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Initialize()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+                ConfigureScene(SceneManager.GetSceneAt(i));
+        }
+
+        private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            ConfigureScene(scene);
+        }
+
+        private static void ConfigureScene(Scene scene)
+        {
+            if (!scene.IsValid() || !scene.isLoaded)
+                return;
+
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                SpriteRenderer[] renderers = root.GetComponentsInChildren<SpriteRenderer>(true);
+                foreach (SpriteRenderer renderer in renderers)
+                {
+                    if (renderer == null || !string.Equals(renderer.gameObject.name, TargetName, StringComparison.Ordinal))
+                        continue;
+
+                    renderer.sortingLayerName = MapPropSorting.SortingLayer;
+
+                    SortingGroup group = renderer.GetComponent<SortingGroup>();
+                    if (group == null)
+                        group = renderer.gameObject.AddComponent<SortingGroup>();
+                    group.sortingLayerName = MapPropSorting.SortingLayer;
+
+                    HeightBasedSorting sorting = renderer.GetComponent<HeightBasedSorting>();
+                    if (sorting == null)
+                        sorting = renderer.gameObject.AddComponent<HeightBasedSorting>();
+                    sorting.ConfigureGroundAnchor(renderer);
+                }
+            }
         }
     }
 }

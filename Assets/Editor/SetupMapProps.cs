@@ -22,8 +22,8 @@ public static class SetupMapProps
     private const int LayoutVersion = 8;
     private const float PixelsPerUnit = 100f;
     private const float MapLeftWorld = -8.96f;
-    private const float MapTopWorld = 6.24f;
-    private const int ReferenceTopCrop = 96;
+    private const float MapTopWorld = 7.20f;
+    private const int ReferenceTopCrop = 0;
 
     private static readonly string[] PropTexturePaths =
     {
@@ -75,16 +75,9 @@ public static class SetupMapProps
         public int Height => Mathf.RoundToInt(sprite.rect.height * scale);
     }
 
-    [InitializeOnLoadMethod]
-    private static void InstallAfterCompile()
-    {
-        EditorApplication.delayCall += () =>
-        {
-            if (!EditorApplication.isPlayingOrWillChangePlaymode &&
-                EditorPrefs.GetInt(VersionKey, 0) < LayoutVersion)
-                Install(false);
-        };
-    }
+    // Superseded by MapReferencePropImporter, which places props from the 16x16
+    // anchor manifest. The menu item below stays available for comparison runs,
+    // but nothing is generated automatically any more.
 
     [MenuItem("Tools/Map/Place Props From Reference Layout")]
     private static void InstallFromMenu()
