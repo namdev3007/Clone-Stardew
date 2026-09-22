@@ -317,6 +317,130 @@ namespace World.Editor
         [MenuItem("Tools/Map/Add Grass Cluster And Sparse Forest Bushes")]
         public static void ApplyForestDetailsMenu() => ApplyForestDetailsToScene();
 
+        [MenuItem("Tools/Map/Add Trees Around Map Prop 019")]
+        public static void AddTreesAroundMapProp019Menu()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                Debug.LogWarning("Exit Play Mode before adding trees around Map Prop 019.");
+                return;
+            }
+
+            List<TextureImporter> importersToRestore = new List<TextureImporter>();
+            MakeReadable("Assets/Sprites/tileset/full trang tri map.png", importersToRestore);
+            Scene scene = SceneManager.GetSceneByPath(LevelFarmPath);
+            bool openedHere = !scene.IsValid() || !scene.isLoaded;
+            if (openedHere)
+                scene = EditorSceneManager.OpenScene(LevelFarmPath, OpenSceneMode.Additive);
+
+            try
+            {
+                GridManager manager = FindInScene<GridManager>(scene);
+                Transform generated = manager != null ? manager.transform.Find(GeneratedGroupName) : null;
+                if (generated == null)
+                {
+                    Debug.LogWarning("Cannot add trees: Map Props (Generated) is missing.");
+                    return;
+                }
+
+                MapRegionGeneratedProp[] existing = generated.GetComponentsInChildren<MapRegionGeneratedProp>(true);
+                if (!existing.Any(prop => prop.name == "Map Prop 019 - cay-vua-1" &&
+                                          prop.TargetCell == new Vector3Int(-29, 41, 0)))
+                {
+                    Debug.LogWarning("Cannot add trees: Map Prop 019 is not at cell (-29, 41).");
+                    return;
+                }
+
+                Tilemap[] tilemaps = manager.GetComponentsInChildren<Tilemap>(true);
+                Tilemap grass = tilemaps.FirstOrDefault(tilemap => tilemap.name == "Grass");
+                Tilemap layout = tilemaps.FirstOrDefault(tilemap => tilemap.name == "Map Layout Base");
+                Dictionary<Texture2D, Color32[]> pixelCache = new Dictionary<Texture2D, Color32[]>();
+                List<Vector3Int> treeCells = existing.Where(prop =>
+                    {
+                        string name = prop.GetComponentInChildren<SpriteRenderer>()?.sprite?.name ?? string.Empty;
+                        return name.StartsWith("cay-") || name.StartsWith("bananatree");
+                    }).Select(prop => prop.TargetCell).ToList();
+                HashSet<Vector3Int> occupiedByLargerProps = existing.Where(prop =>
+                    !(prop.GetComponentInChildren<SpriteRenderer>()?.sprite?.name ?? string.Empty)
+                    .StartsWith("co-")).Select(prop => prop.TargetCell).ToHashSet();
+
+                Sprite[] sprites =
+                {
+                    AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/props-items/trang trí map-tách riêng/cay-vua-1.png"),
+                    AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/props-items/trang trí map-tách riêng/cay-nho-1.png"),
+                    AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/props-items/trang trí map-tách riêng/cay-lon-1.png")
+                };
+                if (sprites.Any(sprite => sprite == null))
+                {
+                    Debug.LogWarning("Cannot add trees: one or more decoration sprites are missing.");
+                    return;
+                }
+
+                const string groupName = "Trees Around Map Prop 019 (Generated)";
+                Transform group = generated.Find(groupName);
+                if (group == null)
+                {
+                    GameObject container = new GameObject(groupName);
+                    Undo.RegisterCreatedObjectUndo(container, "Add trees around Map Prop 019");
+                    group = container.transform;
+                    group.SetParent(generated, false);
+                }
+
+                Material material = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
+                int left = 0;
+                int right = 0;
+                // Check both sides of the reference trunk, using nearby rows only
+                // when the centre row already contains a tree or another large prop.
+                for (int x = -47; x <= -11; x += 3)
+                {
+                    if (Mathf.Abs(x + 29) <= 2)
+                        continue;
+                    foreach (int y in new[] { 41, 42, 40 })
+                    {
+                        Vector3Int cell = new Vector3Int(x, y, 0);
+                        Vector3 worldAnchor = new Vector3(
+                            (cell.x + 0.5f) * CellWorldSize,
+                            cell.y * CellWorldSize + 0.02f, 0f);
+                        bool isGrass = grass != null && grass.HasTile(grass.WorldToCell(worldAnchor));
+                        if (!isGrass && layout != null)
+                            isGrass = IsMostlyGrassTile(layout.GetSprite(layout.WorldToCell(worldAnchor)), pixelCache);
+                        if (!isGrass)
+                            continue;
+                        if (occupiedByLargerProps.Contains(cell))
+                            continue;
+                        if (treeCells.Any(tree => Mathf.Abs(tree.x - x) <= 2 && Mathf.Abs(tree.y - y) <= 1))
+                            continue;
+
+                        int spriteIndex = Mathf.Abs(x / 3) % sprites.Length;
+                        AddForestDetail(group, sprites[spriteIndex], cell, "Top Tree Row", material, true);
+                        treeCells.Add(cell);
+                        occupiedByLargerProps.Add(cell);
+                        if (x < -29) left++; else right++;
+                        break;
+                    }
+                }
+
+                if (left + right > 0)
+                {
+                    EditorSceneManager.MarkSceneDirty(scene);
+                    EditorSceneManager.SaveScene(scene);
+                }
+                Debug.Log($"Map Prop 019: added {left} trees to the left and {right} to the right in Level_Farm.");
+            }
+            finally
+            {
+                if (openedHere && scene.IsValid() && scene.isLoaded)
+                    EditorSceneManager.CloseScene(scene, true);
+                foreach (TextureImporter importer in importersToRestore)
+                {
+                    if (importer == null)
+                        continue;
+                    importer.isReadable = false;
+                    importer.SaveAndReimport();
+                }
+            }
+        }
+
         private static bool ApplyForestDetailsToScene()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -930,6 +1054,9 @@ namespace World.Editor
                 EditorUtility.SetDirty(group);
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene);
+                // The generated root is replaced above, so restore the denser
+                // tree row whenever the reference props are rebuilt.
+                AddTreesAroundMapProp019Menu();
 
                 statusMessage = $"Đã trồng thành công {placedCount} cây & vật trang trí vào Level_Farm.unity!";
                 Debug.Log(statusMessage);
