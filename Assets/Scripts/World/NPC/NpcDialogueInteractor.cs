@@ -92,8 +92,14 @@ namespace World.NPC
         {
             if (role != NpcRole.Grandpa || DialogueUIController.IsDialogueOpen)
                 return;
-            if (TutorialProgressService.Instance.CompletedGrandpaLesson && FarmExpansionRuntime.QuestAvailable)
+
+            TutorialProgressService progress = TutorialProgressService.Instance;
+            bool tutorialReadyToTurnIn = progress.MetGrandpa && progress.NeedsGrandpaCompletionDialogue;
+            bool orchardReadyToUnlock = progress.CompletedGrandpaLesson && FarmExpansionRuntime.QuestAvailable;
+            if (tutorialReadyToTurnIn || orchardReadyToUnlock)
                 status?.ShowExclamation();
+            else if (status != null && status.State == NpcDialogueStatus.DialogueState.Exclamation)
+                status.ShowEllipsis();
         }
 
         public void StartInteraction()
@@ -113,22 +119,29 @@ namespace World.NPC
             TutorialProgressService progress = TutorialProgressService.Instance;
             if (!progress.MetGrandpa)
             {
-                Play(introduction, () =>
-                {
-                    AwardStarterItems();
-                    progress.MarkMetGrandpa();
-                    status?.ShowEllipsis();
-                });
+                // Accept the tutorial as soon as interaction starts. Closing the
+                // dialogue with ESC must not discard the quest and make every hoe
+                // action that follows invisible to tutorial progress.
+                AwardStarterItems();
+                progress.MarkMetGrandpa();
+                progress.SyncHoedCellsFromGrid(FindFirstObjectByType<GridManager>());
+                Play(introduction, () => status?.ShowEllipsis());
                 return;
             }
 
-            if (progress.HoeObjectiveComplete && !progress.CompletedGrandpaLesson)
+            // Reconcile old/current saves whose ground was tilled successfully but
+            // whose tutorial metadata missed the individual hoe callbacks.
+            progress.SyncHoedCellsFromGrid(FindFirstObjectByType<GridManager>());
+
+            if (progress.NeedsGrandpaCompletionDialogue)
             {
-                Play(completion, () =>
-                {
-                    progress.MarkGrandpaLessonComplete();
-                    status?.ShowEllipsis();
-                });
+                // Turning the objective in is the state transition. Commit it
+                // before playing the dialogue so pausing/quitting or skipping in
+                // the middle cannot make the same quest repeat after loading.
+                // The separate dialogue flag also migrates saves that were marked
+                // complete by the old flow before the completion sequence played.
+                progress.MarkGrandpaCompletionDialoguePlayed();
+                Play(completion, () => status?.ShowEllipsis());
                 return;
             }
 

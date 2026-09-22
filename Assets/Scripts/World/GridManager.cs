@@ -1094,6 +1094,12 @@ namespace World
 
         private void ApplyTile(Vector3Int location, string tilemapName, ScriptableTileBase tileBase, bool recordAction)
         {
+            if (tileBase == null)
+            {
+                Debug.LogWarning($"Cannot apply a null tile to '{tilemapName}' at {location}.");
+                return;
+            }
+
             Tilemap tileMap;
 
             tileMaps.TryGetValue(tilemapName, out tileMap);
@@ -1106,6 +1112,10 @@ namespace World
 
                 if (recordAction)
                 {
+                    // Only the latest state for one cell on one tilemap matters.
+                    // Repeated unlock/setup calls used to grow the save file with
+                    // hundreds of identical actions and replay all of them on load.
+                    RemoveRecordedTileAction(location, tilemapName);
                     saveData.actions.Add(new TileManipulationAction()
                     {
                         Guid = tileBase.GetGuid(),
@@ -1216,6 +1226,7 @@ namespace World
         public string OnSave()
         {
             saveData.version = 2;
+            CompactTileActions();
             saveData.farmPlots.Clear();
             foreach (FarmPlotData plot in farmPlots.Values)
             {
@@ -1253,17 +1264,27 @@ namespace World
                     saveData.version = 2;
                 }
 
+                CompactTileActions();
+
                 for (int i = 0; i < saveData.actions.Count; i++)
                 {
-                    ScriptableTileBase tileBase = ScriptableAssetDatabase.GetAsset(saveData.actions[i].Guid) as ScriptableTileBase;
+                    TileManipulationAction action = saveData.actions[i];
+                    ScriptableTileBase tileBase = ScriptableAssetDatabase.GetAsset(action.Guid) as ScriptableTileBase;
+
+                    // Farming tiles used by the rebuilt map live under Assets/Tiles.
+                    // Older builds did not register that folder in the scriptable
+                    // asset database, so keep the tile-map identity as a durable
+                    // fallback for existing save files.
+                    if (tileBase == null)
+                        tileBase = ResolveSavedTile(action.Tag);
 
                     if (tileBase != null)
                     {
-                        ApplyTile(saveData.actions[i].Location, saveData.actions[i].Tag, tileBase, false);
+                        ApplyTile(action.Location, action.Tag, tileBase, false);
                     }
                     else
                     {
-                        Debug.Log("Tried to obtain null tilebase data");
+                        Debug.LogWarning($"Could not restore tile '{action.Guid}' on tilemap '{action.Tag}' at {action.Location}.");
                     }
                 }
 
@@ -1304,6 +1325,44 @@ namespace World
         }
 
         public bool OnSaveCondition() => true;
+
+        private ScriptableTileBase ResolveSavedTile(string tilemapName)
+        {
+            if (dirtHoleTileMap != null && tilemapName == dirtHoleTileMap.name)
+                return dirtHoleTile;
+            if (wateredDirtTileMap != null && tilemapName == wateredDirtTileMap.name)
+                return wateredDirtTile;
+            if (dirtTileMap != null && tilemapName == dirtTileMap.name)
+                return dirtTile;
+
+            return null;
+        }
+
+        private void RemoveRecordedTileAction(Vector3Int location, string tilemapName)
+        {
+            for (int i = saveData.actions.Count - 1; i >= 0; i--)
+            {
+                TileManipulationAction action = saveData.actions[i];
+                if (action.Location == location && action.Tag == tilemapName)
+                    saveData.actions.RemoveAt(i);
+            }
+        }
+
+        private void CompactTileActions()
+        {
+            if (saveData.actions == null || saveData.actions.Count < 2)
+                return;
+
+            HashSet<string> occupiedCells = new HashSet<string>();
+            for (int i = saveData.actions.Count - 1; i >= 0; i--)
+            {
+                TileManipulationAction action = saveData.actions[i];
+                string key = action.Tag + "\u001f" + action.Location.x + "," +
+                             action.Location.y + "," + action.Location.z;
+                if (!occupiedCells.Add(key))
+                    saveData.actions.RemoveAt(i);
+            }
+        }
 
         #endregion
     }

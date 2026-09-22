@@ -12,6 +12,7 @@ namespace World
         [SerializeField] private string propId;
         [SerializeField] private Vector3Int cell;
         [SerializeField, Min(1)] private int requiredHits = 1;
+        [SerializeField] private bool requiresHomeOrchardUnlock = true;
         private SpecialCropProgressService progress;
 
         public static ClearableOrchardProp FindAtCell(Vector3Int targetCell)
@@ -28,10 +29,11 @@ namespace World
             return null;
         }
 
-        public static void AttachNamedRegionProps(MapRegionDefinition orchard,
-            SpecialCropProgressService progressService)
+        public static void AttachNamedRegionProps(MapRegionDefinition region,
+            SpecialCropProgressService progressService, bool requiresUnlock = true,
+            MapRegionDefinition excludedRegion = null, string idPrefix = "HomeOrchard")
         {
-            if (orchard == null || progressService == null)
+            if (region == null || progressService == null)
                 return;
             MapRegionGeneratedProp[] generated = Object.FindObjectsByType<MapRegionGeneratedProp>(
                 FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -41,25 +43,27 @@ namespace World
                 if (source == null)
                     continue;
                 Vector3Int placementCell = GetPlacementCell(source);
-                if (!orchard.Contains(placementCell))
+                if (!region.Contains(placementCell) ||
+                    (excludedRegion != null && excludedRegion.Contains(placementCell)))
                     continue;
                 SpriteRenderer renderer = source.GetComponentInChildren<SpriteRenderer>();
                 if (!IsRemovableVegetation(renderer?.sprite?.name ?? source.gameObject.name))
                     continue;
                 ClearableOrchardProp clearable = source.GetComponent<ClearableOrchardProp>() ??
                                                 source.gameObject.AddComponent<ClearableOrchardProp>();
-                clearable.Configure(source, placementCell, progressService);
+                clearable.Configure(source, placementCell, progressService, requiresUnlock, idPrefix);
             }
         }
 
         private void Configure(MapRegionGeneratedProp source, Vector3Int placementCell,
-            SpecialCropProgressService progressService)
+            SpecialCropProgressService progressService, bool requiresUnlock, string idPrefix)
         {
             cell = placementCell;
             SpriteRenderer renderer = GetComponentInChildren<SpriteRenderer>();
             string spriteName = renderer?.sprite?.name ?? gameObject.name;
             requiredHits = DetermineRequiredHits(spriteName, renderer);
-            propId = $"HomeOrchard/{cell.x}_{cell.y}/{spriteName}";
+            requiresHomeOrchardUnlock = requiresUnlock;
+            propId = $"{idPrefix}/{cell.x}_{cell.y}/{spriteName}";
             progress = progressService;
             Register();
             RefreshState();
@@ -85,7 +89,9 @@ namespace World
 
         public bool TryHit()
         {
-            if (progress == null || !progress.HomeOrchardUnlocked || progress.IsOrchardPropCleared(propId))
+            if (progress == null ||
+                (requiresHomeOrchardUnlock && !progress.HomeOrchardUnlocked) ||
+                progress.IsOrchardPropCleared(propId))
                 return false;
             bool accepted = progress.RecordOrchardPropHit(propId, requiredHits);
             if (accepted)

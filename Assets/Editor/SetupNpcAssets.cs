@@ -142,9 +142,10 @@ public static class SetupNpcAssets
         string instanceName, Vector3 offsetFromHouse)
     {
         Transform existing = FindTransform(scene, instanceName);
-        GameObject instance = existing != null
-            ? existing.gameObject
-            : PrefabUtility.InstantiatePrefab(prefab, scene) as GameObject;
+        if (existing != null)
+            return existing.gameObject;
+
+        GameObject instance = PrefabUtility.InstantiatePrefab(prefab, scene) as GameObject;
 
         if (instance == null)
             return null;

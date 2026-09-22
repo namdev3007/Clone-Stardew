@@ -107,12 +107,23 @@ namespace Main_Menu
             isInitialized = true;
             ResolveTextReferences();
 
+            // Scene UI is frequently restyled directly in the editor. Recover the
+            // reference by name so a replaced remove button never keeps a stale link.
+            if (buttonRequestRemove == null)
+            {
+                buttonRequestRemove = GetComponentsInChildren<Button>(true)
+                    .FirstOrDefault(button => button.name == "Button_RemoveSlot");
+            }
+
             if (characterImage != null)
             {
                 characterImage.preserveAspect = true;
             }
 
-            buttonRequestRemove.onClick.AddListener(RequestRemoveSlot);
+            if (buttonRequestRemove != null)
+                buttonRequestRemove.onClick.AddListener(RequestRemoveSlot);
+            else
+                Debug.LogError($"{name}: Button_RemoveSlot is missing.", this);
         }
 
         private void ResolveTextReferences()

@@ -1,10 +1,12 @@
 ﻿using System;
+using Referencing.Scriptable_Reference;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace User_Interface
 {
+    [DefaultExecutionOrder(-1300)]
     public class ConfirmationWindow : MonoBehaviour
     {
         private static readonly Color32 QuestionColor = new Color32(0xF7, 0xCA, 0x92, 0xFF);
@@ -32,6 +34,12 @@ namespace User_Interface
         [SerializeField]
         private Button buttonAccept;
 
+        [SerializeField]
+        private ScriptableReference sceneReference;
+
+        [SerializeField]
+        private bool hideSceneInstanceOnAwake;
+
         private System.Action actionYes;
         private System.Action actionNo;
 
@@ -47,9 +55,17 @@ namespace User_Interface
 
         private void Awake()
         {
+            if (hideSceneInstanceOnAwake && sceneReference != null)
+                sceneReference.Reference = gameObject;
+
             if (textQuestion != null)
                 textQuestion.color = QuestionColor;
             WireButtons();
+
+            // Remains visible while authoring the scene, but starts hidden in
+            // Play Mode. Configure() enables this same scene object when needed.
+            if (hideSceneInstanceOnAwake)
+                gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -125,9 +141,16 @@ namespace User_Interface
             textAnswerNo?.SetText(configuration.answerNo);
             textAccept?.SetText(configuration.answerYes);
 
-            buttonYes?.gameObject.SetActive(!configuration.acceptOnly);
+            buttonYes?.gameObject.SetActive(true);
             buttonNo?.gameObject.SetActive(!configuration.acceptOnly);
-            buttonAccept?.gameObject.SetActive(configuration.acceptOnly);
+            buttonAccept?.gameObject.SetActive(false);
+
+            // A one-button message reuses Button Yes instead of maintaining a
+            // third duplicate button in the hierarchy.
+            if (buttonYes != null && buttonYes.transform is RectTransform yesRect)
+                yesRect.anchoredPosition = configuration.acceptOnly
+                    ? new Vector2(0f, -27f)
+                    : new Vector2(-43f, -27f);
 
             if (configuration.actionYes != null)
             {

@@ -173,13 +173,13 @@ public static class SetupPauseGameMenuUI
         ConfigureLocalizedVisual(panel, "Button Quit To Menu",
             LoadSprite(ButtonSpriteFolder + "quit-to-menu.png", "quit-to-menu_0"),
             LoadSprite(ButtonSpriteFolder + "quit-to-menu.png", "quit-to-menu_1", false),
-            LoadSprite("Assets/Sprites/Buttons/tieng-viet/ve-menu-chinh.png", "ve-menu-chinh_0"),
-            LoadSprite("Assets/Sprites/Buttons/tieng-viet/ve-menu-chinh.png", "ve-menu-chinh_1", false), true);
+            LoadSprite("Assets/Sprites/Buttons/tieng-viet/ve-menu-chinh 1.png", "ve-menu-chinh 1_0"),
+            LoadSprite("Assets/Sprites/Buttons/tieng-viet/ve-menu-chinh 1.png", "ve-menu-chinh 1_1", false), true);
         ConfigureLocalizedVisual(panel, "Button Quit To Desktop",
             LoadSprite(ButtonSpriteFolder + "quit-to-desktop.png", "quit-to-desktop_0"),
             LoadSprite(ButtonSpriteFolder + "quit-to-desktop.png", "quit-to-desktop_1", false),
-            LoadSprite("Assets/Sprites/Buttons/tieng-viet/thoat-ra-man-hinh-chinh.png", "thoat-ra-man-hinh-chinh_0"),
-            LoadSprite("Assets/Sprites/Buttons/tieng-viet/thoat-ra-man-hinh-chinh.png", "thoat-ra-man-hinh-chinh_1", false), true);
+            LoadSprite("Assets/Sprites/Buttons/tieng-viet/thoat-ra-man-hinh-chinh 1.png", "thoat-ra-man-hinh-chinh 1_0"),
+            LoadSprite("Assets/Sprites/Buttons/tieng-viet/thoat-ra-man-hinh-chinh 1.png", "thoat-ra-man-hinh-chinh 1_1", false), true);
     }
 
     private static void ConfigureLocalizedVisual(Transform panel, string childName, Sprite englishNormal,

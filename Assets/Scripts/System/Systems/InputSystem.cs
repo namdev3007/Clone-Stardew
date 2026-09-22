@@ -175,7 +175,13 @@ namespace GameSystem.Systems
                         }
                     }
 
-                    if (Input.GetMouseButtonDown(0))
+                    // Some touchpads and mouse drivers report both buttons during a
+                    // secondary click. Give right click priority so it can never leak
+                    // into the normal tool-use event and start the hoe animation.
+                    bool secondaryClick = Input.GetMouseButtonDown(1);
+                    bool secondaryHeld = Input.GetMouseButton(1);
+
+                    if (!secondaryClick && !secondaryHeld && Input.GetMouseButtonDown(0))
                     {
                         if (!IsPointerBlockedByUI())
                         {
@@ -185,7 +191,8 @@ namespace GameSystem.Systems
                             nextHeldUseTime = UnityEngine.Time.unscaledTime + Mathf.Max(0.03f, heldUseInterval);
                         }
                     }
-                    else if (Input.GetMouseButton(0) && UnityEngine.Time.unscaledTime >= nextHeldUseTime)
+                    else if (!secondaryClick && !secondaryHeld && Input.GetMouseButton(0) &&
+                             UnityEngine.Time.unscaledTime >= nextHeldUseTime)
                     {
                         Vector2 worldPosition = camera.ScreenToWorldPoint(Input.mousePosition);
                         float minimumDistance = Mathf.Max(0.001f, heldUseMinWorldDistance);
@@ -201,14 +208,17 @@ namespace GameSystem.Systems
                         nextHeldUseTime = UnityEngine.Time.unscaledTime + Mathf.Max(0.03f, heldUseInterval);
                     }
 
-                    if (Input.GetMouseButtonDown(1))
+                    if (secondaryClick)
                     {
                         if (!IsPointerBlockedByUI())
                         {
                             if (playerInventory == null)
                             {
                                 GameObject player = GameObject.FindGameObjectWithTag("Player");
-                                playerInventory = player != null ? player.GetComponent<Item.Inventory.Inventory>() : null;
+                                playerInventory = player != null
+                                    ? player.GetComponent<Item.Inventory.Inventory>() ??
+                                      player.GetComponentInChildren<Item.Inventory.Inventory>(true)
+                                    : null;
                             }
 
                             if (playerInventory == null || !playerInventory.TryCancelSelectedHoeCell())

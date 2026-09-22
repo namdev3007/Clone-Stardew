@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: fdddf3d128e407144b5db1646ae140b8
+guid: abf9cd81e1118684ab2a9c9fb9508f91
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8406048428927889429
-    second: ve-menu-chinh_0
-  - first:
-      213: 2327797889756346128
-    second: ve-menu-chinh_1
+      213: 4561045725436792174
+    second: icon game_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ve-menu-chinh_0
+      name: icon game_0
       rect:
         serializedVersion: 2
-        x: 16
-        y: 16
-        width: 161
-        height: 33
+        x: 39
+        y: 31
+        width: 946
+        height: 1026
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,30 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5103afa428848a470800000000000000
-      internalID: 8406048428927889429
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: ve-menu-chinh_1
-      rect:
-        serializedVersion: 2
-        x: 191
-        y: 16
-        width: 161
-        height: 33
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 017b4d7f8dffd4020800000000000000
-      internalID: 2327797889756346128
+      spriteID: e6d49fcfbe61c4f30800000000000000
+      internalID: 4561045725436792174
       vertices: []
       indices: 
       edges: []
@@ -173,8 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ve-menu-chinh_0: 8406048428927889429
-      ve-menu-chinh_1: 2327797889756346128
+      icon game_0: 4561045725436792174
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

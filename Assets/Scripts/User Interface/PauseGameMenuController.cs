@@ -127,7 +127,7 @@ namespace User_Interface
 
         public void ApplySettingsAndReturn()
         {
-            PlayerPrefs.Save();
+            settingsRoot?.GetComponentInChildren<SettingsSoundUI>(true)?.SaveSettings();
             ShowPauseMenu();
         }
 

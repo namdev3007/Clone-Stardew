@@ -28,7 +28,7 @@ public static class SetupSettingsSoundUI
     private const string VietnameseButtonPath = "Assets/Sprites/Buttons/tieng-viet/tieng-viet.png";
     private const string EnglishButtonPath = "Assets/Sprites/Buttons/tieng-anh/english.png";
     private const string SoundActionPath = "Assets/Content/Actions/Action Play Sound.asset";
-    private const int LayoutVersion = 14;
+    private const int LayoutVersion = 15;
     /// <summary>
     /// The Sounds/Language/Controls panels are drawn slightly larger than their
     /// layout rect. Set here because the layout sync resets local scale.
@@ -158,10 +158,10 @@ public static class SetupSettingsSoundUI
             CreateSectionBackground(controlsSection, "Panel Controls Background", settingsBackground,
                 new Vector2(116f, -12f), new Vector2(100f, 128f));
 
-            Image settingsHeader = CreateHeader(panel, "Title Settings", settingsTitle, new Vector2(0f, 68f), new Vector2(84f, 16f));
-            Image soundsHeader = CreateHeader(soundsSection, "Title Sounds", soundsTitle, new Vector2(-116f, 48f), new Vector2(50f, 10f));
-            Image languageHeader = CreateHeader(languageSection, "Title Language", languageTitle, new Vector2(0f, 48f), new Vector2(62f, 10f));
-            Image controlsHeader = CreateHeader(controlsSection, "Title Controls", controlsTitle, new Vector2(116f, 48f), new Vector2(56f, 10f));
+            Image settingsHeader = CreateHeader(panel, "Title Settings", settingsTitle, new Vector2(0f, 68f), new Vector2(90f, 16f));
+            Image soundsHeader = CreateHeader(soundsSection, "Title Sounds", soundsTitle, new Vector2(-116f, 48f), new Vector2(90f, 16f));
+            Image languageHeader = CreateHeader(languageSection, "Title Language", languageTitle, new Vector2(0f, 48f), new Vector2(90f, 16f));
+            Image controlsHeader = CreateHeader(controlsSection, "Title Controls", controlsTitle, new Vector2(116f, 48f), new Vector2(90f, 16f));
             ConfigureLocalizedHeader(settingsHeader, settingsTitle, settingsTitleVi);
             ConfigureLocalizedHeader(soundsHeader, soundsTitle, soundsTitleVi);
             ConfigureLocalizedHeader(languageHeader, languageTitle, languageTitleVi);
@@ -276,7 +276,8 @@ public static class SetupSettingsSoundUI
         if (localized == null)
             localized = image.gameObject.AddComponent<LocalizedSpriteButton>();
         localized.Configure(image, null, english, null, vietnamese, null, false);
-        localized.ConfigureHeaderSizesIfUnset(image.rectTransform.sizeDelta);
+        Vector2 englishSize = image.rectTransform.sizeDelta;
+        localized.ConfigureSizes(englishSize, englishSize);
     }
 
     private static void ConfigureOpenSceneHeaders(Sprite background, Sprite settings, Sprite sounds,
@@ -314,10 +315,14 @@ public static class SetupSettingsSoundUI
             EnsureSceneBackground(controlsSection, "Panel Controls Background", background,
                 new Vector2(116f, -12f), new Vector2(100f, 128f));
 
-            ConfigureSceneHeader(panel, "Title Settings", settings, settingsVi);
-            ConfigureSceneHeader(soundsSection, "Title Sounds", sounds, soundsVi);
-            ConfigureSceneHeader(languageSection, "Title Language", language, languageVi);
-            ConfigureSceneHeader(controlsSection, "Title Controls", controls, controlsVi);
+            ConfigureSceneHeader(panel, "Title Settings", settings, settingsVi,
+                new Vector2(0f, 68f), new Vector2(90f, 16f));
+            ConfigureSceneHeader(soundsSection, "Title Sounds", sounds, soundsVi,
+                new Vector2(-116f, 48f), new Vector2(90f, 16f));
+            ConfigureSceneHeader(languageSection, "Title Language", language, languageVi,
+                new Vector2(0f, 48f), new Vector2(90f, 16f));
+            ConfigureSceneHeader(controlsSection, "Title Controls", controls, controlsVi,
+                new Vector2(116f, 48f), new Vector2(90f, 16f));
             Transform backButton = panel.parent != null ? panel.parent.Find("Button Back To Pause") : null;
             if (backButton != null)
                 backButton.gameObject.SetActive(true);
@@ -338,11 +343,15 @@ public static class SetupSettingsSoundUI
             EditorSceneManager.SaveOpenScenes();
     }
 
-    private static void ConfigureSceneHeader(Transform panel, string name, Sprite english, Sprite vietnamese)
+    private static void ConfigureSceneHeader(Transform panel, string name, Sprite english, Sprite vietnamese,
+        Vector2 position, Vector2 size)
     {
         Transform target = panel.Find(name);
         if (target != null)
+        {
+            SetRect((RectTransform)target, Vector2.one * 0.5f, position, size);
             ConfigureLocalizedHeader(target.GetComponent<Image>(), english, vietnamese);
+        }
     }
 
     private static void EnsureSceneLanguageButton(Transform parent, string name, Sprite sprite, Vector2 position)
@@ -376,8 +385,8 @@ public static class SetupSettingsSoundUI
         if (section == null)
         {
             section = CreateRect(panel, sectionName);
-            SetStretch((RectTransform)section, Vector2.zero, Vector2.zero);
         }
+        SetStretch((RectTransform)section, Vector2.zero, Vector2.zero);
 
         foreach (string objectName in childNames)
         {
@@ -447,11 +456,11 @@ public static class SetupSettingsSoundUI
         CreateLanguageButton(languageSection, "Language Vietnamese", vietnameseButton, new Vector2(0f, 13f));
         CreateLanguageButton(languageSection, "Language English", englishButton, new Vector2(0f, -30f));
 
-        const string controls = "W/A/S/D   MOVEMENT\n1/2/3/4/5   SLOTS\nB   BAG\nESC   PAUSE / BACK\nO   INTERACT";
-        TMP_Text controlText = CreateText(panel, "Controls List", controls, new Vector2(116f, -10f),
-            new Vector2(94f, 102f), 7.2f);
+        const string controls = "W/A/S/D   MOVEMENT\n1/2/3/4/5   SLOTS\nB   BAG\nESC   PAUSE / BACK\nO   INTERACT\nLEFT MOUSE   USE TOOL\nRIGHT MOUSE   INTERACT / CANCEL SOIL";
+        TMP_Text controlText = CreateText(panel, "Controls List", controls, new Vector2(116f, -13f),
+            new Vector2(96f, 108f), 5.9f);
         controlText.alignment = TextAlignmentOptions.MidlineLeft;
-        controlText.lineSpacing = 7f;
+        controlText.lineSpacing = 3f;
     }
 
     private static void CreateLanguageButton(Transform parent, string name, Sprite sprite, Vector2 position)

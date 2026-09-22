@@ -54,7 +54,10 @@ namespace Referencing.Scriptable_Assets.Editor
 
                 EditorUtility.SetDirty(dataBase);
 
-                string[] lookPath = new string[] { "Assets/ScriptableObjects" };
+                // Referenceable tiles are authored outside ScriptableObjects. They
+                // must be included as well; otherwise GridManager can save their
+                // GUIDs but cannot resolve them when a slot is loaded again.
+                string[] lookPath = new string[] { "Assets/ScriptableObjects", "Assets/Tiles" };
                 string[] itemGuidPaths = AssetDatabase.FindAssets("t:ScriptableObject", lookPath);
 
                 for (int i = 0; i < itemGuidPaths.Length; i++)
@@ -117,7 +120,7 @@ namespace Referencing.Scriptable_Assets.Editor
         {
             cache = new Dictionary<string, string>();
 
-            string[] lookPath = new string[] { "Assets/ScriptableObjects" };
+            string[] lookPath = new string[] { "Assets/ScriptableObjects", "Assets/Tiles" };
             string[] itemGuidPaths = AssetDatabase.FindAssets("t:ScriptableObject", lookPath);
 
             for (int i = 0; i < itemGuidPaths.Length; i++)

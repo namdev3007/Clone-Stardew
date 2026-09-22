@@ -74,6 +74,8 @@ namespace World.NPC
         private RectTransform bagScrollViewport;
         private RectTransform bagScrollContent;
         private SlotView bagSlotTemplate;
+        private Image draggedBagIcon;
+        private int draggedBagIndex = -1;
 
         public bool IsOpen => gameObject.activeSelf;
         public static bool AnyOpen => openWindow != null && openWindow.gameObject.activeSelf;
@@ -122,6 +124,7 @@ namespace World.NPC
 
         private void OnDisable()
         {
+            ClearDraggedBagIcon();
             UnsubscribeFromInventorySize();
             if (openWindow == this)
                 openWindow = null;
@@ -321,12 +324,104 @@ namespace World.NPC
                 RectTransform rect = (RectTransform)view.button.transform;
                 rect.localScale = Vector3.one;
                 rect.sizeDelta = new Vector2(BagSlotSize, BagSlotSize);
+                BindBagDrag(view, i);
             }
 
             int rowCount = Mathf.Max(1, Mathf.CeilToInt(requiredSlots / (float)BagSlotsPerRow));
             float contentHeight = rowCount * BagSlotSize + Mathf.Max(0, rowCount - 1) * BagSlotSpacing;
             bagScrollContent.sizeDelta = new Vector2(0f, contentHeight);
             LayoutRebuilder.ForceRebuildLayoutImmediate(bagScrollContent);
+        }
+
+        private void BindBagDrag(SlotView view, int index)
+        {
+            if (view?.button == null)
+                return;
+            ShopBagSlotDragHandler handler = view.button.GetComponent<ShopBagSlotDragHandler>() ??
+                                             view.button.gameObject.AddComponent<ShopBagSlotDragHandler>();
+            handler.Configure(this, index);
+        }
+
+        internal void BeginBagDrag(int index, PointerEventData data)
+        {
+            if (!openedExplicitly || playerInventory?.GetItem(FirstVisibleInventoryIndex + index)?.Data?.Icon == null)
+                return;
+
+            ClearDraggedBagIcon();
+            draggedBagIndex = index;
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+                return;
+
+            GameObject preview = new GameObject("Dragged Shop Bag Item", typeof(RectTransform),
+                typeof(CanvasRenderer), typeof(Image));
+            preview.transform.SetParent(canvas.rootCanvas.transform, false);
+            preview.transform.SetAsLastSibling();
+            draggedBagIcon = preview.GetComponent<Image>();
+            draggedBagIcon.sprite = playerInventory.GetItem(FirstVisibleInventoryIndex + index).Data.Icon;
+            draggedBagIcon.preserveAspect = true;
+            draggedBagIcon.raycastTarget = false;
+            RectTransform sourceRect = bagSlots[index].icon != null
+                ? bagSlots[index].icon.rectTransform : null;
+            Vector2 sourceSize = sourceRect != null ? sourceRect.rect.size : new Vector2(BagSlotSize, BagSlotSize);
+            draggedBagIcon.rectTransform.sizeDelta = sourceSize * 2f;
+            UpdateBagDrag(data);
+        }
+
+        internal void UpdateBagDrag(PointerEventData data)
+        {
+            if (draggedBagIcon == null)
+                return;
+            Canvas canvas = draggedBagIcon.GetComponentInParent<Canvas>();
+            RectTransform canvasRect = canvas.transform as RectTransform;
+            UnityEngine.Camera camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay
+                ? null : canvas.worldCamera;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    canvasRect, data.position, camera, out Vector2 localPoint))
+                draggedBagIcon.rectTransform.anchoredPosition = localPoint;
+        }
+
+        internal void EndBagDrag(PointerEventData data)
+        {
+            int source = draggedBagIndex;
+            ClearDraggedBagIcon();
+            if (source < 0 || playerInventory == null || EventSystem.current == null)
+                return;
+
+            List<RaycastResult> hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(data, hits);
+            foreach (RaycastResult hit in hits)
+            {
+                Button target = hit.gameObject.GetComponentInParent<Button>();
+                if (target == null)
+                    continue;
+                for (int destination = 0; destination < bagSlots.Length; destination++)
+                {
+                    if (bagSlots[destination]?.button != target || destination == source)
+                        continue;
+                    InventoryItem sourceItem = playerInventory.GetItem(FirstVisibleInventoryIndex + source);
+                    InventoryItem targetItem = playerInventory.GetItem(FirstVisibleInventoryIndex + destination);
+                    bool mergesStack = sourceItem != null && targetItem != null &&
+                        sourceItem.Data == targetItem.Data && sourceItem.Data.CanStack;
+                    playerInventory.MoveItem(FirstVisibleInventoryIndex + source,
+                        FirstVisibleInventoryIndex + destination);
+                    if (selectedBagIndex == source)
+                        selectedBagIndex = destination;
+                    else if (selectedBagIndex == destination && !mergesStack)
+                        selectedBagIndex = source;
+                    RefreshBagSlots();
+                    RefreshSelection();
+                    return;
+                }
+            }
+        }
+
+        private void ClearDraggedBagIcon()
+        {
+            if (draggedBagIcon != null)
+                Destroy(draggedBagIcon.gameObject);
+            draggedBagIcon = null;
+            draggedBagIndex = -1;
         }
 
         private void EnsureBagScrollHierarchy(IReadOnlyList<SlotView> views)

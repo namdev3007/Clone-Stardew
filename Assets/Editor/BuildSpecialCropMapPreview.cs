@@ -182,29 +182,13 @@ public static class BuildSpecialCropMapPreview
         GameObject root = new GameObject(NamedContentRootName);
         SceneManager.MoveGameObjectToScene(root, scene);
 
-        MoveNpcToNamedRegion(scene, collection, grid, "\u00f4ng n\u1ed9i \u0111\u1ee9ng", "NPC Old Man Test");
-        MoveNpcToNamedRegion(scene, collection, grid, "\u00f4ng b\u00e1n h\u1ea1t gi\u1ed1ng", "NPC Seed Seller Test");
+        // NPC transforms are authored directly in Level_Farm. Rebuilding map previews must
+        // not move them back to old Map Region coordinates after the map has been edited.
         // Do not rebuild decorative banana trees. Banana crops planted by the player are
         // managed by the farming system and are not part of this Edit Mode preview root.
         // The dense forest region is intentionally left empty (trees removed).
         // Wells are no longer generated here; they are placed by hand in the scene.
         EditorUtility.SetDirty(root);
-    }
-
-    private static void MoveNpcToNamedRegion(Scene scene, MapRegionCollection collection, GridManager grid,
-        string regionToken, string npcName)
-    {
-        MapRegionDefinition region = FindRegion(collection, regionToken);
-        Transform npc = FindTransform(scene, npcName);
-        if (region == null || npc == null)
-            return;
-
-        Vector3 position = grid.GetWorldLocation(region.MinCell);
-        position.z = 0f;
-        npc.position = position;
-        npc.rotation = Quaternion.identity;
-        npc.localScale = Vector3.one;
-        EditorUtility.SetDirty(npc);
     }
 
     private static void ConfigureAuthoredCucumberState(Scene scene, bool repaired)

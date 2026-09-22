@@ -96,13 +96,16 @@ namespace User_Interface
             }
 
             Vector2 languageSize = vietnamese ? vietnameseSize : englishSize;
-            if (!useNativeSize && languageSize.x > 0f && languageSize.y > 0f &&
+            bool preserveAuthoredOptionsLayout = IsInsideOptionsWindow();
+            if (!preserveAuthoredOptionsLayout && !useNativeSize &&
+                languageSize.x > 0f && languageSize.y > 0f &&
                 targetImage.rectTransform != null)
             {
                 targetImage.rectTransform.sizeDelta = languageSize;
             }
 
-            if (useNativeSize && normal != null && targetImage.rectTransform != null)
+            if (!preserveAuthoredOptionsLayout && useNativeSize && normal != null &&
+                targetImage.rectTransform != null)
             {
                 targetImage.rectTransform.sizeDelta = normal.rect.size;
                 RectTransform indicator = transform.Find("Hover Indicator") as RectTransform;
@@ -110,6 +113,16 @@ namespace User_Interface
                     indicator.anchoredPosition = new Vector2(
                         -(targetImage.rectTransform.sizeDelta.x * 0.5f + indicator.sizeDelta.x * 0.5f + 4f), 0f);
             }
+        }
+
+        private bool IsInsideOptionsWindow()
+        {
+            for (Transform current = transform; current != null; current = current.parent)
+            {
+                if (current.name == "Window_Options")
+                    return true;
+            }
+            return false;
         }
     }
 }

@@ -17,8 +17,7 @@ public static class SetupNewGameNameUI
 {
     private const string ScenePath = "Assets/MainScenes/StartMenu 1.unity";
     private const string ScreenName = "Screen _ New Game Name";
-    private const string ConfirmSpritePath = "Assets/Sprites/Buttons/tieng-viet/xac-nhan.png";
-    private const string ConfirmEnglishSpritePath = "Assets/Sprites/Buttons/tieng-anh/ok.png";
+    private const string ConfirmSpritePath = "Assets/Sprites/Buttons/tieng-anh/ok 1.png";
     private const string BackSpritePath = "Assets/Sprites/Buttons/other-button/back-lùi về.png";
     private const string BackgroundSpritePath = "Assets/Sprites/Background/screen-home.png";
     private const string FontPath = "Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset";
@@ -65,16 +64,12 @@ public static class SetupNewGameNameUI
                 .OfType<Sprite>()
                 .OrderBy(sprite => sprite.name)
                 .ToArray();
-            Sprite[] confirmEnglishSprites = AssetDatabase.LoadAllAssetsAtPath(ConfirmEnglishSpritePath)
-                .OfType<Sprite>()
-                .OrderBy(sprite => sprite.name)
-                .ToArray();
             Sprite backSprite = AssetDatabase.LoadAllAssetsAtPath(BackSpritePath).OfType<Sprite>().FirstOrDefault();
             Sprite backgroundSprite = AssetDatabase.LoadAllAssetsAtPath(BackgroundSpritePath).OfType<Sprite>().FirstOrDefault();
             StringVariable playerName = AssetDatabase.LoadAssetAtPath<StringVariable>(PlayerNamePath);
             StringVariable worldName = AssetDatabase.LoadAssetAtPath<StringVariable>(WorldNamePath);
             ActionNewGame newGameAction = AssetDatabase.LoadAssetAtPath<ActionNewGame>(NewGameActionPath);
-            if (font == null || confirmSprites.Length < 2 || confirmEnglishSprites.Length < 2 ||
+            if (font == null || confirmSprites.Length < 2 ||
                 backSprite == null || backgroundSprite == null || playerName == null || worldName == null ||
                 newGameAction == null)
             {
@@ -127,8 +122,7 @@ public static class SetupNewGameNameUI
             SetRect(input.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f),
                 new Vector2(-170f, -100f), new Vector2(900f, 105f));
 
-            Button confirm = CreateConfirmButton(content.transform,
-                confirmEnglishSprites[0], confirmEnglishSprites[1], confirmSprites[0], confirmSprites[1]);
+            Button confirm = CreateConfirmButton(content.transform, confirmSprites[0], confirmSprites[1]);
             SetRect(confirm.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f),
                 new Vector2(465f, -100f), new Vector2(339f, 99f));
 
@@ -212,14 +206,13 @@ public static class SetupNewGameNameUI
         return input;
     }
 
-    private static Button CreateConfirmButton(Transform parent, Sprite englishNormal, Sprite englishPressed,
-        Sprite vietnameseNormal, Sprite vietnamesePressed)
+    private static Button CreateConfirmButton(Transform parent, Sprite normal, Sprite pressed)
     {
         GameObject root = new GameObject("Button Confirm",
             typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
         root.transform.SetParent(parent, false);
         Image image = root.GetComponent<Image>();
-        image.sprite = englishNormal;
+        image.sprite = normal;
         image.preserveAspect = false;
         image.color = Color.white;
 
@@ -227,13 +220,13 @@ public static class SetupNewGameNameUI
         button.targetGraphic = image;
         button.transition = Selectable.Transition.SpriteSwap;
         SpriteState state = button.spriteState;
-        state.pressedSprite = englishPressed;
-        state.selectedSprite = englishNormal;
-        state.highlightedSprite = englishNormal;
-        state.disabledSprite = englishNormal;
+        state.pressedSprite = pressed;
+        state.selectedSprite = normal;
+        state.highlightedSprite = normal;
+        state.disabledSprite = normal;
         button.spriteState = state;
         root.AddComponent<LocalizedSpriteButton>().Configure(image, button,
-            englishNormal, englishPressed, vietnameseNormal, vietnamesePressed, false);
+            normal, pressed, normal, pressed, false);
         return button;
     }
 

@@ -100,6 +100,8 @@ namespace World.Editor
         private const int TargetLayoutVersion = 13;
         private const string NamedForestGrassVersionKey = "Meadom.NamedForestGrass.Version";
         private const int NamedForestGrassTargetVersion = 1;
+        private const string ForestDetailsVersionKey = "Meadom.ForestDetails.Version";
+        private const int ForestDetailsTargetVersion = 2;
 
         [InitializeOnLoadMethod]
         private static void AutoRunOnCompile()
@@ -139,6 +141,39 @@ namespace World.Editor
 
                 ExecutePendingNamedForestGrass();
             };
+        }
+
+        [InitializeOnLoadMethod]
+        private static void AutoApplyForestDetailsOnCompile()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                if (EditorPrefs.GetInt(ForestDetailsVersionKey, 0) >= ForestDetailsTargetVersion)
+                    return;
+                if (EditorApplication.isPlayingOrWillChangePlaymode)
+                {
+                    EditorApplication.playModeStateChanged -= ApplyPendingForestDetailsAfterPlayMode;
+                    EditorApplication.playModeStateChanged += ApplyPendingForestDetailsAfterPlayMode;
+                    return;
+                }
+                ExecutePendingForestDetails();
+            };
+        }
+
+        private static void ApplyPendingForestDetailsAfterPlayMode(PlayModeStateChange state)
+        {
+            if (state != PlayModeStateChange.EnteredEditMode)
+                return;
+            EditorApplication.playModeStateChanged -= ApplyPendingForestDetailsAfterPlayMode;
+            EditorApplication.delayCall += ExecutePendingForestDetails;
+        }
+
+        private static void ExecutePendingForestDetails()
+        {
+            if (EditorPrefs.GetInt(ForestDetailsVersionKey, 0) >= ForestDetailsTargetVersion)
+                return;
+            if (ApplyForestDetailsToScene())
+                EditorPrefs.SetInt(ForestDetailsVersionKey, ForestDetailsTargetVersion);
         }
 
         private static void ApplyPendingNamedForestGrassAfterPlayMode(PlayModeStateChange state)
@@ -277,6 +312,198 @@ namespace World.Editor
                     importer.SaveAndReimport();
                 }
             }
+        }
+
+        [MenuItem("Tools/Map/Add Grass Cluster And Sparse Forest Bushes")]
+        public static void ApplyForestDetailsMenu() => ApplyForestDetailsToScene();
+
+        private static bool ApplyForestDetailsToScene()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                return false;
+
+            Scene scene = SceneManager.GetSceneByPath(LevelFarmPath);
+            bool openedHere = !scene.IsValid() || !scene.isLoaded;
+            if (openedHere)
+                scene = EditorSceneManager.OpenScene(LevelFarmPath, OpenSceneMode.Additive);
+
+            try
+            {
+                GridManager manager = FindInScene<GridManager>(scene);
+                Transform generated = manager != null ? manager.transform.Find(GeneratedGroupName) : null;
+                if (generated == null)
+                {
+                    Debug.LogWarning("Cannot add forest details: Map Props (Generated) is missing.");
+                    return false;
+                }
+
+                int added = AddForestDetails(generated, LoadGrassCellsFromLevelFarm());
+                EditorSceneManager.MarkSceneDirty(scene);
+                EditorSceneManager.SaveScene(scene);
+                Debug.Log($"Added {added} grass and bush props to Level_Farm.");
+                return true;
+            }
+            finally
+            {
+                if (openedHere && scene.IsValid() && scene.isLoaded)
+                    EditorSceneManager.CloseScene(scene, true);
+            }
+        }
+
+        private static int AddForestDetails(Transform generated, HashSet<Vector3Int> grassCells)
+        {
+            MapRegionCollection regions = AssetDatabase.LoadAssetAtPath<MapRegionCollection>(RegionCollectionPath);
+            MapRegionDefinition sparseForest = regions?.Regions.FirstOrDefault(IsSparseForestRegion);
+            Sprite bush = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/Sprites/props-items/trang trí map-tách riêng/bui-cay.png");
+            Sprite tallGrass = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/Sprites/props-items/trang trí map-tách riêng/co-cao.png");
+            Sprite shortGrass = AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/Sprites/props-items/trang trí map-tách riêng/co-nho-1.png");
+            if (sparseForest == null || bush == null || tallGrass == null || shortGrass == null || grassCells == null)
+                return 0;
+
+            const string groupName = "Sparse Forest Details (Generated)";
+            Transform previous = generated.Find(groupName);
+            if (previous != null)
+            {
+                if (IsSelectionInside(Selection.activeObject, previous))
+                    Selection.activeObject = null;
+                Undo.DestroyObjectImmediate(previous.gameObject);
+            }
+
+            HashSet<Vector3Int> occupied = new HashSet<Vector3Int>();
+            HashSet<Vector3Int> occupiedByLargerProps = new HashSet<Vector3Int>();
+            List<Vector3Int> treeCells = new List<Vector3Int>();
+            List<Vector3Int> bushCells = new List<Vector3Int>();
+            foreach (MapRegionGeneratedProp prop in generated.GetComponentsInChildren<MapRegionGeneratedProp>(true))
+            {
+                Vector3Int cell = prop.TargetCell;
+                occupied.Add(cell);
+                string spriteName = prop.GetComponentInChildren<SpriteRenderer>()?.sprite?.name ?? string.Empty;
+                if (spriteName.StartsWith("cay-") || spriteName.StartsWith("bananatree"))
+                    treeCells.Add(cell);
+                if (!spriteName.StartsWith("co-"))
+                    occupiedByLargerProps.Add(cell);
+                if (spriteName == "bui-cay")
+                    bushCells.Add(cell);
+            }
+
+            GameObject group = new GameObject(groupName);
+            Undo.RegisterCreatedObjectUndo(group, "Add sparse forest details");
+            group.transform.SetParent(generated, false);
+            Material material = AssetDatabase.GetBuiltinExtraResource<Material>("Sprites-Default.mat");
+            int added = 0;
+
+            // A few bushes across the named sparse forest. Keep space around tree
+            // trunks and other bushes so the forest remains noticeably sparse.
+            for (int y = sparseForest.MinCell.y; y <= sparseForest.MaxCell.y; y++)
+            for (int x = sparseForest.MinCell.x; x <= sparseForest.MaxCell.x; x++)
+            {
+                Vector3Int cell = new Vector3Int(x, y, 0);
+                if (!grassCells.Contains(cell) || occupied.Contains(cell) ||
+                    ForestDetailHash(x, y, 0x42555348u) % 100u >= 6u ||
+                    treeCells.Any(tree => Mathf.Abs(tree.x - x) <= 2 && Mathf.Abs(tree.y - y) <= 2) ||
+                    bushCells.Any(other => Mathf.Abs(other.x - x) <= 2 && Mathf.Abs(other.y - y) <= 2))
+                    continue;
+
+                AddForestDetail(group.transform, bush, cell, "Sparse Forest Bush", material);
+                bushCells.Add(cell);
+                occupied.Add(cell);
+                added++;
+            }
+
+            // Fill a compact patch around Forest Grass 27,32 while retaining the
+            // existing tall grass there. Only paint actual grass-ground cells.
+            for (int y = 27; y <= 37; y++)
+            for (int x = 22; x <= 32; x++)
+            {
+                Vector3Int cell = new Vector3Int(x, y, 0);
+                int distance = Mathf.Abs(x - 27) + Mathf.Abs(y - 32);
+                int threshold = distance <= 3 ? 83 : distance <= 6 ? 60 : 36;
+                uint hash = ForestDetailHash(x, y, 0x47524153u);
+                if (!sparseForest.Contains(cell) || !grassCells.Contains(cell) || occupied.Contains(cell) ||
+                    hash % 100u >= threshold ||
+                    treeCells.Any(tree => Mathf.Abs(tree.x - x) <= 1 && Mathf.Abs(tree.y - y) <= 1))
+                    continue;
+
+                Sprite sprite = hash % 4u == 0u ? shortGrass : tallGrass;
+                AddForestDetail(group.transform, sprite, cell, "Forest Grass Cluster", material);
+                occupied.Add(cell);
+                added++;
+            }
+
+            // Map Prop 019 is the authored tree at (-29,41). Thicken its row
+            // horizontally in both directions without changing the reference tree.
+            if (generated.GetComponentsInChildren<MapRegionGeneratedProp>(true).Any(prop =>
+                    prop.name == "Map Prop 019 - cay-vua-1" &&
+                    prop.TargetCell == new Vector3Int(-29, 41, 0)))
+            {
+                Sprite[] rowTrees =
+                {
+                    AssetDatabase.LoadAssetAtPath<Sprite>(
+                        "Assets/Sprites/props-items/trang trí map-tách riêng/cay-vua-1.png"),
+                    AssetDatabase.LoadAssetAtPath<Sprite>(
+                        "Assets/Sprites/props-items/trang trí map-tách riêng/cay-nho-1.png"),
+                    AssetDatabase.LoadAssetAtPath<Sprite>(
+                        "Assets/Sprites/props-items/trang trí map-tách riêng/cay-lon-1.png")
+                };
+                for (int x = -50; x <= 1; x += 3)
+                {
+                    Vector3Int cell = new Vector3Int(x, 41, 0);
+                    if (!grassCells.Contains(cell) || occupiedByLargerProps.Contains(cell) ||
+                        treeCells.Any(tree => Mathf.Abs(tree.x - x) <= 2 && Mathf.Abs(tree.y - 41) <= 1))
+                        continue;
+                    Sprite sprite = rowTrees[(x + 50) / 3 % rowTrees.Length];
+                    if (sprite == null)
+                        continue;
+                    AddForestDetail(group.transform, sprite, cell, "Top Tree Row", material, true);
+                    treeCells.Add(cell);
+                    occupiedByLargerProps.Add(cell);
+                    added++;
+                }
+            }
+
+            return added;
+        }
+
+        private static uint ForestDetailHash(int x, int y, uint salt)
+        {
+            uint hash = unchecked((uint)(x * 73856093 ^ y * 19349663)) ^ salt;
+            hash ^= hash >> 16;
+            hash *= 0x7feb352du;
+            hash ^= hash >> 15;
+            return hash;
+        }
+
+        private static void AddForestDetail(Transform parent, Sprite sprite, Vector3Int cell,
+            string regionName, Material material, bool addCollider = false)
+        {
+            Vector3 anchor = new Vector3(
+                (cell.x + 0.5f) * CellWorldSize,
+                cell.y * CellWorldSize + 0.02f, 0f);
+            GameObject prop = new GameObject($"{regionName} {cell.x},{cell.y} - {sprite.name}");
+            prop.transform.SetParent(parent, false);
+            prop.transform.position = anchor - new Vector3(sprite.bounds.center.x, sprite.bounds.min.y, 0f);
+            SpriteRenderer renderer = prop.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.sortingLayerName = "Dynamic";
+            renderer.sortingOrder = MapPropSorting.GetSortingOrder(sprite, anchor.y);
+            if (material != null)
+                renderer.sharedMaterial = material;
+
+            if (addCollider)
+            {
+                Bounds bounds = sprite.bounds;
+                BoxCollider2D collider = prop.AddComponent<BoxCollider2D>();
+                collider.size = new Vector2(Mathf.Max(0.12f, bounds.size.x * 0.42f),
+                    Mathf.Clamp(bounds.size.y * 0.16f, 0.08f, 0.24f));
+                collider.offset = new Vector2(bounds.center.x,
+                    bounds.min.y + collider.size.y * 0.5f);
+            }
+
+            MapRegionGeneratedProp tracking = prop.AddComponent<MapRegionGeneratedProp>();
+            tracking.Initialize(regionName, cell, cell, $"forest_detail_{cell.x}_{cell.y}");
         }
 
         private void OnEnable()
@@ -697,6 +924,8 @@ namespace World.Editor
 
                     placedCount++;
                 }
+
+                AddForestDetails(group.transform, LoadGrassCellsFromLevelFarm());
 
                 EditorUtility.SetDirty(group);
                 EditorSceneManager.MarkSceneDirty(scene);

@@ -155,7 +155,6 @@ public static class SetupNewFarmMap
             DisableLegacyWorldArt(scene);
             ConfigureMapBoundary(manager.transform, mapBase.cellBounds);
             ConfigureCameraBounds(scene, mapBase.cellBounds, grid.cellSize);
-            RepositionNpcTests(scene);
 
             EditorUtility.SetDirty(manager);
             EditorSceneManager.MarkSceneDirty(scene);
@@ -406,16 +405,6 @@ public static class SetupNewFarmMap
             new Vector2(right, top), new Vector2(right, bottom)
         });
         confinement.transform.position = Vector3.zero;
-    }
-
-    private static void RepositionNpcTests(Scene scene)
-    {
-        GameObject grandpa = FindGameObject(scene, "NPC Old Man Test");
-        GameObject seller = FindGameObject(scene, "NPC Seed Seller Test");
-        if (grandpa != null)
-            grandpa.transform.position = new Vector3(-2.35f, 0.55f, grandpa.transform.position.z);
-        if (seller != null)
-            seller.transform.position = new Vector3(-3.15f, 0.55f, seller.transform.position.z);
     }
 
     private static GameObject FindGameObject(Scene scene, string name)

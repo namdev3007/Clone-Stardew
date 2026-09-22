@@ -46,6 +46,7 @@ namespace User_Interface
         private float lastMainVolume = 1f;
         private float lastMusicVolume = 0.5f;
         private float lastSfxVolume = 1f;
+        private bool valuesLoaded;
 
         public void Configure(Slider main, Slider music, Slider sfx, Sprite onSprite, Sprite offSprite,
             ActionPlaySound action,
@@ -76,6 +77,27 @@ namespace User_Interface
         private void OnDisable()
         {
             UnbindListeners();
+            SaveSettings();
+        }
+
+        public void SaveSettings()
+        {
+            if (!valuesLoaded)
+                return;
+            if (mainSlider != null)
+                PlayerPrefs.SetFloat(MasterVolumeKey, Mathf.Clamp01(mainSlider.value));
+            SavedSoundConfig saved = ReadSoundConfig();
+            if (musicSlider != null)
+            {
+                saved.musicVolume = Mathf.Clamp01(musicSlider.value);
+                saved.musicEnabled = saved.musicVolume > MutedThreshold;
+            }
+            if (sfxSlider != null)
+            {
+                saved.fxVolume = Mathf.Clamp01(sfxSlider.value);
+                saved.fxEnabled = saved.fxVolume > MutedThreshold;
+            }
+            PlayerPrefs.SetString("config", JsonUtility.ToJson(saved));
             PlayerPrefs.Save();
         }
 
@@ -113,6 +135,7 @@ namespace User_Interface
             lastSfxVolume = saved.fxVolume > MutedThreshold ? saved.fxVolume : 1f;
             RefreshIcons();
             ApplyLanguageVisuals(UseVietnamese, false);
+            valuesLoaded = true;
         }
 
         private static SavedSoundConfig ReadSoundConfig()
@@ -140,6 +163,7 @@ namespace User_Interface
             soundAction?.SetMusicVolume(Mathf.Clamp01(value));
             if (value > MutedThreshold) lastMusicVolume = value;
             SetStateIcon(musicHandleIcon, value);
+            SaveSettings();
         }
 
         private void SetSfxVolume(float value)
@@ -148,6 +172,7 @@ namespace User_Interface
             soundAction?.SetFXVolume(Mathf.Clamp01(value));
             if (value > MutedThreshold) lastSfxVolume = value;
             SetStateIcon(sfxHandleIcon, value);
+            SaveSettings();
         }
 
         private void SelectVietnamese() => SetLanguage(true);
@@ -164,9 +189,6 @@ namespace User_Interface
         {
             foreach (LocalizedSpriteButton title in GetComponentsInChildren<LocalizedSpriteButton>(true))
             {
-                Image titleImage = title.GetComponent<Image>();
-                if (titleImage != null && title.name.StartsWith("Title ", System.StringComparison.Ordinal))
-                    title.ConfigureHeaderSizesIfUnset(titleImage.rectTransform.sizeDelta);
                 title.RefreshLanguage();
             }
 
@@ -189,8 +211,9 @@ namespace User_Interface
             if (controlsText != null)
             {
                 controlsText.text = vietnamese
-                    ? "W/A/S/D   DI CHUYỂN\n1/2/3/4/5   Ô ĐỒ\nB   TÚI\nESC   TẠM DỪNG / LÙI\nO   TƯƠNG TÁC"
-                    : "W/A/S/D   MOVEMENT\n1/2/3/4/5   SLOTS\nB   BAG\nESC   PAUSE / BACK\nO   INTERACT";
+                    ? "W/A/S/D   DI CHUYỂN\n1/2/3/4/5   Ô ĐỒ\nB   TÚI\nESC   TẠM DỪNG / LÙI\nO   TƯƠNG TÁC\nCHUỘT TRÁI   DÙNG CÔNG CỤ\nCHUỘT PHẢI   TƯƠNG TÁC / HỦY Ô ĐẤT"
+                    : "W/A/S/D   MOVEMENT\n1/2/3/4/5   SLOTS\nB   BAG\nESC   PAUSE / BACK\nO   INTERACT\nLEFT MOUSE   USE TOOL\nRIGHT MOUSE   INTERACT / CANCEL SOIL";
+
             }
             if (notify)
                 LanguageChanged?.Invoke(vietnamese);

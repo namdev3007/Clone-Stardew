@@ -720,53 +720,6 @@ namespace World
         }
     }
 
-    public sealed class WaterRefillSource : MonoBehaviour
-    {
-        [SerializeField] private Vector3Int[] refillCells = Array.Empty<Vector3Int>();
-        private GridManager gridManager;
-        public IReadOnlyList<Vector3Int> RefillCells => refillCells;
-
-        public void Configure(GridManager grid, IEnumerable<Vector3Int> cells)
-        {
-            if (Application.isPlaying)
-                Unregister();
-            gridManager = grid;
-            refillCells = cells != null ? new List<Vector3Int>(cells).ToArray() : Array.Empty<Vector3Int>();
-            if (Application.isPlaying)
-                Register();
-        }
-
-        private void OnEnable()
-        {
-            if (Application.isPlaying)
-                Register();
-        }
-
-        private void OnDisable()
-        {
-            if (Application.isPlaying)
-                Unregister();
-        }
-
-        private void Register()
-        {
-            if (gridManager == null)
-                gridManager = FindFirstObjectByType<GridManager>();
-            if (gridManager == null)
-                return;
-            for (int i = 0; i < refillCells.Length; i++)
-                gridManager.RegisterWaterRefillCell(refillCells[i]);
-        }
-
-        private void Unregister()
-        {
-            if (gridManager == null)
-                return;
-            for (int i = 0; i < refillCells.Length; i++)
-                gridManager.UnregisterWaterRefillCell(refillCells[i]);
-        }
-    }
-
     public static class SpecialCropRuntimeBootstrap
     {
         private const string ConfigResourcePath = "Farming/Special Crop Runtime Config";
@@ -827,7 +780,14 @@ namespace World
 
             SpecialCropRuntime.ResetAreas();
             FarmExpansionRuntime.Configure(grid, progress, initialFarm, homeOrchard);
-            ClearableOrchardProp.AttachNamedRegionProps(homeOrchard, progress);
+            // Decorations inside the starting farm are valid axe targets from the
+            // beginning. The expanded home orchard keeps its progression lock.
+            // Excluding the starting farm from the second pass prevents the
+            // overlapping home-orchard rectangle from re-locking those props.
+            ClearableOrchardProp.AttachNamedRegionProps(
+                initialFarm, progress, false, null, "InitialFarm");
+            ClearableOrchardProp.AttachNamedRegionProps(
+                homeOrchard, progress, true, initialFarm, "HomeOrchard");
             GameObject root = new GameObject("Special Crop Areas Runtime");
             SceneManager.MoveGameObjectToScene(root, grid.gameObject.scene);
             CreateArea(root.transform, "Cucumber Trellis", SpecialCropAreaId.CucumberTrellis,

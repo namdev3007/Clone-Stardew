@@ -16,6 +16,7 @@ namespace World.NPC
             public bool metGrandpa;
             public bool receivedStarterTools;
             public bool completedGrandpaLesson;
+            public bool playedGrandpaCompletionDialogue;
             public bool metSeller;
             public int highestUnlockedCropOrder;
             public List<string> hoedCells = new List<string>();
@@ -49,6 +50,10 @@ namespace World.NPC
         public bool MetGrandpa { get { EnsureLoaded(); return data.metGrandpa; } }
         public bool ReceivedStarterTools { get { EnsureLoaded(); return data.receivedStarterTools; } }
         public bool CompletedGrandpaLesson { get { EnsureLoaded(); return data.completedGrandpaLesson; } }
+        public bool PlayedGrandpaCompletionDialogue
+        {
+            get { EnsureLoaded(); return data.playedGrandpaCompletionDialogue; }
+        }
         public bool MetSeller { get { EnsureLoaded(); return data.metSeller; } }
         public int HighestUnlockedCropOrder
         {
@@ -56,6 +61,15 @@ namespace World.NPC
         }
         public int HoedCellCount { get { EnsureLoaded(); return data.hoedCells.Count; } }
         public bool HoeObjectiveComplete => HoedCellCount >= 3;
+        public bool NeedsGrandpaCompletionDialogue
+        {
+            get
+            {
+                EnsureLoaded();
+                return !data.playedGrandpaCompletionDialogue &&
+                       (data.completedGrandpaLesson || data.hoedCells.Count >= 3);
+            }
+        }
 
         public event System.Action ProgressChanged;
 
@@ -100,10 +114,48 @@ namespace World.NPC
             Commit();
         }
 
+        /// <summary>
+        /// Reconciles tutorial progress with the soil that is actually hoed in the scene.
+        /// This recovers progress when a dialogue was interrupted before its completion
+        /// callback, or when an older save contains tilled tiles but no tutorial cell list.
+        /// </summary>
+        public void SyncHoedCellsFromGrid(GridManager gridManager)
+        {
+            EnsureLoaded();
+            if (!data.metGrandpa || data.completedGrandpaLesson || gridManager == null ||
+                gridManager.DirtHoleTileMap == null)
+                return;
+
+            bool changed = false;
+            foreach (Vector3Int cell in gridManager.DirtHoleTileMap.cellBounds.allPositionsWithin)
+            {
+                if (!gridManager.DirtHoleTileMap.HasTile(cell) || !gridManager.CanHoeCell(cell))
+                    continue;
+
+                string key = cell.x + "," + cell.y + "," + cell.z;
+                if (data.hoedCells.Contains(key))
+                    continue;
+
+                data.hoedCells.Add(key);
+                changed = true;
+            }
+
+            if (changed)
+                Commit();
+        }
+
         public void MarkGrandpaLessonComplete()
         {
             EnsureLoaded();
             data.completedGrandpaLesson = true;
+            Commit();
+        }
+
+        public void MarkGrandpaCompletionDialoguePlayed()
+        {
+            EnsureLoaded();
+            data.completedGrandpaLesson = true;
+            data.playedGrandpaCompletionDialogue = true;
             Commit();
         }
 
