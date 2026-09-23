@@ -1,4 +1,5 @@
 using System;
+using Audio;
 using Entity_Components;
 using Entity_Components.Player;
 using TMPro;
@@ -457,6 +458,7 @@ namespace World.NPC
 
         private void ShowLine()
         {
+            GameAudioService.PlayDialogue();
             DialogueSequence.Line line = currentSequence.Lines[lineIndex];
             bool playerSpeaking = line.speaker == DialogueSequence.Speaker.Player;
             npcDialogueGroup.SetActive(!playerSpeaking);

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1a7428f59d443f1b4021799a5e8c110, type: 3}
+  m_Name: Game Audio Config
+  m_EditorClassIdentifier: 
+  fxMixerGroup: {fileID: 243021609953075458, guid: b225f9be77e9d4f419c8019339876305,
+    type: 2}
+  dialogueSfx: {fileID: 8300000, guid: 931aec5b330cfdf41a68d2fd0e8f797c, type: 3}
+  fertilizeSfx: {fileID: 8300000, guid: 2411ca1c7099b714e8dfb2b0b1d232e1, type: 3}
+  waterSfx: {fileID: 8300000, guid: 38d6c6f10f047d245a933859a2eacfca, type: 3}
+  refillWaterSfx: {fileID: 8300000, guid: 92cc8a837e5540c44a8a7c72724fd094, type: 3}
+  plantSeedSfx: {fileID: 8300000, guid: 2411ca1c7099b714e8dfb2b0b1d232e1, type: 3}
+  harvestSfx: {fileID: 8300000, guid: fa47c71c76a9de24292585e03d2f5122, type: 3}
+  itemPickupSfx: {fileID: 8300000, guid: 5fe765c66e7155148848ae2786f2b077, type: 3}
+  slotClickSfx: {fileID: 8300000, guid: 2411ca1c7099b714e8dfb2b0b1d232e1, type: 3}
+  slotHoverSfx: {fileID: 8300000, guid: 69135be6fded1c14196430807607bfe1, type: 3}
+  menuButtonClickSfx: {fileID: 8300000, guid: 75a0c05f177fe2d429a123dee79a0d17, type: 3}
+  unlockLandSfx: {fileID: 8300000, guid: 3be7b403eef087e438dec79e27b77f04, type: 3}
+  coinSfx: {fileID: 8300000, guid: 2bab334ebdfb49d46ad700672725bf86, type: 3}
+  chopSwingSfx: {fileID: 8300000, guid: b1012f5e28e5c954b82047984706b184, type: 3}
+  chopTreeSfx: {fileID: 8300000, guid: ae6fd86a206765c4eb511dfc85fc1818, type: 3}
+  chopFoliageSfx: {fileID: 8300000, guid: 9292d862bcfacdf43b9b21b37e07af27, type: 3}
+  footstepCollection: {fileID: 11400000, guid: 837e7bf0a05ab9c40a9a49a8d11118b6, type: 2}

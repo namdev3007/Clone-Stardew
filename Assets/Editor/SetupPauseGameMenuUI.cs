@@ -15,7 +15,7 @@ public static class SetupPauseGameMenuUI
     private const string SettingsSpriteFolder = "Assets/Sprites/settings-loadgame-ui/";
     private const int AlignmentVersion = 3;
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background align so manual scene edits are preserved
     private static void AlignAfterCompile()
     {
         string key = "Meadom.PauseGameMainAlignment." + Application.dataPath.GetHashCode();

@@ -1,4 +1,5 @@
 using System.Collections;
+using Audio;
 using System.Collections.Generic;
 using UnityEngine;
 using World.Objects;
@@ -49,13 +50,11 @@ namespace World
 
             // Vegetables and other ordinary crops are exclusive to the normal
             // farm. Banana/Mango keep their progression gate and may use either
-            // the normal farm or the unlocked perennial orchard.
+            // the normal farm or the unlocked perennial orchard, inset by at least 1 tile from the border.
             if (!definition.IsPerennialTree)
                 return initialFarm.Contains(cell);
 
-            return HomeOrchardUnlocked &&
-                   (initialFarm.Contains(cell) ||
-                    (homeOrchard != null && homeOrchard.Contains(cell)));
+            return HomeOrchardUnlocked && CanPlantPerennialFootprint(cell);
         }
 
         public static bool CanPlantPerennialFootprint(Vector3Int center)
@@ -67,8 +66,12 @@ namespace World
                 : homeOrchard != null && homeOrchard.Contains(center) ? homeOrchard : null;
             if (owner == null)
                 return false;
-            for (int y = -1; y <= 1; y++)
-            for (int x = -1; x <= 1; x++)
+
+            // Perennial trees (banana, mango) cannot be planted on the outer edge/border of the soil/region;
+            // they must be indented at least 1 tile deep inwards into the area.
+            // With a 1-tile inset/padding around the 3x3 footprint, radius 2 [-2..2] must stay inside the owner region.
+            for (int y = -2; y <= 2; y++)
+            for (int x = -2; x <= 2; x++)
                 if (!owner.Contains(center + new Vector3Int(x, y, 0)))
                     return false;
             return true;
@@ -138,6 +141,7 @@ namespace World
                 }
 
                 progress.UnlockHomeOrchard();
+                GameAudioService.PlayUnlockLand();
             }
             finally
             {

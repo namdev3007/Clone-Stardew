@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Referencing
 {
@@ -16,7 +16,7 @@ namespace Referencing
             if (clips.Length > 0 && audioSource.enabled)
             {
                 audioSource.pitch = Random.Range(pitchVariance.x, pitchVariance.y);
-                audioSource.PlayOneShot(clips[Random.Range(0, clips.Length - 1)]);
+                audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)]);
             }
         }
     }

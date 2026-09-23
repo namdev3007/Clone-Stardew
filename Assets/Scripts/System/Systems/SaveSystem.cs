@@ -103,6 +103,7 @@ namespace GameSystem.Systems
             }
 
             onSceneWarp?.AddListener(OnSceneWarp);
+            SaveMaster.OnWritingToDiskBegin += OnWritingToDiskBegin;
         }
 
         private static void SetReferenceValue(StringReference reference, string value)
@@ -117,7 +118,25 @@ namespace GameSystem.Systems
 
         private void OnSceneWarp(string scene)
         {
-            cachedSaveData.lastScene = scene;
+            if (cachedSaveData != null)
+            {
+                cachedSaveData.lastScene = scene;
+                SyncSaveDataMetaData();
+            }
+        }
+
+        private void OnWritingToDiskBegin(int slot)
+        {
+            SyncSaveDataMetaData();
+        }
+
+        public void SyncSaveDataMetaData()
+        {
+            if (!SaveMaster.IsSlotLoaded() || cachedSaveData == null)
+                return;
+
+            cachedSaveData.timePlayed = SaveMaster.GetSaveTimePlayed().ToString();
+            SaveMaster.SetMetaData("savedata", JsonUtility.ToJson(cachedSaveData));
         }
 
         private void Start()
@@ -131,12 +150,10 @@ namespace GameSystem.Systems
 
         private void OnDestroy()
         {
-            // In case no save is loaded, do not set the time played metadata.
-            if (!SaveMaster.IsSlotLoaded())
-                return;
-            
-            cachedSaveData.timePlayed = SaveMaster.GetSaveTimePlayed().ToString();
-            SaveMaster.SetMetaData("savedata", JsonUtility.ToJson(cachedSaveData));
+            onSceneWarp?.RemoveListener(OnSceneWarp);
+            SaveMaster.OnWritingToDiskBegin -= OnWritingToDiskBegin;
+
+            SyncSaveDataMetaData();
         }
 
     }

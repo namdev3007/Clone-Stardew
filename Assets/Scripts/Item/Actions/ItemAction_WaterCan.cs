@@ -1,4 +1,5 @@
-﻿using Entity_Components;
+using Audio;
+using Entity_Components;
 using Entity_Components.Character;
 using Entity_Components.Player;
 using Item.Inventory;
@@ -76,7 +77,7 @@ namespace Item.Actions
                 Crop targetCrop = gridManager.GetCrop(location);
                 bool cropNeedsWater = targetCrop != null && targetCrop.NeedsWater;
                 bool dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
-                bool canWaterGround = gridManager.HasDirtHole(location) && (cropNeedsWater || dryFarmGround);
+                bool canWaterGround = cropNeedsWater || (gridManager.HasDirtHole(location) && dryFarmGround);
 
                 // Validate before starting the animation. Held mouse input can ask
                 // to use the can again just after a tile became wet; previously the
@@ -102,6 +103,7 @@ namespace Item.Actions
                         current = currentItemEnergy.max
                     };
                     OnObtainedWater.Invoke();
+                    GameAudioService.PlayRefillWater();
                     UpdateWorldGauge(userInventory, getInventoryItem.Energy, true);
                     userInventory.ReloadItemSlot(itemIndex);
                     yield break;
@@ -138,13 +140,13 @@ namespace Item.Actions
                         cropNeedsWater = crop != null && crop.NeedsWater;
                         dryFarmGround = !gridManager.HasWateredDirt(location) && gridManager.HasDirtHole(location);
 
-                        if (gridManager.HasDirtHole(location) && (cropNeedsWater || dryFarmGround))
+                        if (cropNeedsWater || (gridManager.HasDirtHole(location) && dryFarmGround))
                         {
                             ItemEnergy currentItemEnergy = getInventoryItem.Energy;
 
                             if (FarmingCheats.InfiniteWater || currentItemEnergy.current >= energyCost)
                             {
-                                if (!gridManager.HasWateredDirt(location))
+                                if (gridManager.HasDirtHole(location) && !gridManager.HasWateredDirt(location))
                                     gridManager.SetWateredDirtTile(location);
 
                                 crop?.TryWater();
@@ -165,6 +167,7 @@ namespace Item.Actions
                                 };
 
                                 OnWateredGround.Invoke();
+                                GameAudioService.PlayWatering();
 
                                 UpdateWorldGauge(userInventory, getInventoryItem.Energy, true);
                                 userInventory.ReloadItemSlot(itemIndex);

@@ -280,11 +280,6 @@ namespace World
             if (!SpecialCropRuntime.CanPlant(location, definition))
                 return false;
 
-            // Cucumber/dragon fruit posts need no hoeing. Prepare the same soil
-            // state a hoed cell has so watering, growth and harvest keep working.
-            if (definition != null && SpecialCropRuntime.IsRepairedPlantingSlot(location))
-                PrepareTrellisPlantingSlot(location);
-
             if (definition != null && definition.IsPerennialTree)
             {
                 if (!CanPlantPerennialTree(location))
@@ -304,7 +299,7 @@ namespace World
             if (reservedPlantingCells.ContainsKey(location))
                 return false;
 
-            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location))
+            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location) || !plot.fertilized)
                 return false;
 
             fertilized = plot.fertilized;
@@ -312,14 +307,6 @@ namespace World
             plot.status = FarmPlotStatus.None;
             RefreshFarmPlotIndicator(plot);
             return true;
-        }
-
-        private void PrepareTrellisPlantingSlot(Vector3Int location)
-        {
-            EnsureDirtTile(location);
-            if (!HasDirtHole(location))
-                SetDirtHoleTile(location);
-            RegisterFarmPlot(location);
         }
 
         public bool CheatBeginShowcasePlanting(Vector3Int location, CropDefinition definition, out bool fertilized)
@@ -461,6 +448,23 @@ namespace World
         private bool CanPlantPerennialTree(Vector3Int center)
         {
             bool canPlantOnGrass = FarmExpansionRuntime.CanPlantPerennialFootprint(center);
+            if (!canPlantOnGrass)
+                return false;
+
+            bool isPlantingOnDirt = HasDirt(center);
+            if (isPlantingOnDirt)
+            {
+                // Banana and mango trees planted on soil cannot be on the outer edge of the dirt plot;
+                // they must be indented at least 1 tile deep into the dirt (1-tile padding around the 3x3 footprint).
+                for (int dy = -2; dy <= 2; dy++)
+                for (int dx = -2; dx <= 2; dx++)
+                {
+                    Vector3Int checkCell = center + new Vector3Int(dx, dy, 0);
+                    if (!HasDirt(checkCell))
+                        return false;
+                }
+            }
+
             for (int y = -1; y <= 1; y++)
             {
                 for (int x = -1; x <= 1; x++)
@@ -1155,6 +1159,40 @@ namespace World
             return SpecialCropRuntime.CanHoe(position);
         }
 
+        public bool HasFarmPlot(Vector3Int position)
+        {
+            return farmPlots.ContainsKey(position);
+        }
+
+        public bool HasCrop(Vector3Int position)
+        {
+            return crops.ContainsKey(position) && crops[position] != null;
+        }
+
+        /// <summary>
+        /// Returns true if the cell is any valid soil plot (hoed dirt hole, registered
+        /// farm plot, planted crop, repaired trellis planting slot, or tillable farm dirt).
+        /// </summary>
+        public bool IsSoilCell(Vector3Int position)
+        {
+            if (HasDirtHole(position))
+                return true;
+
+            if (farmPlots.ContainsKey(position))
+                return true;
+
+            if (crops.ContainsKey(position) && crops[position] != null)
+                return true;
+
+            if (SpecialCropRuntime.IsRepairedPlantingSlot(position))
+                return true;
+
+            if (CanHoeCell(position) && HasDirt(position) && !HasWater(position))
+                return true;
+
+            return false;
+        }
+
         public void RegisterWaterRefillCell(Vector3Int position)
         {
             position.z = 0;
@@ -1318,7 +1356,10 @@ namespace World
                     if (farmPlots.TryGetValue(entry.Key, out FarmPlotData plot))
                     {
                         plot.occupied = true;
-                        RefreshFarmPlotIndicator(plot);
+                        if (entry.Value != null)
+                            entry.Value.RefreshVisuals();
+                        else
+                            RefreshFarmPlotIndicator(plot);
                     }
                 }
             }

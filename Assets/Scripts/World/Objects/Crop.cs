@@ -1,3 +1,4 @@
+using Audio;
 using Combat;
 using Combat.Interfaces;
 using Item;
@@ -36,11 +37,12 @@ namespace World.Objects
             public bool wateredThisCycle;
             public int harvestCount;
             public int axeHitCount;
+            public float waterWaitTimer;
         }
 
         private const float MissingFertilizerPenaltySeconds = 15f;
-        private const float FirstGrowthMissingWaterPenaltySeconds = 6f;
-        private const float RegrowthMissingWaterPenaltySeconds = 21f;
+        private const float MissingWaterPenaltySeconds = 6f;
+        private const float WaterWaitTimeoutSeconds = 30f;
         private const float RegrowthRestSeconds = 10f;
         private const float CropVisualScale = 0.5f;
         private const float CropVisualPositionY = 0f;
@@ -63,6 +65,7 @@ namespace World.Objects
         private float activeDuration;
         private bool fertilized;
         private bool wateredThisCycle;
+        private float waterWaitTimer;
         private int harvestCount;
         private int axeHitCount;
         private bool registered;
@@ -71,7 +74,7 @@ namespace World.Objects
         private SortingGroup depthSortingGroup;
         private float lastDepthSortY = float.NaN;
 
-        public bool NeedsWater => !wateredThisCycle && (phase == GrowthPhase.Growing || phase == GrowthPhase.Regrowing);
+        public bool NeedsWater => !wateredThisCycle && (phase == GrowthPhase.WaitingForFirstWater || phase == GrowthPhase.WaitingForRegrowthWater);
         public bool IsReadyToHarvest => phase == GrowthPhase.ReadyToHarvest;
         public bool UsesPerennialFootprint => definition != null && definition.IsPerennialTree;
 
@@ -156,6 +159,28 @@ namespace World.Objects
 
             switch (phase)
             {
+                case GrowthPhase.WaitingForFirstWater:
+                    if (definition.IsPerennialTree)
+                    {
+                        waterWaitTimer = Mathf.Max(0f, waterWaitTimer - UnityEngine.Time.deltaTime);
+                        if (waterWaitTimer <= 0f)
+                        {
+                            StartFirstGrowth(watered: false);
+                        }
+                    }
+                    break;
+
+                case GrowthPhase.WaitingForRegrowthWater:
+                    if (definition.IsPerennialTree)
+                    {
+                        waterWaitTimer = Mathf.Max(0f, waterWaitTimer - UnityEngine.Time.deltaTime);
+                        if (waterWaitTimer <= 0f)
+                        {
+                            StartRegrowth(watered: false);
+                        }
+                    }
+                    break;
+
                 case GrowthPhase.Growing:
                 case GrowthPhase.Regrowing:
                     remainingSeconds = Mathf.Max(0f, remainingSeconds - UnityEngine.Time.deltaTime);
@@ -168,7 +193,7 @@ namespace World.Objects
                     remainingSeconds = Mathf.Max(0f, remainingSeconds - UnityEngine.Time.deltaTime);
                     if (remainingSeconds <= 0f)
                     {
-                        StartRegrowth();
+                        BeginRegrowthCycle();
                     }
                     break;
             }
@@ -183,18 +208,43 @@ namespace World.Objects
             }
         }
 
+        private bool IsGroundWet()
+        {
+            if (gridManager == null && gridManagerReference != null)
+                gridManager = gridManagerReference.Reference?.GetComponent<GridManager>();
+
+            if (gridManager == null)
+                return false;
+
+            Vector3Int gridLoc = gridManager.GetGridLocation(transform.position);
+            return gridManager.HasWateredDirt(gridLoc) || gridManager.ContainsMapAtLocation(groundWetTilemapName, transform.position);
+        }
+
         public void Configure(CropDefinition cropDefinition, bool wasFertilized)
         {
             showcaseMode = false;
             definition = cropDefinition;
             fertilized = wasFertilized;
             harvestCount = 0;
-            StartFirstGrowth();
+            axeHitCount = 0;
             health?.Revive();
             health?.SetInvulnerable(true);
             ConfigureDrop();
             RegisterWithGrid();
-            RefreshVisuals();
+
+            if (IsGroundWet())
+            {
+                StartFirstGrowth(watered: true);
+            }
+            else
+            {
+                phase = GrowthPhase.WaitingForFirstWater;
+                wateredThisCycle = false;
+                waterWaitTimer = definition != null && definition.IsPerennialTree ? WaterWaitTimeoutSeconds : 0f;
+                activeDuration = definition.FirstGrowthSeconds;
+                remainingSeconds = activeDuration;
+                RefreshVisuals();
+            }
         }
 
         public void ConfigureShowcase(CropDefinition cropDefinition, int stageIndex, bool harvestableDemo)
@@ -235,41 +285,69 @@ namespace World.Objects
             if (definition == null || !NeedsWater)
                 return false;
 
-            float removedPenalty = phase == GrowthPhase.Regrowing
-                ? RegrowthMissingWaterPenaltySeconds
-                : FirstGrowthMissingWaterPenaltySeconds;
-            wateredThisCycle = true;
-            activeDuration = Mathf.Max(0.1f, activeDuration - removedPenalty);
-            remainingSeconds = Mathf.Max(0f, remainingSeconds - removedPenalty);
-            RefreshVisuals();
-            if (remainingSeconds <= 0f)
-                BecomeHarvestable();
-            return true;
+            if (phase == GrowthPhase.WaitingForFirstWater)
+            {
+                StartFirstGrowth(watered: true);
+                return true;
+            }
+
+            if (phase == GrowthPhase.WaitingForRegrowthWater)
+            {
+                StartRegrowth(watered: true);
+                return true;
+            }
+
+            return false;
         }
 
-        private void StartFirstGrowth()
+        private void StartFirstGrowth(bool watered)
         {
             if (definition == null)
                 return;
 
             phase = GrowthPhase.Growing;
-            wateredThisCycle = false;
-            activeDuration = definition.FirstGrowthSeconds
-                + (fertilized ? 0f : MissingFertilizerPenaltySeconds)
-                + FirstGrowthMissingWaterPenaltySeconds;
+            wateredThisCycle = watered;
+
+            float penalty = 0f;
+            if (definition.IsPerennialTree && !watered)
+                penalty = MissingWaterPenaltySeconds;
+
+            activeDuration = definition.FirstGrowthSeconds + penalty;
             remainingSeconds = activeDuration;
             health?.SetInvulnerable(true);
             RefreshVisuals();
         }
 
-        private void StartRegrowth()
+        private void BeginRegrowthCycle()
+        {
+            if (IsGroundWet())
+            {
+                StartRegrowth(watered: true);
+            }
+            else
+            {
+                phase = GrowthPhase.WaitingForRegrowthWater;
+                wateredThisCycle = false;
+                waterWaitTimer = definition != null && definition.IsPerennialTree ? WaterWaitTimeoutSeconds : 0f;
+                activeDuration = definition.RegrowthSeconds;
+                remainingSeconds = activeDuration;
+                RefreshVisuals();
+            }
+        }
+
+        private void StartRegrowth(bool watered)
         {
             if (definition == null)
                 return;
 
             phase = GrowthPhase.Regrowing;
-            wateredThisCycle = false;
-            activeDuration = definition.RegrowthSeconds + RegrowthMissingWaterPenaltySeconds;
+            wateredThisCycle = watered;
+
+            float penalty = 0f;
+            if (definition.IsPerennialTree && !watered)
+                penalty = MissingWaterPenaltySeconds;
+
+            activeDuration = definition.RegrowthSeconds + penalty;
             remainingSeconds = activeDuration;
             health?.SetInvulnerable(true);
             RefreshVisuals();
@@ -303,7 +381,7 @@ namespace World.Objects
             gridManager?.SetCropStatus(transform.position, FarmPlotStatus.Harvest);
         }
 
-        private void RefreshVisuals()
+        public void RefreshVisuals()
         {
             if (definition == null)
                 return;
@@ -317,7 +395,7 @@ namespace World.Objects
                 case GrowthPhase.Growing:
                 case GrowthPhase.Regrowing:
                     UpdateGrowthSprite();
-                    gridManager?.SetCropStatus(transform.position, wateredThisCycle ? FarmPlotStatus.None : FarmPlotStatus.Water);
+                    gridManager?.SetCropStatus(transform.position, FarmPlotStatus.None);
                     break;
                 case GrowthPhase.ReadyToHarvest:
                     SetSprite(GetLastSprite());
@@ -345,10 +423,22 @@ namespace World.Objects
                 return;
 
             int firstIndex = phase == GrowthPhase.Regrowing ? definition.RegrowthStageStart : 0;
-            int usableCount = sprites.Length - firstIndex;
+            int totalCount = sprites.Length - firstIndex;
+            if (totalCount <= 0)
+                return;
+
+            // The final sprite (sprites.Length - 1) is reserved for ReadyToHarvest.
+            // While actively growing, distribute progress across intermediate growing sprites.
+            int growingStages = totalCount - 1;
+            if (growingStages <= 0)
+            {
+                SetSprite(sprites[firstIndex]);
+                return;
+            }
+
             float progress = 1f - Mathf.Clamp01(remainingSeconds / activeDuration);
-            int offset = Mathf.Min(usableCount - 1, Mathf.FloorToInt(progress * usableCount));
-            SetSprite(sprites[firstIndex + Mathf.Max(0, offset)]);
+            int offset = Mathf.Clamp(Mathf.FloorToInt(progress * growingStages), 0, growingStages - 1);
+            SetSprite(sprites[firstIndex + offset]);
         }
 
         private Sprite GetGrowthSprite(int index)
@@ -387,19 +477,15 @@ namespace World.Objects
 
             spriteRenderer.transform.localScale = Vector3.one * scale;
             float x = ((pivot.x - sprite.rect.width * 0.5f) / pixelsPerUnit) * scale;
-            Sprite[] growthSprites = definition != null ? definition.GrowthSprites : null;
-            // Trellis crops start on a tall post sprite, so they stay bottom-anchored
-            // like the empty post they replace instead of dropping into the cell.
-            bool isPlantedSeedStage = growthSprites != null && growthSprites.Length > 0 &&
-                                      growthSprites[0] == sprite &&
-                                      definition.PlantingZone == PlantingZone.Normal;
+            // Trellis crops and perennial trees stand upright from their ground anchor.
+            // Regular ground crops grow directly centered inside the hoed soil plot (ô đất) across all stages.
+            bool isAnchoredAtBottom = definition != null &&
+                                      (definition.IsPerennialTree ||
+                                       definition.PlantingZone != PlantingZone.Normal);
 
-            // Large growth stages stand on the cell centre by their bottom edge.
-            // The freshly planted seed is a small ground marker, so centre its
-            // complete sprite inside the soil cell instead of pushing it upward.
-            float y = isPlantedSeedStage
-                ? ((pivot.y - sprite.rect.height * 0.5f) / pixelsPerUnit) * scale
-                : (pivot.y / pixelsPerUnit) * scale;
+            float y = isAnchoredAtBottom
+                ? (pivot.y / pixelsPerUnit) * scale
+                : ((pivot.y - sprite.rect.height * 0.5f) / pixelsPerUnit) * scale;
             Vector2 stageOffset = definition != null ? definition.GetStagePositionOffset(sprite) : Vector2.zero;
             spriteRenderer.transform.localPosition = new Vector3(
                 x + stageOffset.x,
@@ -420,6 +506,7 @@ namespace World.Objects
             if (phase != GrowthPhase.ReadyToHarvest || definition == null)
                 return false;
 
+            GameAudioService.PlayHarvest();
             itemDropper?.Drop(transform.position);
             TutorialProgressService.Instance.RecordCropHarvested(definition.DisplayName);
             harvestCount++;
@@ -485,16 +572,50 @@ namespace World.Objects
 
             float timeLeftToSkip = seconds;
             int transitionGuard = 0;
-            while (timeLeftToSkip > 0f && transitionGuard++ < 4)
+            while (timeLeftToSkip > 0f && transitionGuard++ < 6)
             {
                 switch (phase)
                 {
                     case GrowthPhase.WaitingForFirstWater:
-                        StartFirstGrowth();
+                        if (definition.IsPerennialTree)
+                        {
+                            if (timeLeftToSkip < waterWaitTimer)
+                            {
+                                waterWaitTimer -= timeLeftToSkip;
+                                timeLeftToSkip = 0f;
+                            }
+                            else
+                            {
+                                timeLeftToSkip -= waterWaitTimer;
+                                waterWaitTimer = 0f;
+                                StartFirstGrowth(watered: false);
+                            }
+                        }
+                        else
+                        {
+                            StartFirstGrowth(watered: true);
+                        }
                         break;
 
                     case GrowthPhase.WaitingForRegrowthWater:
-                        StartRegrowth();
+                        if (definition.IsPerennialTree)
+                        {
+                            if (timeLeftToSkip < waterWaitTimer)
+                            {
+                                waterWaitTimer -= timeLeftToSkip;
+                                timeLeftToSkip = 0f;
+                            }
+                            else
+                            {
+                                timeLeftToSkip -= waterWaitTimer;
+                                waterWaitTimer = 0f;
+                                StartRegrowth(watered: false);
+                            }
+                        }
+                        else
+                        {
+                            StartRegrowth(watered: true);
+                        }
                         break;
 
                     case GrowthPhase.Growing:
@@ -515,7 +636,7 @@ namespace World.Objects
                         if (timeLeftToSkip >= remainingSeconds)
                         {
                             timeLeftToSkip -= remainingSeconds;
-                            StartRegrowth();
+                            BeginRegrowthCycle();
                         }
                         else
                         {
@@ -553,14 +674,15 @@ namespace World.Objects
         {
             return JsonUtility.ToJson(new SaveData
             {
-                version = 5,
+                version = 6,
                 definitionGuid = definition != null ? definition.GetGuid() : string.Empty,
                 phase = (int)phase,
                 remainingSeconds = remainingSeconds,
                 fertilized = fertilized,
                 wateredThisCycle = wateredThisCycle,
                 harvestCount = harvestCount,
-                axeHitCount = axeHitCount
+                axeHitCount = axeHitCount,
+                waterWaitTimer = waterWaitTimer
             });
         }
 
@@ -574,6 +696,7 @@ namespace World.Objects
             wateredThisCycle = saveData.wateredThisCycle;
             harvestCount = Mathf.Max(0, saveData.harvestCount);
             axeHitCount = Mathf.Max(0, saveData.axeHitCount);
+            waterWaitTimer = Mathf.Max(0f, saveData.waterWaitTimer);
 
             if (definition != null)
             {
@@ -581,11 +704,11 @@ namespace World.Objects
                 {
                     if (phase == GrowthPhase.WaitingForFirstWater)
                     {
-                        StartFirstGrowth();
+                        StartFirstGrowth(watered: true);
                     }
                     else if (phase == GrowthPhase.WaitingForRegrowthWater)
                     {
-                        StartRegrowth();
+                        StartRegrowth(watered: true);
                     }
                     else
                     {
@@ -602,11 +725,21 @@ namespace World.Objects
                     remainingSeconds = Mathf.Max(0f, remainingSeconds - MissingFertilizerPenaltySeconds);
                 }
 
+                if (saveData.version < 6)
+                {
+                    if ((phase == GrowthPhase.WaitingForFirstWater || phase == GrowthPhase.WaitingForRegrowthWater) && waterWaitTimer <= 0f)
+                    {
+                        waterWaitTimer = WaterWaitTimeoutSeconds;
+                    }
+                }
+
+                float penalty = 0f;
+                if (definition.IsPerennialTree && !wateredThisCycle)
+                    penalty = MissingWaterPenaltySeconds;
+
                 activeDuration = phase == GrowthPhase.Regrowing
-                    ? definition.RegrowthSeconds + (wateredThisCycle ? 0f : RegrowthMissingWaterPenaltySeconds)
-                    : definition.FirstGrowthSeconds
-                        + (fertilized ? 0f : MissingFertilizerPenaltySeconds)
-                        + (wateredThisCycle ? 0f : FirstGrowthMissingWaterPenaltySeconds);
+                    ? definition.RegrowthSeconds + penalty
+                    : definition.FirstGrowthSeconds + penalty;
             }
 
             ConfigureDrop();

@@ -16,6 +16,9 @@ namespace User_Interface
         [Header("Optional per-language size (zero keeps the authored size)")]
         [SerializeField] private Vector2 englishSize;
         [SerializeField] private Vector2 vietnameseSize;
+        [Header("Optional per-language position (if set, overrides anchoredPosition)")]
+        [SerializeField] private Vector2 englishPosition;
+        [SerializeField] private Vector2 vietnamesePosition;
 
         public void Configure(Image image, Button button, Sprite enNormal, Sprite enSelected,
             Sprite viNormal, Sprite viSelected, bool resize)
@@ -38,6 +41,13 @@ namespace User_Interface
         {
             englishSize = english;
             vietnameseSize = vietnamese;
+            Apply(SettingsSoundUI.UseVietnamese);
+        }
+
+        public void ConfigurePositions(Vector2 english, Vector2 vietnamese)
+        {
+            englishPosition = english;
+            vietnamesePosition = vietnamese;
             Apply(SettingsSoundUI.UseVietnamese);
         }
 
@@ -96,16 +106,20 @@ namespace User_Interface
             }
 
             Vector2 languageSize = vietnamese ? vietnameseSize : englishSize;
-            bool preserveAuthoredOptionsLayout = IsInsideOptionsWindow();
-            if (!preserveAuthoredOptionsLayout && !useNativeSize &&
+            if (!useNativeSize &&
                 languageSize.x > 0f && languageSize.y > 0f &&
                 targetImage.rectTransform != null)
             {
                 targetImage.rectTransform.sizeDelta = languageSize;
             }
 
-            if (!preserveAuthoredOptionsLayout && useNativeSize && normal != null &&
-                targetImage.rectTransform != null)
+            Vector2 languagePos = vietnamese ? vietnamesePosition : englishPosition;
+            if ((languagePos.x != 0f || languagePos.y != 0f) && targetImage.rectTransform != null)
+            {
+                targetImage.rectTransform.anchoredPosition = languagePos;
+            }
+
+            if (useNativeSize && normal != null && targetImage.rectTransform != null)
             {
                 targetImage.rectTransform.sizeDelta = normal.rect.size;
                 RectTransform indicator = transform.Find("Hover Indicator") as RectTransform;
@@ -113,16 +127,6 @@ namespace User_Interface
                     indicator.anchoredPosition = new Vector2(
                         -(targetImage.rectTransform.sizeDelta.x * 0.5f + indicator.sizeDelta.x * 0.5f + 4f), 0f);
             }
-        }
-
-        private bool IsInsideOptionsWindow()
-        {
-            for (Transform current = transform; current != null; current = current.parent)
-            {
-                if (current.name == "Window_Options")
-                    return true;
-            }
-            return false;
         }
     }
 }

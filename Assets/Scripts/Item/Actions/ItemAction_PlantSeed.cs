@@ -1,3 +1,4 @@
+using Audio;
 using Entity_Components.Player;
 using Item.Inventory;
 using Referencing;
@@ -70,6 +71,7 @@ namespace Item.Actions
 
             if (getItem != null && getItem.Amount > 0 && PlantAction(userInventory))
             {
+                GameAudioService.PlayPlantSeed();
                 getItem.Amount -= 1;
 
                 if (getItem.Amount <= 0)

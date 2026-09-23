@@ -28164,7 +28164,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -116, y: 48}
-  m_SizeDelta: {x: 90, y: 16}
+  m_SizeDelta: {x: 76, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7536734685964133254
 CanvasRenderer:
@@ -28225,8 +28225,11 @@ MonoBehaviour:
   vietnameseNormal: {fileID: 21300000, guid: 3fc67695acb4ace45aedbc7c65ec1411, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
-  englishSize: {x: 90, y: 16}
-  vietnameseSize: {x: 90, y: 16}
+  englishSize: {x: 76, y: 16}
+  vietnameseSize: {x: 105, y: 27}
+  englishPosition: {x: -116, y: 48}
+  vietnamesePosition: {x: -116, y: 46}
+
 --- !u!1 &1163739291446929377
 GameObject:
   m_ObjectHideFlags: 0
@@ -28999,17 +29002,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetImage: {fileID: 8234269955724723586}
   targetButton: {fileID: 6081990863933807279}
-  englishNormal: {fileID: -1389953553123087195, guid: fbe175d4a369ecd4dab7e068117d9208,
-    type: 3}
-  englishSelected: {fileID: 3456514613640070654, guid: fbe175d4a369ecd4dab7e068117d9208,
-    type: 3}
-  vietnameseNormal: {fileID: 4018550051731580167, guid: b2f3fb4bc3dd26c49adbc3d1041c986a,
-    type: 3}
-  vietnameseSelected: {fileID: -1947125193793143427, guid: b2f3fb4bc3dd26c49adbc3d1041c986a,
-    type: 3}
+  englishNormal: {fileID: -1389953553123087195, guid: fbe175d4a369ecd4dab7e068117d9208, type: 3}
+  englishSelected: {fileID: 3456514613640070654, guid: fbe175d4a369ecd4dab7e068117d9208, type: 3}
+  vietnameseNormal: {fileID: 4018550051731580167, guid: b2f3fb4bc3dd26c49adbc3d1041c986a, type: 3}
+  vietnameseSelected: {fileID: -1947125193793143427, guid: b2f3fb4bc3dd26c49adbc3d1041c986a, type: 3}
   useNativeSize: 1
-  englishSize: {x: 0, y: 0}
-  vietnameseSize: {x: 0, y: 0}
+  englishSize: {x: 150, y: 33}
+  vietnameseSize: {x: 161, y: 33}
 --- !u!1 &3141898255589121042
 GameObject:
   m_ObjectHideFlags: 0
@@ -29458,7 +29457,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 116, y: 48}
-  m_SizeDelta: {x: 90, y: 16}
+  m_SizeDelta: {x: 103, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5740083477152855959
 CanvasRenderer:
@@ -29518,8 +29517,11 @@ MonoBehaviour:
   vietnameseNormal: {fileID: 21300000, guid: d0d7909311fe69f4f9f30f162accbe46, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
-  englishSize: {x: 90, y: 16}
-  vietnameseSize: {x: 90, y: 16}
+  englishSize: {x: 103, y: 16}
+  vietnameseSize: {x: 118, y: 26}
+  englishPosition: {x: 116, y: 48}
+  vietnamesePosition: {x: 116, y: 48}
+
 --- !u!1 &3856161578784719895
 GameObject:
   m_ObjectHideFlags: 0
@@ -29632,7 +29634,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 48}
-  m_SizeDelta: {x: 90, y: 16}
+  m_SizeDelta: {x: 103, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3292132394512179919
 CanvasRenderer:
@@ -29693,8 +29695,11 @@ MonoBehaviour:
   vietnameseNormal: {fileID: 21300000, guid: 7e3206a324a9c72489f6d0fa07480872, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
-  englishSize: {x: 90, y: 16}
-  vietnameseSize: {x: 90, y: 16}
+  englishSize: {x: 103, y: 16}
+  vietnameseSize: {x: 97, y: 21}
+  englishPosition: {x: 0, y: 48}
+  vietnamesePosition: {x: 0, y: 48}
+
 --- !u!1 &4341521315895039401
 GameObject:
   m_ObjectHideFlags: 0
@@ -30569,7 +30574,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 68}
-  m_SizeDelta: {x: 90, y: 16}
+  m_SizeDelta: {x: 137, y: 29}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4269421051337918822
 CanvasRenderer:
@@ -30630,8 +30635,11 @@ MonoBehaviour:
   vietnameseNormal: {fileID: 21300000, guid: 8d1430088d2bb274fb865c2f146fdd1a, type: 3}
   vietnameseSelected: {fileID: 0}
   useNativeSize: 0
-  englishSize: {x: 90, y: 16}
-  vietnameseSize: {x: 90, y: 16}
+  englishSize: {x: 137, y: 29}
+  vietnameseSize: {x: 128, y: 48}
+  englishPosition: {x: 0, y: 68}
+  vietnamesePosition: {x: 0, y: 70}
+
 --- !u!1 &5675318356742166189
 GameObject:
   m_ObjectHideFlags: 0

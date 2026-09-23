@@ -26,6 +26,12 @@ namespace Action.Actions
         public void Execute(string synchronizedName)
         {
             int getUnusedSlot = SaveFileUtility.GetAvailableSaveSlot();
+            if (getUnusedSlot < 0)
+            {
+                Debug.LogError("No available save slot found for New Game.");
+                return;
+            }
+
             SaveMaster.SetSlot(getUnusedSlot, true);
 
             // Create the load-screen metadata before changing scene. Previously it

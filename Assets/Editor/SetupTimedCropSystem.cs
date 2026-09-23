@@ -249,10 +249,9 @@ public static class SetupTimedCropSystem
         ItemCollection collection = AssetDatabase.LoadAssetAtPath<ItemCollection>(StartingItemsPath);
         if (collection == null || carrotSeed == null || fertilizer == null) return;
 
-        ItemData gold = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/ScriptableObjects/Items/Tools/Item_Gold.asset");
         ItemData waterCan = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/ScriptableObjects/Items/Tools/Item_Tool_WaterCan.asset");
-        ItemData[] data = { gold, waterCan, carrotSeed, fertilizer };
-        int[] amounts = { 200, 1, 3, 0 };
+        ItemData[] data = { waterCan, carrotSeed, fertilizer };
+        int[] amounts = { 1, 3, 0 };
         SerializedObject serialized = new SerializedObject(collection);
         SerializedProperty items = serialized.FindProperty("items");
         items.arraySize = data.Length;

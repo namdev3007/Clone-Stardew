@@ -159,22 +159,6 @@ MonoBehaviour:
       requireVisibleMapTile: 1
       skipWaterCells: 1
       autoSaveScene: 1
-  - regionName: "r\xE0o ch\u1EAFn add colider cho n\xF3 2"
-    sceneName: Core 1
-    minCell: {x: 7, y: -2, z: 0}
-    maxCell: {x: 18, y: -2, z: 0}
-    scatterSettings:
-      source: 0
-      density: 0.15
-      randomSeed: 12345
-      minimumCellSpacing: 1
-      minimumBananaStage: 0
-      maximumBananaStage: 7
-      randomScaleRange: {x: 1, y: 1}
-      addCollider: 1
-      requireVisibleMapTile: 1
-      skipWaterCells: 1
-      autoSaveScene: 1
   - regionName: "r\xE0o ch\u1EAFn add colider cho n\xF3 3"
     sceneName: Core 1
     minCell: {x: 22, y: -3, z: 0}
@@ -433,72 +417,6 @@ MonoBehaviour:
       requireVisibleMapTile: 1
       skipWaterCells: 1
       autoSaveScene: 1
-  - regionName: "tr\u1ED3ng 4 c\xE2y chu\u1ED1i"
-    sceneName: Core 1
-    minCell: {x: 30, y: 0, z: 0}
-    maxCell: {x: 33, y: 2, z: 0}
-    scatterSettings:
-      source: 0
-      density: 0.15
-      randomSeed: 12345
-      minimumCellSpacing: 1
-      minimumBananaStage: 0
-      maximumBananaStage: 7
-      randomScaleRange: {x: 1, y: 1}
-      addCollider: 1
-      requireVisibleMapTile: 1
-      skipWaterCells: 1
-      autoSaveScene: 1
-  - regionName: "tr\u1ED3ng 4 c\xE2y chu\u1ED1i c\xE2y n\xE0y kh\xF4ng l\u1EDBn"
-    sceneName: Core 1
-    minCell: {x: 30, y: 0, z: 0}
-    maxCell: {x: 33, y: 2, z: 0}
-    scatterSettings:
-      source: 0
-      density: 0.15
-      randomSeed: 12345
-      minimumCellSpacing: 1
-      minimumBananaStage: 0
-      maximumBananaStage: 7
-      randomScaleRange: {x: 1, y: 1}
-      addCollider: 1
-      requireVisibleMapTile: 1
-      skipWaterCells: 1
-      autoSaveScene: 1
-  - regionName: "tr\u1ED3ng 5 c\xE2y chu\u1ED1i c\xE2y n\xE0y c\u0169ng kh\xF4ng
-      l\u1EDBn \u0111\u01B0\u1EE3c"
-    sceneName: Core 1
-    minCell: {x: 14, y: 2, z: 0}
-    maxCell: {x: 18, y: 4, z: 0}
-    scatterSettings:
-      source: 0
-      density: 0.15
-      randomSeed: 12345
-      minimumCellSpacing: 1
-      minimumBananaStage: 0
-      maximumBananaStage: 7
-      randomScaleRange: {x: 1, y: 1}
-      addCollider: 1
-      requireVisibleMapTile: 1
-      skipWaterCells: 1
-      autoSaveScene: 1
-  - regionName: "Tr\u1ED3ng ng\u1EABu nhi\xEAn 5 c\xE2y chu\u1ED1i \u1EDF \u0111\xE2y
-      c\xE2y n\xE0y kh\xF4ng l\u1EDBn ch\u1EB7t \u0111\u01B0\u1EE3c"
-    sceneName: Core 1
-    minCell: {x: -26, y: 21, z: 0}
-    maxCell: {x: -22, y: 23, z: 0}
-    scatterSettings:
-      source: 0
-      density: 0.15
-      randomSeed: 12345
-      minimumCellSpacing: 1
-      minimumBananaStage: 0
-      maximumBananaStage: 7
-      randomScaleRange: {x: 1, y: 1}
-      addCollider: 1
-      requireVisibleMapTile: 1
-      skipWaterCells: 1
-      autoSaveScene: 1
   - regionName: "V\xF9ng tr\u1ED3ng c\xE2y b\xECnh th\u01B0\u1EDDng, c\xE2y l\xE2u
       n\u0103m c\u0169ng c\xF3 th\u1EC3 tr\u1ED3ng tr\xEAn n\xE0y"
     sceneName: Core 1
@@ -731,22 +649,6 @@ MonoBehaviour:
     sceneName: Core 1
     minCell: {x: -42, y: -11, z: 0}
     maxCell: {x: -23, y: -2, z: 0}
-    scatterSettings:
-      source: 0
-      density: 0.15
-      randomSeed: 12345
-      minimumCellSpacing: 1
-      minimumBananaStage: 0
-      maximumBananaStage: 7
-      randomScaleRange: {x: 1, y: 1}
-      addCollider: 1
-      requireVisibleMapTile: 1
-      skipWaterCells: 1
-      autoSaveScene: 1
-  - regionName: "\u0111\u1EB7t box colider 7"
-    sceneName: Core 1
-    minCell: {x: 9, y: -7, z: 0}
-    maxCell: {x: 19, y: -2, z: 0}
     scatterSettings:
       source: 0
       density: 0.15

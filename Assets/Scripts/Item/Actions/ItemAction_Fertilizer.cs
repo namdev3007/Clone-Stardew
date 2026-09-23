@@ -1,3 +1,4 @@
+using Audio;
 using Entity_Components.Player;
 using Item.Inventory;
 using Referencing.Scriptable_Reference;
@@ -28,6 +29,8 @@ namespace Item.Actions
 
             if (gridManager == null || !gridManager.TryFertilizePlot(selector.GetGridSelectionPosition()))
                 yield break;
+
+            GameAudioService.PlayFertilize();
 
             ItemEnergy energy = item.Energy;
             energy.current = Mathf.Max(energy.min, energy.current - 1f);

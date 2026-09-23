@@ -70,6 +70,10 @@ namespace User_Interface
 
         private void OnEnable()
         {
+            if (vietnameseButton == null || englishButton == null)
+            {
+                FindInteractiveReferences();
+            }
             LoadValues();
             BindListeners();
         }

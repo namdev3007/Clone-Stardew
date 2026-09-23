@@ -18,6 +18,13 @@ namespace Item.Actions
         [SerializeField]
         private float speed;
 
+        public float Speed => speed > 0.01f ? speed : 1.5f;
+
+        public void TriggerSuccess()
+        {
+            onSuccess?.Invoke();
+        }
+
         [SerializeField]
         private ScriptableReference gridManagerReference;
 

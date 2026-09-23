@@ -89,4 +89,55 @@ namespace World
             }
         }
     }
+
+    /// <summary>
+    /// Automatically ensures all Map Props on the Dynamic layer have their
+    /// sorting order aligned with their ground contact point at runtime.
+    /// This guarantees that duplicated or repositioned props always sort
+    /// properly with the player even if not saved in editor.
+    /// </summary>
+    public static class MapPropDepthInstaller
+    {
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Initialize()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+                ConfigureScene(SceneManager.GetSceneAt(i));
+        }
+
+        private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            ConfigureScene(scene);
+        }
+
+        public static void ConfigureScene(Scene scene)
+        {
+            if (!scene.IsValid() || !scene.isLoaded)
+                return;
+
+            foreach (GameObject root in scene.GetRootGameObjects())
+            {
+                if (root == null) continue;
+
+                SpriteRenderer[] renderers = root.GetComponentsInChildren<SpriteRenderer>(true);
+                foreach (SpriteRenderer renderer in renderers)
+                {
+                    if (renderer == null || renderer.sprite == null) continue;
+
+                    string name = renderer.gameObject.name;
+                    bool isMapProp = name.StartsWith("Map Prop", StringComparison.OrdinalIgnoreCase) ||
+                                     (renderer.transform.parent != null &&
+                                      string.Equals(renderer.transform.parent.name, "Map Props (Generated)", StringComparison.OrdinalIgnoreCase));
+
+                    if (!isMapProp) continue;
+
+                    renderer.sortingLayerName = MapPropSorting.SortingLayer;
+                    renderer.sortingOrder = MapPropSorting.GetSortingOrder(renderer.sprite, renderer.bounds.min.y);
+                }
+            }
+        }
+    }
 }

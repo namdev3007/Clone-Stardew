@@ -13,12 +13,6 @@ MonoBehaviour:
   m_Name: StartingItems_Player
   m_EditorClassIdentifier: 
   items:
-  - Data: {fileID: 11400000, guid: 01f8d174962102c4d8c5cf00c70f82e5, type: 2}
-    Amount: 200
-    Energy:
-      min: 0
-      max: 0
-      current: 0
   - Data: {fileID: 11400000, guid: 26741901f5e3eb64aade72e03860b605, type: 2}
     Amount: 1
     Energy:

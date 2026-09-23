@@ -1,4 +1,4 @@
-﻿using Plugins.Lowscope.ComponentSaveSystem;
+using Plugins.Lowscope.ComponentSaveSystem;
 using Referencing.Scriptable_Variables.Variables;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -20,6 +20,19 @@ namespace Action.Actions
             {
                 SceneManager.LoadScene(playerScene.Value); 
                 // Last saved scene is loaded through the WarpSystem
+            }
+            else
+            {
+                Data.SaveData fallbackData = new Data.SaveData
+                {
+                    lastScene = "Level_Farm",
+                    playerName = $"Meadow {slotNumber + 1}",
+                    farmName = $"Meadow {slotNumber + 1}",
+                    creationDate = System.DateTime.Now.ToString("O", System.Globalization.CultureInfo.InvariantCulture),
+                    timePlayed = System.TimeSpan.Zero.ToString()
+                };
+                SaveMaster.SetMetaData("savedata", JsonUtility.ToJson(fallbackData));
+                SceneManager.LoadScene(playerScene.Value);
             }
         }
     }

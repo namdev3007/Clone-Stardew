@@ -1,4 +1,5 @@
 using System;
+using Audio;
 using System.Collections.Generic;
 using System.Linq;
 using Interactions;
@@ -187,9 +188,11 @@ namespace World
 
         public static bool CanHoe(Vector3Int cell)
         {
-            // Trellis areas are never hoed: seeds go straight onto the posts.
             SpecialCropAreaController area = FindArea(cell);
-            return area == null && FarmExpansionRuntime.CanHoe(cell);
+            if (area != null)
+                return area.IsRepaired && area.IsPlantingSlot(cell);
+
+            return FarmExpansionRuntime.CanHoe(cell);
         }
 
         /// <summary>True for one of the eight post cells of a repaired trellis area.</summary>
@@ -200,14 +203,9 @@ namespace World
         }
 
         /// <summary>
-        /// Post cells of either trellis, repaired or not. These stay hoed for the
-        /// whole game and must never be reset back to ordinary ground.
+        /// Trellis slots must be hoed by the player after repair before planting.
         /// </summary>
-        public static bool IsPermanentTilledCell(Vector3Int cell)
-        {
-            SpecialCropAreaController area = FindArea(cell);
-            return area != null && area.IsPlantingSlot(cell);
-        }
+        public static bool IsPermanentTilledCell(Vector3Int cell) => false;
 
         public static bool CanPlant(Vector3Int cell, CropDefinition definition)
         {
@@ -275,7 +273,7 @@ namespace World
             progress = progressService;
             config = runtimeConfig;
             BuildEightSlots();
-            EnsurePermanentTilledGround();
+            EnsurePlantingSlotGround();
             FindAuthoredStateVisuals();
             BuildVisuals();
             progress.StateChanged += RefreshState;
@@ -294,7 +292,6 @@ namespace World
             if (UnityEngine.Time.unscaledTime < nextVisualRefresh)
                 return;
             nextVisualRefresh = UnityEngine.Time.unscaledTime + 0.2f;
-            EnsurePermanentTilledGround();
             if (!IsRepaired)
                 return;
 
@@ -606,6 +603,7 @@ namespace World
             string question = areaId == SpecialCropAreaId.CucumberTrellis
                 ? "Repair the cucumber trellis for 30Đ?"
                 : "Repair the dragon fruit field for 30Đ?";
+            GameAudioService.PlaySlotClick();
             window.Configure(new ConfirmationWindow.Configuration
             {
                 acceptOnly = false,
@@ -623,6 +621,7 @@ namespace World
                 !progress.CanRepair(areaId) || !inventory.TryRemoveItemAmount(config.currencyItem, RepairCost))
                 return;
             progress.MarkRepaired(areaId);
+            GameAudioService.PlayUnlockLand();
         }
 
         private static Inventory FindPlayerInventory()
@@ -690,7 +689,7 @@ namespace World
             }
             if (repairedRoot != null)
                 repairedRoot.SetActive(repaired);
-            EnsurePermanentTilledGround();
+            EnsurePlantingSlotGround();
             if (!repaired)
                 return;
 
@@ -702,20 +701,24 @@ namespace World
             }
         }
 
-        private void EnsurePermanentTilledGround()
+        private void EnsurePlantingSlotGround()
         {
             if (gridManager == null)
                 return;
 
-            // The eight trellis cells are authored farm plots. They are hoed
-            // from the beginning and must never fall back to ordinary ground,
-            // regardless of repair, watering, harvesting, reset, or save load.
+            // Ensure underlying dirt tiles exist for the 8 predefined planting slots
+            // so they can be hoed by the player once the area is repaired.
             for (int i = 0; i < slots.Count; i++)
             {
                 Vector3Int cell = slots[i];
                 gridManager.EnsureDirtTile(cell);
-                if (!gridManager.HasDirtHole(cell))
-                    gridManager.SetDirtHoleTile(cell);
+
+                // If not repaired, clear any unplanted dirt hole so locked trellis slots cannot be planted.
+                if (!IsRepaired && gridManager.GetCrop(cell) == null && gridManager.HasDirtHole(cell))
+                {
+                    if (gridManager.DirtHoleTileMap != null)
+                        gridManager.DirtHoleTileMap.SetTile(cell, null);
+                }
             }
         }
     }

@@ -35,18 +35,14 @@ public static class SetupSettingsSoundUI
     /// </summary>
     private const float SectionBackgroundScale = 1.25f;
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background layout sync so manual editor adjustments to Sounds Section are preserved.
+    // Use MenuItem "Tools/UI/Setup Settings Sound UI" if a full rebuild is ever explicitly desired.
     private static void InstallAfterCompile()
     {
-        EditorApplication.delayCall += TryInstall;
-        EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-        EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
     }
 
     private static void OnPlayModeStateChanged(PlayModeStateChange state)
     {
-        if (state == PlayModeStateChange.EnteredEditMode)
-            EditorApplication.delayCall += TryInstall;
     }
 
     private static void TryInstall()
@@ -158,14 +154,18 @@ public static class SetupSettingsSoundUI
             CreateSectionBackground(controlsSection, "Panel Controls Background", settingsBackground,
                 new Vector2(116f, -12f), new Vector2(100f, 128f));
 
-            Image settingsHeader = CreateHeader(panel, "Title Settings", settingsTitle, new Vector2(0f, 68f), new Vector2(90f, 16f));
-            Image soundsHeader = CreateHeader(soundsSection, "Title Sounds", soundsTitle, new Vector2(-116f, 48f), new Vector2(90f, 16f));
-            Image languageHeader = CreateHeader(languageSection, "Title Language", languageTitle, new Vector2(0f, 48f), new Vector2(90f, 16f));
-            Image controlsHeader = CreateHeader(controlsSection, "Title Controls", controlsTitle, new Vector2(116f, 48f), new Vector2(90f, 16f));
-            ConfigureLocalizedHeader(settingsHeader, settingsTitle, settingsTitleVi);
-            ConfigureLocalizedHeader(soundsHeader, soundsTitle, soundsTitleVi);
-            ConfigureLocalizedHeader(languageHeader, languageTitle, languageTitleVi);
-            ConfigureLocalizedHeader(controlsHeader, controlsTitle, controlsTitleVi);
+            Image settingsHeader = CreateHeader(panel, "Title Settings", settingsTitle, new Vector2(0f, 68f), new Vector2(137f, 29f));
+            Image soundsHeader = CreateHeader(soundsSection, "Title Sounds", soundsTitle, new Vector2(-116f, 48f), new Vector2(76f, 16f));
+            Image languageHeader = CreateHeader(languageSection, "Title Language", languageTitle, new Vector2(0f, 48f), new Vector2(103f, 16f));
+            Image controlsHeader = CreateHeader(controlsSection, "Title Controls", controlsTitle, new Vector2(116f, 48f), new Vector2(103f, 16f));
+            ConfigureLocalizedHeader(settingsHeader, settingsTitle, settingsTitleVi,
+                new Vector2(137f, 29f), new Vector2(128f, 48f), new Vector2(0f, 68f), new Vector2(0f, 70f));
+            ConfigureLocalizedHeader(soundsHeader, soundsTitle, soundsTitleVi,
+                new Vector2(76f, 16f), new Vector2(105f, 27f), new Vector2(-116f, 48f), new Vector2(-116f, 46f));
+            ConfigureLocalizedHeader(languageHeader, languageTitle, languageTitleVi,
+                new Vector2(103f, 16f), new Vector2(97f, 21f), new Vector2(0f, 48f), new Vector2(0f, 48f));
+            ConfigureLocalizedHeader(controlsHeader, controlsTitle, controlsTitleVi,
+                new Vector2(103f, 16f), new Vector2(118f, 26f), new Vector2(116f, 48f), new Vector2(116f, 48f));
 
             Slider main = CreateVolumeControl(soundsSection, "Main", -142f, 1f, mainLabel, track, soundOn,
                 out Image mainHandle);
@@ -267,7 +267,8 @@ public static class SetupSettingsSoundUI
         return header;
     }
 
-    private static void ConfigureLocalizedHeader(Image image, Sprite english, Sprite vietnamese)
+    private static void ConfigureLocalizedHeader(Image image, Sprite english, Sprite vietnamese,
+        Vector2 englishSize, Vector2 vietnameseSize, Vector2 englishPos = default, Vector2 vietnamesePos = default)
     {
         if (image == null)
             return;
@@ -276,8 +277,9 @@ public static class SetupSettingsSoundUI
         if (localized == null)
             localized = image.gameObject.AddComponent<LocalizedSpriteButton>();
         localized.Configure(image, null, english, null, vietnamese, null, false);
-        Vector2 englishSize = image.rectTransform.sizeDelta;
-        localized.ConfigureSizes(englishSize, englishSize);
+        localized.ConfigureSizes(englishSize, vietnameseSize);
+        if (englishPos != Vector2.zero || vietnamesePos != Vector2.zero)
+            localized.ConfigurePositions(englishPos, vietnamesePos);
     }
 
     private static void ConfigureOpenSceneHeaders(Sprite background, Sprite settings, Sprite sounds,
@@ -316,13 +318,17 @@ public static class SetupSettingsSoundUI
                 new Vector2(116f, -12f), new Vector2(100f, 128f));
 
             ConfigureSceneHeader(panel, "Title Settings", settings, settingsVi,
-                new Vector2(0f, 68f), new Vector2(90f, 16f));
+                new Vector2(0f, 68f), new Vector2(0f, 70f),
+                new Vector2(137f, 29f), new Vector2(128f, 48f));
             ConfigureSceneHeader(soundsSection, "Title Sounds", sounds, soundsVi,
-                new Vector2(-116f, 48f), new Vector2(90f, 16f));
+                new Vector2(-116f, 48f), new Vector2(-116f, 46f),
+                new Vector2(76f, 16f), new Vector2(105f, 27f));
             ConfigureSceneHeader(languageSection, "Title Language", language, languageVi,
-                new Vector2(0f, 48f), new Vector2(90f, 16f));
+                new Vector2(0f, 48f), new Vector2(0f, 48f),
+                new Vector2(103f, 16f), new Vector2(97f, 21f));
             ConfigureSceneHeader(controlsSection, "Title Controls", controls, controlsVi,
-                new Vector2(116f, 48f), new Vector2(90f, 16f));
+                new Vector2(116f, 48f), new Vector2(116f, 48f),
+                new Vector2(103f, 16f), new Vector2(118f, 26f));
             Transform backButton = panel.parent != null ? panel.parent.Find("Button Back To Pause") : null;
             if (backButton != null)
                 backButton.gameObject.SetActive(true);
@@ -344,13 +350,14 @@ public static class SetupSettingsSoundUI
     }
 
     private static void ConfigureSceneHeader(Transform panel, string name, Sprite english, Sprite vietnamese,
-        Vector2 position, Vector2 size)
+        Vector2 englishPos, Vector2 vietnamesePos, Vector2 englishSize, Vector2 vietnameseSize)
     {
         Transform target = panel.Find(name);
         if (target != null)
         {
-            SetRect((RectTransform)target, Vector2.one * 0.5f, position, size);
-            ConfigureLocalizedHeader(target.GetComponent<Image>(), english, vietnamese);
+            SetRect((RectTransform)target, Vector2.one * 0.5f, englishPos, englishSize);
+            ConfigureLocalizedHeader(target.GetComponent<Image>(), english, vietnamese,
+                englishSize, vietnameseSize, englishPos, vietnamesePos);
         }
     }
 

@@ -2,6 +2,7 @@ using Entity_Components.Interfaces;
 using Event.Events;
 using Referencing.Scriptable_Reference;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using World;
 
 namespace Entity_Components.Player
@@ -30,7 +31,7 @@ namespace Entity_Components.Player
         private float selectionTileDistance;
 
         [SerializeField]
-        private Vector2 gridOffset = new Vector3(-0.08f, -0.08f);
+        private Vector2 gridOffset = new Vector2(0.08f, 0.08f);
 
         [SerializeField]
         private Vector2 selectionViewOffset;
@@ -45,31 +46,50 @@ namespace Entity_Components.Player
 
         private bool displaySelectionView;
         private bool frozen;
+        private bool isPaused;
         private Vector2 lastMoveDirection;
+        private UnityEngine.Camera mainCamera;
+
+        private const float PulseSpeed = 5.5f;
+        private const float MinAlpha = 0.80f;
+        private const float MaxAlpha = 1.0f;
 
         private void Awake()
         {
             mouseWorldInput?.AddListener(OnMouseMove);
             onGamePauzed?.AddListener(OnGamePauze);
 
-            selectionGameObject = new GameObject();
-            selectionGameObject.transform.SetParent(this.transform);
+            selectionGameObject = new GameObject("SelectionCursor");
+            // Do not parent to this.transform: Player's SortingGroup traps children
+            // and blocks independent depth-sorting against tiles and props.
             selectionSpriteRenderer = selectionGameObject.AddComponent<SpriteRenderer>();
             selectionSpriteRenderer.sprite = cursorSprite;
-            selectionSpriteRenderer.sortingOrder = -500;
-            selectionSpriteRenderer.color = new Color(1, 1, 1, 0.25f);
-
-#if UNITY_EDITOR
-            selectionGameObject.name = "SelectionCursor";
-#endif
+            selectionSpriteRenderer.sortingLayerName = "Dynamic";
+            selectionSpriteRenderer.sortingOrder = 0;
+            selectionSpriteRenderer.color = Color.white;
+            selectionGameObject.SetActive(false);
 
             gridManagerReference.AddListener(OnFoundGridReference);
+        }
 
+        private void OnDisable()
+        {
+            if (selectionGameObject != null)
+            {
+                selectionGameObject.SetActive(false);
+            }
         }
 
         private void OnDestroy()
         {
             gridManagerReference.RemoveListener(OnFoundGridReference);
+            mouseWorldInput?.RemoveListener(OnMouseMove);
+            onGamePauzed?.RemoveListener(OnGamePauze);
+
+            if (selectionGameObject != null)
+            {
+                Destroy(selectionGameObject);
+            }
         }
 
         private void OnFoundGridReference(GameObject obj)
@@ -79,9 +99,46 @@ namespace Entity_Components.Player
 
         private void OnGamePauze(bool state)
         {
+            isPaused = state;
             if (selectionGameObject != null)
             {
-                selectionGameObject.gameObject.SetActive(state);
+                selectionGameObject.SetActive(false);
+            }
+        }
+
+        private void Update()
+        {
+            if (gridManager == null || frozen || isPaused)
+            {
+                if (selectionGameObject != null && selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(false);
+                return;
+            }
+
+            if (mainCamera == null)
+            {
+                mainCamera = UnityEngine.Camera.main;
+            }
+
+            if (mainCamera != null)
+            {
+                Vector2 currentMouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                Vector3Int currentCell = gridManager.Grid.WorldToCell(currentMouseWorld);
+                if (currentCell != mouseGridLocation)
+                {
+                    OnMouseMove(currentMouseWorld);
+                }
+                else
+                {
+                    UpdateHighlight();
+                }
+            }
+
+            if (selectionGameObject != null && selectionGameObject.activeSelf && selectionSpriteRenderer != null)
+            {
+                float t = 0.5f + 0.5f * Mathf.Sin(UnityEngine.Time.unscaledTime * PulseSpeed);
+                float alpha = Mathf.Lerp(MinAlpha, MaxAlpha, t);
+                selectionSpriteRenderer.color = new Color(1f, 1f, 0.92f, alpha);
             }
         }
 
@@ -89,8 +146,10 @@ namespace Entity_Components.Player
         {
             lastMousePosition = location;
 
-            if (gridManager == null || frozen)
+            if (gridManager == null || frozen || isPaused)
             {
+                if (selectionGameObject != null && selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(false);
                 return;
             }
 
@@ -98,17 +157,10 @@ namespace Entity_Components.Player
 
             if (Vector3Int.Distance(mouseGridLocation, characterGridLocation) <= selectionTileDistance)
             {
-                selectionGameObject.gameObject.SetActive(displaySelectionView);
-
-                if (gridManager != null)
-                {
-                    selectionGameObject.transform.position = (Vector2)gridManager.Grid.CellToWorld(mouseGridLocation) + gridOffset;
-                    currentSelectionGridPosition = mouseGridLocation;
-                }
+                currentSelectionGridPosition = mouseGridLocation;
             }
             else
             {
-                selectionGameObject.gameObject.SetActive(false);
                 Vector2 mouseDirection = location - (Vector2)transform.position;
                 if (mouseDirection.sqrMagnitude > 0.001f)
                 {
@@ -117,6 +169,53 @@ namespace Entity_Components.Player
                         + Vector2.ClampMagnitude(mouseDirection, gridManager.Grid.cellSize.x));
                 }
                 currentSelectionGridPosition = characterForwardGridLocation;
+            }
+
+            UpdateHighlight();
+        }
+
+        private void UpdateHighlight()
+        {
+            if (selectionGameObject == null || gridManager == null || frozen || isPaused)
+            {
+                if (selectionGameObject != null && selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(false);
+                return;
+            }
+
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                if (selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(false);
+                return;
+            }
+
+            if (World.NPC.DialogueUIController.IsDialogueOpen ||
+                User_Interface.BagWindow.AnyOpen ||
+                World.NPC.ShopWindowController.AnyOpen)
+            {
+                if (selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(false);
+                return;
+            }
+
+            bool isSoil = gridManager.IsSoilCell(mouseGridLocation);
+            if (isSoil)
+            {
+                if (!selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(true);
+
+                Vector2 cellCenter = (Vector2)gridManager.Grid.CellToWorld(mouseGridLocation) + gridOffset;
+                Vector3 targetWorldPos = new Vector3(cellCenter.x, cellCenter.y, 0f);
+                selectionGameObject.transform.position = targetWorldPos;
+
+                selectionSpriteRenderer.sortingLayerName = "Dynamic";
+                selectionSpriteRenderer.sortingOrder = Mathf.RoundToInt(targetWorldPos.y * -100f) + 5;
+            }
+            else
+            {
+                if (selectionGameObject.activeSelf)
+                    selectionGameObject.SetActive(false);
             }
         }
 
@@ -152,7 +251,6 @@ namespace Entity_Components.Player
             {
                 return lastMoveDirection;
             }
-
         }
 
         public Vector2 GetMouseLookDirection()
@@ -189,15 +287,21 @@ namespace Entity_Components.Player
         public void Display(bool display)
         {
             displaySelectionView = display;
-
-            selectionGameObject.gameObject.SetActive(display);
+            if (!display && selectionGameObject != null)
+            {
+                selectionGameObject.SetActive(false);
+            }
         }
 
         public void SetFrozen(bool frozen)
         {
             this.frozen = frozen;
 
-            if (!frozen)
+            if (frozen && selectionGameObject != null)
+            {
+                selectionGameObject.SetActive(false);
+            }
+            else if (!frozen)
             {
                 OnMouseMove(lastMousePosition);
             }

@@ -1,3 +1,4 @@
+using Audio;
 using Item.Inventory.Interfaces;
 using Item.Actions;
 using Referencing.Scriptable_Reference;
@@ -57,6 +58,7 @@ namespace Item.Inventory
         private Vector2 amountSizeDelta;
         private Vector3 amountLocalScale;
         private bool amountLayoutCached;
+        private const float DraggedIconScale = 1.5f;
 
         public int GetSlotIndex()
         {
@@ -130,7 +132,9 @@ namespace Item.Inventory
                 references.AmountText.gameObject.SetActive(false);
                 references.energySlider.gameObject.SetActive(false);
 
-                SetHighlighted(false);
+                bool shouldHighlight = references.Inventory != null && references.Inventory.SelectedSlotIndex == slotIndex;
+                isSelected = shouldHighlight;
+                SetHighlighted(shouldHighlight);
 
                 initialized = true;
             }
@@ -331,6 +335,8 @@ namespace Item.Inventory
             if (IsBlockedGameplayBarSlot())
                 return;
 
+            GameAudioService.PlaySlotClick();
+
             if (settings.equipItemOnClick)
             {
                 if (references.Inventory != null)
@@ -358,6 +364,12 @@ namespace Item.Inventory
 
                         references.Icon.transform.SetParent(iconLayerTransform);
                         references.AmountText.transform.SetParent(iconLayerTransform);
+
+                        // Icons rest at 0.75 scale inside a slot. Display the item at
+                        // twice that size while it follows the pointer so tools remain
+                        // clearly visible outside their slot.
+                        references.Icon.transform.localScale = Vector3.one * DraggedIconScale;
+                        references.Icon.transform.SetAsLastSibling();
                     }
 
                     isDragging = true;
@@ -461,7 +473,9 @@ namespace Item.Inventory
             if (IsBlockedGameplayBarSlot())
                 return;
 
-            if (settings.hasSelectionHighlight)
+            GameAudioService.PlaySlotHover();
+
+            if (settings.hasSelectionHighlight && (isSelected || !IsGameplayBarSlot()))
                 SetHighlighted(true);
             ShowItemDescription();
         }
@@ -474,6 +488,17 @@ namespace Item.Inventory
             GetDescriptionPanel()?.ClearIfNotPinned(slotIndex);
         }
 
+        private bool IsGameplayBarSlot()
+        {
+            for (Transform current = transform; current != null; current = current.parent)
+            {
+                if (current.name == "InventoryBar" || current.name == "Inventory Bar")
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// The HUD toolbar stays visible behind the bag, but must not receive UI
         /// pointer events through it. Bag/Quick slots inside Window_Inventory are
@@ -484,13 +509,7 @@ namespace Item.Inventory
             if (!BagWindow.AnyOpen)
                 return false;
 
-            for (Transform current = transform; current != null; current = current.parent)
-            {
-                if (current.name == "InventoryBar" || current.name == "Inventory Bar")
-                    return true;
-            }
-
-            return false;
+            return IsGameplayBarSlot();
         }
 
         private void ShowItemDescription()

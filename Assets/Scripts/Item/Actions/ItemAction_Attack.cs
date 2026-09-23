@@ -1,3 +1,4 @@
+using Audio;
 using Combat;
 using Combat.Data;
 using Entity_Components;
@@ -93,6 +94,8 @@ namespace Item.Actions
                 }
             }
 
+            GameAudioService.PlayChopSwing();
+
             getMover.FreezeMovement(true);
 
             // The release sits in a finally block: an interrupted swing must
@@ -103,11 +106,18 @@ namespace Item.Actions
 
                 if (isCropAxe)
                 {
+                    bool isTree = axeTarget != null || (orchardPropTarget != null && orchardPropTarget.IsTreeOrWood);
                     bool hitAccepted = orchardPropTarget != null
                         ? orchardPropTarget.TryHit()
                         : axeTarget != null && axeTarget.TryUseAxe();
                     if (hitAccepted)
+                    {
                         userInventory.TryConsumeToolDurability(itemIndex);
+                        if (isTree)
+                            GameAudioService.PlayChopTree();
+                        else
+                            GameAudioService.PlayChopFoliage();
+                    }
 
                     yield return new WaitForSeconds(animationTime * 0.5f);
                     yield break;

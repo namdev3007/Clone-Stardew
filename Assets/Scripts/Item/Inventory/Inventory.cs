@@ -183,6 +183,11 @@ namespace Item.Inventory
 
                 obtainedStartingItems = true;
             }
+
+            if (selectedSlotIndex < 0 && inventorySize > 0)
+            {
+                SelectItemByIndex(0);
+            }
         }
 
         #region Public Functionality
@@ -213,12 +218,12 @@ namespace Item.Inventory
         }
 
         /// <summary>
-        /// Consumes a secondary click while the hoe is equipped. Unlike hoeing,
-        /// cancelling a plot is immediate and does not spend tool durability.
+        /// Consumes a secondary click while the hoe is equipped. Plays the hoe swing animation
+        /// and cancels the hoed plot upon impact without spending tool durability.
         /// </summary>
         public bool TryCancelSelectedHoeCell()
         {
-            if (!(GetItem(selectedSlotIndex)?.Data?.Action is ItemAction_DigHole))
+            if (!(GetItem(selectedSlotIndex)?.Data?.Action is ItemAction_DigHole hoeAction))
                 return false;
 
             if (isMovementFrozen)
@@ -226,10 +231,52 @@ namespace Item.Inventory
 
             GridSelector selector = GetComponent<GridSelector>();
             World.GridManager gridManager = selector?.GetGridManager();
-            if (gridManager != null)
-                gridManager.TryCancelHoedCell(selector.GetGridSelectionPosition());
+            if (gridManager == null)
+                return false;
 
+            Vector3Int location = selector.GetGridSelectionPosition();
+            if (!gridManager.HasDirtHole(location) || World.SpecialCropRuntime.IsPermanentTilledCell(location))
+                return false;
+
+            StartCoroutine(CancelHoeCellRoutine(location, selector, gridManager, hoeAction));
             return true;
+        }
+
+        private IEnumerator CancelHoeCellRoutine(Vector3Int location, GridSelector selector, World.GridManager gridManager, ItemAction_DigHole hoeAction)
+        {
+            Aimer aimer = GetComponent<Aimer>();
+            Mover mover = GetComponent<Mover>();
+            aimer?.SetAimDirection(selector.GetMouseLookDirection());
+            mover?.FreezeMovement(true);
+            selector?.SetFrozen(true);
+
+            float speed = hoeAction != null ? hoeAction.Speed : 1.5f;
+            float animationTime = 1f / speed;
+
+            FullBodyPlayerSpriteAnimator[] animators = GetComponentsInChildren<FullBodyPlayerSpriteAnimator>();
+            for (int i = 0; i < animators.Length; i++)
+            {
+                animators[i].PlayAction(FullBodyPlayerSpriteAnimator.ActionType.Hoe, speed);
+            }
+
+            try
+            {
+                yield return new WaitForSeconds(animationTime * 0.5f);
+
+                if (gridManager != null && gridManager.HasDirtHole(location))
+                {
+                    gridManager.TryCancelHoedCell(location);
+                    hoeAction?.TriggerSuccess();
+                }
+
+                yield return new WaitForSeconds(animationTime * 0.5f);
+            }
+            finally
+            {
+                mover?.FreezeMovement(false);
+                if (selector != null)
+                    selector.SetFrozen(false);
+            }
         }
 
         public void SelectItemByIndex(int slotIndex)
@@ -933,9 +980,9 @@ namespace Item.Inventory
             {
                 InventoryItemSave getSave = inventorySaveData.savedItems[i];
 
-                // These tools are managed by StartingItems_Player. Skipping them here
-                // removes the old pickaxe/scythe/sword from existing saves and lets
-                // the current three-tool set be inserted in its configured order.
+                // Only obsolete tools are skipped so they can be replaced by the
+                // current starter set. The watering can must be restored normally:
+                // its saved energy is the amount of water remaining in the can.
                 if (IsManagedStarterTool(getSave.guidString) || IsLegacyKaleSeed(getSave.guidString))
                 {
                     continue;
@@ -1010,7 +1057,6 @@ namespace Item.Inventory
         {
             switch (guidString)
             {
-                case "249ef2e3-4402-4c04-be80-39cb272de1be": // Water Can
                 case "928f42f8-0698-4d62-83f6-4c4bb12b3d0d": // Old Pickaxe
                 case "0c929f40-01fa-4065-b3c5-104edd735469": // Old Scythe
                 case "cd3512d2-0a30-42fa-99b2-f112cd0e5272": // Old Sword

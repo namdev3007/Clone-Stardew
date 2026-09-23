@@ -40,6 +40,8 @@ public static class FarmMapEditModeLoader
         EditorSceneManager.activeSceneChangedInEditMode += OnActiveSceneChanged;
         EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
         EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        EditorSceneManager.sceneSaving -= OnSceneSaving;
+        EditorSceneManager.sceneSaving += OnSceneSaving;
         QueueEnsureVisible();
     }
 
@@ -47,6 +49,24 @@ public static class FarmMapEditModeLoader
     private static void ShowFromMenu()
     {
         EnsureVisible(true);
+    }
+
+    [MenuItem("Tools/Map/Save All Open Farm Scenes %#s")]
+    public static void SaveAllScenesFromMenu()
+    {
+        Scene coreScene = SceneManager.GetSceneByPath(CoreScenePath);
+        if (coreScene.IsValid() && coreScene.isLoaded && coreScene.isDirty)
+            EditorSceneManager.SaveScene(coreScene);
+
+        Scene farmScene = SceneManager.GetSceneByPath(FarmScenePath);
+        if (farmScene.IsValid() && farmScene.isLoaded)
+        {
+            ConfigureMapPropSorting(farmScene);
+            if (farmScene.isDirty)
+                EditorSceneManager.SaveScene(farmScene);
+        }
+
+        Debug.Log("[FarmMapEditModeLoader] Saved all open farm scenes.");
     }
 
     [MenuItem("Tools/Map/Sync Authored Farm Props And Wells")]
@@ -69,25 +89,122 @@ public static class FarmMapEditModeLoader
 
         MoveAuthoredMapObjectsToFarm(coreScene, farmScene);
         ConfigureFarmWells(farmScene);
+        ConfigureFarmFenceSorting(farmScene);
+        ConfigureMapPropSorting(farmScene);
         SceneView.RepaintAll();
+    }
+
+    [MenuItem("Tools/Map/Sync All Map Props Sorting")]
+    public static void SyncMapPropsFromMenu()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning("Stop Play Mode before syncing map props.");
+            return;
+        }
+
+        Scene farmScene = SceneManager.GetSceneByPath(FarmScenePath);
+        bool openedHere = false;
+        if (!farmScene.IsValid() || !farmScene.isLoaded)
+        {
+            farmScene = EditorSceneManager.OpenScene(FarmScenePath, OpenSceneMode.Additive);
+            openedHere = true;
+        }
+
+        if (!farmScene.IsValid() || !farmScene.isLoaded)
+        {
+            Debug.LogError("Could not open Level_Farm for syncing prop sorting.");
+            return;
+        }
+
+        bool changed = ConfigureMapPropSorting(farmScene);
+        Debug.Log(changed ? "Finished syncing Map Prop sorting orders in Level_Farm." : "All Map Props sorting orders in Level_Farm are already up to date.");
+
+        if (openedHere)
+        {
+            EditorSceneManager.CloseScene(farmScene, true);
+        }
+        else
+        {
+            SceneView.RepaintAll();
+        }
+    }
+
+    [InitializeOnLoadMethod]
+    private static void QueuePropSortingCheck()
+    {
+        EditorApplication.delayCall += () =>
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
+                return;
+
+            SyncMapPropsFromMenu();
+        };
     }
 
     private static void OnSceneOpened(Scene scene, OpenSceneMode mode)
     {
         if (scene.path == CoreScenePath)
             QueueEnsureVisible();
+        else if (scene.path == FarmScenePath)
+            ConfigureMapPropSorting(scene);
     }
 
     private static void OnActiveSceneChanged(Scene previous, Scene next)
     {
         if (next.path == CoreScenePath)
             QueueEnsureVisible();
+        else if (next.path == FarmScenePath)
+            ConfigureMapPropSorting(next);
     }
+
+    private static bool isSavingScenes;
 
     private static void OnPlayModeStateChanged(PlayModeStateChange state)
     {
         if (state == PlayModeStateChange.EnteredEditMode)
             QueueEnsureVisible();
+        else if (state == PlayModeStateChange.ExitingEditMode)
+        {
+            Scene farmScene = SceneManager.GetSceneByPath(FarmScenePath);
+            if (farmScene.IsValid() && farmScene.isLoaded)
+            {
+                ConfigureMapPropSorting(farmScene);
+                if (farmScene.isDirty)
+                {
+                    EditorSceneManager.SaveScene(farmScene);
+                    Debug.Log("[FarmMapEditModeLoader] Auto-saved modified Level_Farm before entering Play Mode.");
+                }
+            }
+        }
+    }
+
+    private static void OnSceneSaving(Scene scene, string path)
+    {
+        if (isSavingScenes)
+            return;
+
+        if (string.Equals(path, CoreScenePath, StringComparison.OrdinalIgnoreCase))
+        {
+            Scene farmScene = SceneManager.GetSceneByPath(FarmScenePath);
+            if (farmScene.IsValid() && farmScene.isLoaded && farmScene.isDirty)
+            {
+                try
+                {
+                    isSavingScenes = true;
+                    EditorSceneManager.SaveScene(farmScene);
+                    Debug.Log("[FarmMapEditModeLoader] Auto-saved modified Level_Farm along with Core 1.");
+                }
+                finally
+                {
+                    isSavingScenes = false;
+                }
+            }
+        }
+        else if (string.Equals(path, FarmScenePath, StringComparison.OrdinalIgnoreCase) && scene.IsValid() && scene.isLoaded)
+        {
+            ConfigureMapPropSorting(scene);
+        }
     }
 
     private static void QueueEnsureVisible()
@@ -133,6 +250,7 @@ public static class FarmMapEditModeLoader
         MoveAuthoredMapObjectsToFarm(coreScene, farmScene);
         ConfigureFarmWells(farmScene);
         ConfigureFarmFenceSorting(farmScene);
+        ConfigureMapPropSorting(farmScene);
 
         SceneView.RepaintAll();
     }
@@ -343,6 +461,55 @@ public static class FarmMapEditModeLoader
             EditorSceneManager.MarkSceneDirty(farmScene);
             EditorSceneManager.SaveScene(farmScene);
         }
+    }
+
+    public static bool ConfigureMapPropSorting(Scene farmScene)
+    {
+        if (!farmScene.IsValid() || !farmScene.isLoaded)
+            return false;
+
+        bool changed = false;
+        GameObject[] roots = farmScene.GetRootGameObjects();
+        foreach (GameObject root in roots)
+        {
+            if (root == null)
+                continue;
+
+            SpriteRenderer[] renderers = root.GetComponentsInChildren<SpriteRenderer>(true);
+            foreach (SpriteRenderer renderer in renderers)
+            {
+                if (renderer == null || renderer.sprite == null)
+                    continue;
+
+                string name = renderer.gameObject.name;
+                bool isMapProp = name.StartsWith("Map Prop", StringComparison.OrdinalIgnoreCase) ||
+                                 (renderer.transform.parent != null &&
+                                  string.Equals(renderer.transform.parent.name, "Map Props (Generated)", StringComparison.OrdinalIgnoreCase));
+
+                if (!isMapProp)
+                    continue;
+
+                int targetOrder = World.MapPropSorting.GetSortingOrder(renderer.sprite, renderer.bounds.min.y);
+
+                if (renderer.sortingLayerName == World.MapPropSorting.SortingLayer && renderer.sortingOrder == targetOrder)
+                    continue;
+
+                Undo.RecordObject(renderer, "Update Map Prop Sorting Order");
+                renderer.sortingLayerName = World.MapPropSorting.SortingLayer;
+                renderer.sortingOrder = targetOrder;
+                EditorUtility.SetDirty(renderer);
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            EditorSceneManager.MarkSceneDirty(farmScene);
+            EditorSceneManager.SaveScene(farmScene);
+            Debug.Log("Synchronized Map Prop sorting orders in Level_Farm.");
+        }
+
+        return changed;
     }
 }
 #endif

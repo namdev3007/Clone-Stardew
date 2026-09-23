@@ -1,4 +1,5 @@
 using System;
+using Audio;
 using System.Collections.Generic;
 using Item;
 using Item.Inventory;
@@ -95,7 +96,27 @@ namespace World.NPC
         private void Awake()
         {
             ResolveMissingControls();
+            SetBagAmountTextWhite();
             BindButtons();
+        }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            SetBagAmountTextWhite();
+        }
+#endif
+
+        private void SetBagAmountTextWhite()
+        {
+            if (bagSlots == null)
+                return;
+
+            foreach (SlotView slot in bagSlots)
+            {
+                if (slot?.secondaryText != null)
+                    slot.secondaryText.color = Color.white;
+            }
         }
 
         private void Update()
@@ -172,6 +193,7 @@ namespace World.NPC
             buyButton = authoredBuy;
             sellButton = authoredSell;
             backButton = authoredBack;
+            SetBagAmountTextWhite();
         }
 
         public void Open(NpcShopCatalog catalog, System.Action closed)
@@ -244,12 +266,14 @@ namespace World.NPC
             {
                 int captured = i;
                 shopSlots[i]?.button?.onClick.AddListener(() => SelectShopSlot(captured));
+                AddHoverSound(shopSlots[i]?.button);
             }
 
             for (int i = 0; i < bagSlots.Length; i++)
             {
                 int captured = i;
                 bagSlots[i]?.button?.onClick.AddListener(() => SelectBagSlot(captured));
+                AddHoverSound(bagSlots[i]?.button);
             }
 
             previousPageButton?.onClick.AddListener(PreviousPage);
@@ -261,6 +285,15 @@ namespace World.NPC
             buyButton?.onClick.AddListener(BuySelectedItem);
             sellButton?.onClick.AddListener(SellSelectedItem);
             buttonsBound = true;
+        }
+
+        private static void AddHoverSound(Button button)
+        {
+            if (button == null) return;
+            EventTrigger trigger = button.gameObject.GetComponent<EventTrigger>() ?? button.gameObject.AddComponent<EventTrigger>();
+            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
+            entry.callback.AddListener((_) => GameAudioService.PlaySlotHover());
+            trigger.triggers.Add(entry);
         }
 
         private void SubscribeToInventorySize()
@@ -324,6 +357,8 @@ namespace World.NPC
                 RectTransform rect = (RectTransform)view.button.transform;
                 rect.localScale = Vector3.one;
                 rect.sizeDelta = new Vector2(BagSlotSize, BagSlotSize);
+                if (view.secondaryText != null)
+                    view.secondaryText.color = Color.white;
                 BindBagDrag(view, i);
             }
 
@@ -516,7 +551,11 @@ namespace World.NPC
                 if (child.name == "Image_Icon")
                     icon = child.GetComponent<Image>();
                 else if (child.name == "Text_Amount")
+                {
                     amount = child.GetComponent<TextMeshProUGUI>();
+                    if (amount != null)
+                        amount.color = Color.white;
+                }
             }
 
             return new SlotView
@@ -620,6 +659,7 @@ namespace World.NPC
                 return;
             }
 
+            GameAudioService.PlayCoin();
             quantity = 1;
             RefreshBagSlots();
             RefreshSelection();
@@ -659,6 +699,7 @@ namespace World.NPC
             InventoryItem remaining = playerInventory.GetItem(slotIndex);
             if (remaining == null)
                 selectedBagIndex = -1;
+            GameAudioService.PlayCoin();
             quantity = 1;
             RefreshBagSlots();
             RefreshSelection();
@@ -743,6 +784,7 @@ namespace World.NPC
 
         private void SelectShopSlot(int visibleRow)
         {
+            GameAudioService.PlaySlotClick();
             int entryIndex = pageIndex * EntriesPerPage + visibleRow;
             if (entryIndex < 0 || entryIndex >= visibleEntries.Count)
                 return;
@@ -757,6 +799,7 @@ namespace World.NPC
 
         private void SelectBagSlot(int visibleBagIndex)
         {
+            GameAudioService.PlaySlotClick();
             InventoryItem item = playerInventory?.GetItem(FirstVisibleInventoryIndex + visibleBagIndex);
             if (item == null)
                 return;

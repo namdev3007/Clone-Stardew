@@ -1,3 +1,4 @@
+using Audio;
 using Plugins.Lowscope.ComponentSaveSystem.Interfaces;
 using Referencing.Scriptable_Assets;
 using System.Collections;
@@ -135,6 +136,7 @@ namespace Item
                 Inventory.Inventory getInventory = gameObject.GetComponent<Inventory.Inventory>();
 
                 getInventory.AddItem(configuration.data, configuration.amount);
+                GameAudioService.PlayItemPickup();
             }
 
             this.gameObject.SetActive(false);

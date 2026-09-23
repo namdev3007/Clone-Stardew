@@ -19,7 +19,8 @@ public static class BuildSpecialCropMapPreview
     private const string LockSignPath = "Assets/Sprites/props-items/ban-khoa.png";
     private static readonly Vector3Int RemovedDecorativeBananaCell = new Vector3Int(-22, 21, 0);
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background rebuild so manual BoxCollider2D edits in scene are not deleted/overwritten.
+    // Use MenuItem "Tools/Farming/Build Special Crop Areas In Map" if a rebuild from MapRegionCollection is explicitly needed.
     private static void QueueBuild()
     {
         EditorApplication.delayCall += () =>
@@ -325,11 +326,8 @@ public static class BuildSpecialCropMapPreview
         for (int i = 0; i < slots.Count; i++)
         {
             Vector3Int cell = slots[i];
-            // Trellis planting cells are permanently tilled, including the
-            // locked Edit Mode preview. Runtime enforces the same invariant.
+            // Ensure underlying dirt exists for the 8 predefined planting slots.
             grid.EnsureDirtTile(cell);
-            if (!grid.HasDirtHole(cell))
-                grid.SetDirtHoleTile(cell);
 
             GameObject post = new GameObject($"Planting Post {i + 1} [{cell.x},{cell.y}]");
             post.transform.SetParent(slotsRoot.transform, false);

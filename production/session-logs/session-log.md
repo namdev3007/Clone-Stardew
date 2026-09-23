@@ -1179,3 +1179,94 @@ Assets/Tiles/Map Layout/Map Layout Preview.prefab
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260922_222525
+### Uncommitted Changes
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Utilities.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Utilities.dll.meta
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+---
+
+## Session End: 20260922_232404
+### Uncommitted Changes
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Utilities.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Utilities.dll.meta
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+Cơ chế (1).docx
+production/session-logs/session-log.md
+---
+
+## Session End: 20260922_233349
+### Uncommitted Changes
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Utilities.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Utilities.dll.meta
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+Cơ chế (1).docx
+production/session-logs/session-log.md
+---
+
+## Session End: 20260922_233627
+### Uncommitted Changes
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Utilities.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Utilities.dll.meta
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+Cơ chế (1).docx
+production/session-logs/session-log.md
+---
+
+## Session End: 20260922_233713
+### Uncommitted Changes
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEditor/Sirenix.Utilities.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Serialization.dll.meta
+Assets/Plugins/Sirenix/Assemblies/NoEmitAndNoEditor/Sirenix.Utilities.dll.meta
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+Cơ chế (1).docx
+production/session-logs/session-log.md
+---
+

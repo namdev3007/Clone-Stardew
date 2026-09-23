@@ -1,3 +1,4 @@
+using Audio;
 using Entity_Components.Interfaces;
 using UnityEngine;
 
@@ -40,6 +41,8 @@ namespace Entity_Components.Character
         private ActionType action;
         private UnityEngine.Sprite heldItem;
         private SpriteRenderer heldItemRenderer;
+        private float footstepTimer;
+        private const float FootstepInterval = 0.35f;
 
         public void SetHeldItem(UnityEngine.Sprite itemSprite)
         {
@@ -128,6 +131,20 @@ namespace Entity_Components.Character
             target.flipX = Mathf.Abs(direction.x) >= Mathf.Abs(direction.y) && direction.x < 0f;
             UpdateHeldItemRenderer(displayingHeldItem, frame);
             elapsed += UnityEngine.Time.deltaTime;
+
+            if (action == ActionType.None && velocity > 0.01f)
+            {
+                footstepTimer -= UnityEngine.Time.deltaTime;
+                if (footstepTimer <= 0f)
+                {
+                    footstepTimer = FootstepInterval;
+                    GameAudioService.PlayFootstep();
+                }
+            }
+            else
+            {
+                footstepTimer = 0.12f;
+            }
         }
 
         private void EnsureHeldItemRenderer()

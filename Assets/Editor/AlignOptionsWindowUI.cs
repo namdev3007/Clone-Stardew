@@ -16,12 +16,11 @@ public static class AlignOptionsWindowUI
     private const string OkPath = "Assets/Sprites/Buttons/tieng-anh/ok.png";
     private const string ConfirmPath = "Assets/Sprites/Buttons/tieng-viet/xac-nhan.png";
     private const string TitlesPath = "Assets/Sprites/settings-loadgame-ui/text-dùng cho ui-settings/";
-    private const int Version = 2;
-    private static readonly Vector2 CommonTitleSize = new Vector2(90f, 16f);
+    private const int Version = 3;
 
     private static string VersionKey => "Meadom.AlignOptionsWindow." + Application.dataPath.GetHashCode();
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background alignment so manual edits are preserved
     private static void QueueInstall()
     {
         EditorApplication.delayCall += () =>
@@ -88,13 +87,17 @@ public static class AlignOptionsWindowUI
         AlignSection(panel, "Language Section");
         AlignSection(panel, "Controls Section");
         AlignTitle(panel, "Title Settings", "text-settings.png", "text-cài đặt.png",
-            new Vector2(0f, 68f));
+            new Vector2(0f, 68f), new Vector2(0f, 70f),
+            new Vector2(137f, 29f), new Vector2(128f, 48f));
         AlignTitle(panel, "Title Sounds", "text-sounds.png", "text-âm thanh.png",
-            new Vector2(-116f, 48f));
+            new Vector2(-116f, 48f), new Vector2(-116f, 46f),
+            new Vector2(76f, 16f), new Vector2(105f, 27f));
         AlignTitle(panel, "Title Language", "text-language.png", "text-ngôn ngữ.png",
-            new Vector2(0f, 48f));
+            new Vector2(0f, 48f), new Vector2(0f, 48f),
+            new Vector2(103f, 16f), new Vector2(97f, 21f));
         AlignTitle(panel, "Title Controls", "text-controls.png", "text-điều khiển.png",
-            new Vector2(116f, 48f));
+            new Vector2(116f, 48f), new Vector2(116f, 48f),
+            new Vector2(103f, 16f), new Vector2(118f, 26f));
     }
 
     private static void AlignSection(Transform panel, string name)
@@ -170,7 +173,7 @@ public static class AlignOptionsWindowUI
     }
 
     private static void AlignTitle(Transform panel, string name, string englishFile, string vietnameseFile,
-        Vector2 position)
+        Vector2 englishPos, Vector2 vietnamesePos, Vector2 englishSize, Vector2 vietnameseSize)
     {
         Transform found = panel.GetComponentsInChildren<Transform>(true).FirstOrDefault(child => child.name == name);
         if (found == null)
@@ -182,13 +185,14 @@ public static class AlignOptionsWindowUI
         if (image == null || english == null || vietnamese == null)
             return;
 
-        SetPosition((RectTransform)found, position, CommonTitleSize);
+        SetPosition((RectTransform)found, englishPos, englishSize);
         image.preserveAspect = true;
         image.raycastTarget = false;
         LocalizedSpriteButton localized = found.GetComponent<LocalizedSpriteButton>() ??
                                           found.gameObject.AddComponent<LocalizedSpriteButton>();
         localized.Configure(image, null, english, null, vietnamese, null, false);
-        localized.ConfigureSizes(CommonTitleSize, CommonTitleSize);
+        localized.ConfigureSizes(englishSize, vietnameseSize);
+        localized.ConfigurePositions(englishPos, vietnamesePos);
     }
 
     private static Vector2 SizeFor(Sprite sprite, float height, float maxWidth)
