@@ -38,13 +38,32 @@ namespace World
     }
 
     /// <summary>
-    /// Installs depth sorting on the two authored upright fence posts without
-    /// changing their SpriteRenderer Order in Layer. This also covers play mode
-    /// when the farm scene is loaded after Core 1.
+    /// Installs depth sorting on authored fences (including the upright fence posts
+    /// and the cucumber trellis boundary fences like hàng rào_3 (1)) without changing their
+    /// authored SpriteRenderer Order in Layer. This also covers play mode when the farm
+    /// scene is loaded after Core 1.
     /// </summary>
     public static class AuthoredFenceDepthInstaller
     {
-        private const string TargetName = "hàng rào_0 (1)";
+        public static bool IsTargetFence(GameObject go)
+        {
+            if (go == null) return false;
+            string name = go.name;
+            if (string.Equals(name, "hàng rào_0 (1)", StringComparison.Ordinal) ||
+                string.Equals(name, "hàng rào_3 (1)", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (go.transform.parent != null &&
+                string.Equals(go.transform.parent.name, "ruộng dưa chuột", StringComparison.OrdinalIgnoreCase) &&
+                name.IndexOf("hàng rào", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialize()
@@ -61,7 +80,7 @@ namespace World
             ConfigureScene(scene);
         }
 
-        private static void ConfigureScene(Scene scene)
+        public static void ConfigureScene(Scene scene)
         {
             if (!scene.IsValid() || !scene.isLoaded)
                 return;
@@ -71,7 +90,7 @@ namespace World
                 SpriteRenderer[] renderers = root.GetComponentsInChildren<SpriteRenderer>(true);
                 foreach (SpriteRenderer renderer in renderers)
                 {
-                    if (renderer == null || !string.Equals(renderer.gameObject.name, TargetName, StringComparison.Ordinal))
+                    if (renderer == null || !IsTargetFence(renderer.gameObject))
                         continue;
 
                     renderer.sortingLayerName = MapPropSorting.SortingLayer;

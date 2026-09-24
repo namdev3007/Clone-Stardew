@@ -8,6 +8,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using World;
+using World.Objects;
 
 public static class BuildSpecialCropMapPreview
 {
@@ -81,9 +82,11 @@ public static class BuildSpecialCropMapPreview
             ConfigureAuthoredCucumberState(scene, false);
 
             BuildArea(root.transform, "Cucumber Trellis", cucumber, gridManager,
-                cucumberLock, First(config.cucumberStages), Array.Empty<Sprite>(), false, lockSign);
+                cucumberLock, First(config.cucumberStages), Array.Empty<Sprite>(), false, lockSign,
+                config.cucumberEmptyPostAnchor, config.cucumberEmptyPostAnchorPixel);
             BuildArea(root.transform, "Dragon Fruit Field", dragon, gridManager,
-                dragonLock, First(config.dragonFruitStages), config.dragonFruitBrokenSprites, true, lockSign);
+                dragonLock, First(config.dragonFruitStages), config.dragonFruitBrokenSprites, true, lockSign,
+                config.dragonFruitEmptyPostAnchor, config.dragonFruitEmptyPostAnchorPixel);
             BuildNamedRegionColliders(scene, config.regions, gridManager);
             BuildNamedRegionContent(scene, config.regions, gridManager);
 
@@ -120,38 +123,31 @@ public static class BuildSpecialCropMapPreview
             return;
 
         const string rootName = "Named Region Box Colliders";
-        // Remove the temporary root-level objects created by the old YAML based
-        // builder. They duplicate these colliders and can leave broken SceneRoot
-        // references when Unity repairs the scene during import.
-        foreach (GameObject sceneRoot in scene.GetRootGameObjects())
-        {
-            if (sceneRoot.name.StartsWith("đặt box collider [", StringComparison.OrdinalIgnoreCase) ||
-                sceneRoot.name.StartsWith("đặt box colider [", StringComparison.OrdinalIgnoreCase) ||
-                sceneRoot.name.StartsWith("đặt boxcolider [", StringComparison.OrdinalIgnoreCase))
-            {
-                UnityEngine.Object.DestroyImmediate(sceneRoot);
-            }
-        }
-
         Transform oldRoot = FindRoot(scene, rootName);
-        if (oldRoot != null)
-            UnityEngine.Object.DestroyImmediate(oldRoot.gameObject);
+        GameObject root = oldRoot != null ? oldRoot.gameObject : new GameObject(rootName);
+        if (oldRoot == null)
+            SceneManager.MoveGameObjectToScene(root, scene);
 
-        GameObject root = new GameObject(rootName);
-        SceneManager.MoveGameObjectToScene(root, scene);
         int count = 0;
         foreach (MapRegionDefinition region in collection.Regions)
         {
             if (region == null || !IsColliderRegion(region.RegionName))
                 continue;
 
+            Transform existingCollider = FindExistingRegionCollider(root.transform, region);
+            if (existingCollider != null)
+            {
+                count++;
+                continue;
+            }
+
+            string targetName = $"{region.RegionName} [{region.MinCell.x},{region.MinCell.y} to {region.MaxCell.x},{region.MaxCell.y}]";
             Vector3 cellSize = grid.Grid.cellSize;
             Vector3 minWorld = grid.Grid.CellToWorld(region.MinCell);
             Vector3 maxWorld = grid.Grid.CellToWorld(region.MaxCell + new Vector3Int(1, 1, 0));
             Vector3 size = maxWorld - minWorld;
 
-            GameObject colliderObject = new GameObject(
-                $"{region.RegionName} [{region.MinCell.x},{region.MinCell.y} to {region.MaxCell.x},{region.MaxCell.y}]");
+            GameObject colliderObject = new GameObject(targetName);
             colliderObject.transform.SetParent(root.transform, false);
             colliderObject.transform.position = (minWorld + maxWorld) * 0.5f;
             BoxCollider2D collider = colliderObject.AddComponent<BoxCollider2D>();
@@ -163,7 +159,36 @@ public static class BuildSpecialCropMapPreview
         }
 
         EditorUtility.SetDirty(root);
-        Debug.Log($"Built {count} named BoxCollider2D regions in Level_Farm.");
+        Debug.Log($"Preserved/verified {count} named BoxCollider2D regions in Level_Farm.");
+    }
+
+    private static Transform FindExistingRegionCollider(Transform root, MapRegionDefinition region)
+    {
+        string coordTag = $"[{region.MinCell.x},{region.MinCell.y} to {region.MaxCell.x},{region.MaxCell.y}]";
+        string targetName = $"{region.RegionName} {coordTag}";
+
+        Transform exact = root.Find(targetName);
+        if (exact != null)
+            return exact;
+
+        string normTarget = NormalizeColliderName(targetName);
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = root.GetChild(i);
+            string childName = child.name;
+            if (NormalizeColliderName(childName).Equals(normTarget, StringComparison.OrdinalIgnoreCase))
+                return child;
+            if (childName.Contains(coordTag) && IsColliderRegion(childName))
+                return child;
+        }
+
+        return null;
+    }
+
+    private static string NormalizeColliderName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return string.Empty;
+        return name.Replace("collider", "colider", StringComparison.OrdinalIgnoreCase).Trim();
     }
 
     private static bool IsColliderRegion(string regionName)
@@ -312,7 +337,8 @@ public static class BuildSpecialCropMapPreview
 
     private static void BuildArea(Transform parent, string name, MapRegionDefinition region,
         GridManager grid, MapRegionDefinition lockRegion, Sprite emptyPost,
-        IReadOnlyList<Sprite> brokenSprites, bool fillEveryBrokenSlot, Sprite lockSprite)
+        IReadOnlyList<Sprite> brokenSprites, bool fillEveryBrokenSlot, Sprite lockSprite,
+        CropStageAnchor postAnchor, Vector2 postAnchorPixel)
     {
         GameObject area = new GameObject(name + " [" + region.RegionName + "]");
         area.transform.SetParent(parent, false);
@@ -323,6 +349,7 @@ public static class BuildSpecialCropMapPreview
         slotsRoot.transform.SetParent(area.transform, false);
         slotsRoot.SetActive(false);
         List<Vector3Int> slots = BuildEightSlots(region);
+        bool isDragonFruit = region != null && region.RegionName.IndexOf("thanh long", StringComparison.OrdinalIgnoreCase) >= 0;
         for (int i = 0; i < slots.Count; i++)
         {
             Vector3Int cell = slots[i];
@@ -332,7 +359,13 @@ public static class BuildSpecialCropMapPreview
             GameObject post = new GameObject($"Planting Post {i + 1} [{cell.x},{cell.y}]");
             post.transform.SetParent(slotsRoot.transform, false);
             post.transform.position = grid.GetWorldLocation(cell);
-            AddSprite(post.transform, "State 0 Visual", emptyPost, 0.5f);
+            AddSprite(post.transform, "State 0 Visual", emptyPost, 0.5f, alignToCell: true, anchor: postAnchor, anchorPixel: postAnchorPixel);
+            if (isDragonFruit)
+            {
+                SpriteRenderer sr = post.GetComponentInChildren<SpriteRenderer>();
+                if (sr != null)
+                    sr.sortingOrder = SpecialCropAreaController.GetDragonFruitSortingOrder(post.transform.position.y);
+            }
 
             BoxCollider2D collider = post.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(0.075f, 0.12f);
@@ -356,7 +389,13 @@ public static class BuildSpecialCropMapPreview
                 GameObject piece = new GameObject($"Broken Post {i + 1} [{cell.x},{cell.y}]");
                 piece.transform.SetParent(brokenRoot.transform, false);
                 piece.transform.position = grid.GetWorldLocation(cell);
-                AddSprite(piece.transform, "Visual", sprite, 0.5f);
+                AddSprite(piece.transform, "Visual", sprite, 0.5f, alignToCell: true);
+                if (isDragonFruit)
+                {
+                    SpriteRenderer sr = piece.GetComponentInChildren<SpriteRenderer>();
+                    if (sr != null)
+                        sr.sortingOrder = SpecialCropAreaController.GetDragonFruitSortingOrder(piece.transform.position.y);
+                }
                 BoxCollider2D collider = piece.AddComponent<BoxCollider2D>();
                 collider.size = new Vector2(0.14f, 0.10f);
                 collider.offset = new Vector2(0f, 0.05f);
@@ -391,9 +430,10 @@ public static class BuildSpecialCropMapPreview
         int maxX = region.MaxCell.x - (region.Width > 2 ? 1 : 0);
         int minY = region.MinCell.y + (region.Height > 2 ? 1 : 0);
         int maxY = region.MaxCell.y - (region.Height > 2 ? 1 : 0);
+        int lowerRowY = minY;
         for (int row = 0; row < 2; row++)
         {
-            int y = Mathf.RoundToInt(Mathf.Lerp(minY, maxY, row));
+            int y = row == 0 ? maxY : lowerRowY;
             for (int column = 0; column < 4; column++)
             {
                 int x = Mathf.RoundToInt(Mathf.Lerp(minX, maxX, column / 3f));
@@ -403,7 +443,13 @@ public static class BuildSpecialCropMapPreview
         return slots;
     }
 
-    private static void AddSprite(Transform parent, string name, Sprite sprite, float scale)
+    /// <summary>
+    /// Post art uses the same cell alignment as the runtime crops. Collider
+    /// offsets stay relative to the legacy anchor: the runtime copies them and
+    /// moves them with the art (SpecialCropAreaController.ShiftColliderWithCellAlignedArt).
+    /// </summary>
+    private static void AddSprite(Transform parent, string name, Sprite sprite, float scale, bool alignToCell = false,
+        CropStageAnchor anchor = CropStageAnchor.Auto, Vector2 anchorPixel = default)
     {
         GameObject visual = new GameObject(name);
         visual.transform.SetParent(parent, false);
@@ -415,9 +461,10 @@ public static class BuildSpecialCropMapPreview
         renderer.sortingOrder = Mathf.RoundToInt(-parent.position.y * 100f);
         if (sprite == null)
             return;
-        float x = (sprite.pivot.x - sprite.rect.width * 0.5f) / sprite.pixelsPerUnit * scale;
-        float y = sprite.pivot.y / sprite.pixelsPerUnit * scale;
-        visual.transform.localPosition = new Vector3(x, y, 0f);
+        Vector2 offset = alignToCell
+            ? CropSpriteAlignment.GetAnchoredOffset(sprite, scale, CropSpriteAlignment.DefaultCellHeight, anchor, anchorPixel)
+            : CropSpriteAlignment.GetLegacyBottomCenterOffset(sprite, scale);
+        visual.transform.localPosition = new Vector3(offset.x, offset.y, 0f);
     }
 
     private static Sprite First(Sprite[] sprites) => sprites != null && sprites.Length > 0 ? sprites[0] : null;

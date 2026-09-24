@@ -24,6 +24,8 @@ namespace Item.Actions
 
         private GridManager gridManager;
 
+        public CropDefinition CropDefinition => cropDefinition;
+
         public int ShowcaseStageCount => cropDefinition != null && cropDefinition.GrowthSprites != null
             ? cropDefinition.GrowthSprites.Length
             : 0;

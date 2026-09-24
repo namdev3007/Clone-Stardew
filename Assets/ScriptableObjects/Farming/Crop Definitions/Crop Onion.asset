@@ -25,6 +25,20 @@ MonoBehaviour:
   - {fileID: 1959719492587709510, guid: 283985260d7e5634daaedc2895c7c470, type: 3}
   - {fileID: -882565154794485970, guid: 283985260d7e5634daaedc2895c7c470, type: 3}
   - {fileID: -4372325461809979238, guid: 283985260d7e5634daaedc2895c7c470, type: 3}
+  stageAnchorModes:
+  - 1
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  stageAnchorPixels:
+  - {x: 0, y: 0}
+  - {x: 6, y: 3}
+  - {x: 8, y: 3}
+  - {x: 12, y: 3}
+  - {x: 18, y: 3}
+  - {x: 17, y: 3}
   stagePositionOffsets:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
@@ -32,4 +46,5 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
+  groundInset: 0.05
   harvestedItem: {fileID: 11400000, guid: 39ea2ab1adc928f4394a0c50e35c7252, type: 2}

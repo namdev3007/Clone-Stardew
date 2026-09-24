@@ -43,10 +43,14 @@ MonoBehaviour:
   - {fileID: 5945726643352455649, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
   - {fileID: -8564440145278846475, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
   - {fileID: 2623760060342323582, guid: 672e74decb7187b4e9451beb1bdc8185, type: 3}
+  cucumberEmptyPostAnchor: 1
+  cucumberEmptyPostAnchorPixel: {x: 0, y: 0}
+  dragonFruitEmptyPostAnchor: 3
+  dragonFruitEmptyPostAnchorPixel: {x: 9, y: 3}
   cucumberRepairedFence: {fileID: 6673256488409564741, guid: 423e07858d05d394ca651923d5f8cac5,
     type: 3}
-  cucumberUpperFencePosition: {x: -2.6473, y: 3.3}
-  cucumberLowerFencePosition: {x: -2.6473, y: 2.983}
+  cucumberUpperFencePosition: {x: -2.64, y: 3.247}
+  cucumberLowerFencePosition: {x: -2.64, y: 2.926}
   cucumberFenceScale: {x: 0.4990512, y: 0.544553}
   lockSign: {fileID: -2232192959912990605, guid: b87daf26be0da3f4fad301209afa3f4d, type: 3}
   currencyItem: {fileID: 11400000, guid: 01f8d174962102c4d8c5cf00c70f82e5, type: 2}

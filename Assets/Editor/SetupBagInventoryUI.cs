@@ -13,7 +13,7 @@ public static class SetupBagInventoryUI
     private const string SpriteRoot = "Assets/Sprites/bag-shop-ui/bag";
     private const string MarkerName = "BagInventoryLayout";
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background configure so manual editor adjustments to Bag UI are preserved.
     private static void QueueSetup()
     {
         EditorApplication.delayCall += () => Configure(false);

@@ -101,6 +101,8 @@ namespace World
         private readonly Dictionary<Vector3Int, Crop> crops = new Dictionary<Vector3Int, Crop>();
         private readonly Dictionary<Vector3Int, Vector3Int> reservedPlantingCells = new Dictionary<Vector3Int, Vector3Int>();
         private readonly HashSet<Vector3Int> waterRefillCells = new HashSet<Vector3Int>();
+        private static readonly Collider2D[] ObstacleCheckBuffer = new Collider2D[32];
+        private readonly Dictionary<Vector3Int, List<MapRegionGeneratedProp>> generatedPropsByCell = new Dictionary<Vector3Int, List<MapRegionGeneratedProp>>();
         private FarmStatusSpriteSet farmStatusSprites;
         private bool farmStatusIndicatorsVisible = true;
 
@@ -110,8 +112,8 @@ namespace World
 
         private const float CropStatusScale = 0.5f;
         private const float CropStatusGap = 0.012f;
-        private const float CropStatusBobAmplitude = 0.006f;
-        private const float CropStatusBobCyclesPerSecond = 1.15f;
+        private const float CropStatusBobAmplitude = 0.02f;
+        private const float CropStatusBobCyclesPerSecond = 1.2f;
         private const float GroundStatusCellFill = 0.72f;
         private const float WateredDirtOverlayAlpha = 0.58f;
         private const float FarmStatusValidationInterval = 0.25f;
@@ -214,6 +216,8 @@ namespace World
                     tileMaps.Add(getTileMaps[i].name, getTileMaps[i]);
                 }
 
+                IndexGeneratedProps();
+
                 initialized = true;
             }
 
@@ -225,6 +229,46 @@ namespace World
             // whole cell into an opaque dark block.
             if (wateredDirtTileMap != null)
                 wateredDirtTileMap.color = new Color(1f, 1f, 1f, WateredDirtOverlayAlpha);
+        }
+
+        public void IndexGeneratedProps()
+        {
+            generatedPropsByCell.Clear();
+            MapRegionGeneratedProp[] allProps = FindObjectsByType<MapRegionGeneratedProp>(FindObjectsSortMode.None);
+            for (int i = 0; i < allProps.Length; i++)
+            {
+                MapRegionGeneratedProp p = allProps[i];
+                if (p == null) continue;
+
+                Vector3Int cell = p.TargetCell != default ? p.TargetCell : Grid.WorldToCell(p.transform.position);
+                AddGeneratedPropToCell(cell, p);
+
+                BoxCollider2D box = p.GetComponent<BoxCollider2D>();
+                if (box != null && grid != null)
+                {
+                    Bounds b = box.bounds;
+                    int minX = Mathf.FloorToInt(b.min.x / grid.cellSize.x);
+                    int maxX = Mathf.FloorToInt(b.max.x / grid.cellSize.x);
+                    int minY = Mathf.FloorToInt(b.min.y / grid.cellSize.y);
+                    int maxY = Mathf.FloorToInt(b.max.y / grid.cellSize.y);
+                    for (int y = minY; y <= maxY; y++)
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        AddGeneratedPropToCell(new Vector3Int(x, y, 0), p);
+                    }
+                }
+            }
+        }
+
+        private void AddGeneratedPropToCell(Vector3Int cell, MapRegionGeneratedProp prop)
+        {
+            if (!generatedPropsByCell.TryGetValue(cell, out List<MapRegionGeneratedProp> list))
+            {
+                list = new List<MapRegionGeneratedProp>(1);
+                generatedPropsByCell[cell] = list;
+            }
+            if (!list.Contains(prop))
+                list.Add(prop);
         }
 
         public void RegisterFarmPlot(Vector3Int location)
@@ -253,6 +297,19 @@ namespace World
         public bool TryFertilizePlot(Vector3Int location)
         {
             Initialize();
+
+            Crop plantedCrop = GetCrop(location);
+            if (plantedCrop != null)
+            {
+                bool applied = plantedCrop.TryFertilize();
+                if (applied && farmPlots.TryGetValue(GetGridLocation(plantedCrop.transform.position), out FarmPlotData cropPlot))
+                {
+                    cropPlot.fertilized = true;
+                    cropPlot.status = FarmPlotStatus.None;
+                    RefreshFarmPlotIndicator(cropPlot);
+                }
+                return applied;
+            }
 
             if (!SpecialCropRuntime.CanHoe(location) ||
                 reservedPlantingCells.ContainsKey(location) ||
@@ -288,24 +345,52 @@ namespace World
                 RegisterFarmPlot(location);
                 FarmPlotData perennialPlot = farmPlots[location];
                 perennialPlot.occupied = true;
-                perennialPlot.fertilized = true;
+                perennialPlot.fertilized = false;
                 perennialPlot.status = FarmPlotStatus.None;
                 ReservePerennialFootprint(location);
                 RefreshFarmPlotIndicator(perennialPlot);
-                fertilized = true;
+                fertilized = false;
                 return true;
             }
 
             if (reservedPlantingCells.ContainsKey(location))
                 return false;
 
-            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location) || !plot.fertilized)
+            if (HasObstacleAtCell(location))
+                return false;
+
+            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location))
                 return false;
 
             fertilized = plot.fertilized;
             plot.occupied = true;
             plot.status = FarmPlotStatus.None;
             RefreshFarmPlotIndicator(plot);
+            return true;
+        }
+
+        public bool CanPlant(Vector3Int location, CropDefinition definition)
+        {
+            Initialize();
+
+            if (definition == null)
+                return false;
+
+            if (!SpecialCropRuntime.CanPlant(location, definition))
+                return false;
+
+            if (definition.IsPerennialTree)
+                return CanPlantPerennialTree(location);
+
+            if (reservedPlantingCells.ContainsKey(location))
+                return false;
+
+            if (HasObstacleAtCell(location))
+                return false;
+
+            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location))
+                return false;
+
             return true;
         }
 
@@ -368,8 +453,14 @@ namespace World
 
         public Crop GetCrop(Vector3Int location)
         {
-            crops.TryGetValue(location, out Crop crop);
-            return crop;
+            if (crops.TryGetValue(location, out Crop crop) && crop != null)
+                return crop;
+
+            if (reservedPlantingCells.TryGetValue(location, out Vector3Int center) &&
+                crops.TryGetValue(center, out Crop centerCrop) && centerCrop != null)
+                return centerCrop;
+
+            return null;
         }
 
         public void SetCropStatus(Vector3 worldPosition, FarmPlotStatus status)
@@ -445,8 +536,9 @@ namespace World
             RemoveFarmPlotIndicator(location);
         }
 
-        private bool CanPlantPerennialTree(Vector3Int center)
+        public bool CanPlantPerennialTree(Vector3Int center)
         {
+            Initialize();
             bool canPlantOnGrass = FarmExpansionRuntime.CanPlantPerennialFootprint(center);
             if (!canPlantOnGrass)
                 return false;
@@ -454,10 +546,9 @@ namespace World
             bool isPlantingOnDirt = HasDirt(center);
             if (isPlantingOnDirt)
             {
-                // Banana and mango trees planted on soil cannot be on the outer edge of the dirt plot;
-                // they must be indented at least 1 tile deep into the dirt (1-tile padding around the 3x3 footprint).
-                for (int dy = -2; dy <= 2; dy++)
-                for (int dx = -2; dx <= 2; dx++)
+                // Ensure all cells of the 3x3 footprint are on valid dirt.
+                for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++)
                 {
                     Vector3Int checkCell = center + new Vector3Int(dx, dy, 0);
                     if (!HasDirt(checkCell))
@@ -476,10 +567,80 @@ namespace World
 
                     if (farmPlots.TryGetValue(location, out FarmPlotData plot) && plot.occupied)
                         return false;
+
+                    if (HasObstacleAtCell(location))
+                        return false;
                 }
             }
 
             return true;
+        }
+
+        public bool HasObstacleAtCell(Vector3Int location)
+        {
+            Initialize();
+
+            // 1. Water
+            if (HasWater(location))
+                return true;
+
+            // 2. Tilemaps: Fences, Cliffs, Walls
+            foreach (KeyValuePair<string, Tilemap> kvp in tileMaps)
+            {
+                if (kvp.Value == null)
+                    continue;
+
+                string name = kvp.Key.ToLowerInvariant();
+                if (name.Contains("fence") || name.Contains("cliff") || name.Contains("wall") || name.Contains("rào"))
+                {
+                    if (kvp.Value.HasTile(location))
+                        return true;
+                }
+            }
+
+            // 3. Clearable orchard vegetation props (trees, bushes, grass, flowers, logs, pre-existing bananas)
+            ClearableOrchardProp prop = ClearableOrchardProp.FindAtCell(location);
+            if (prop != null && prop.gameObject.activeInHierarchy)
+                return true;
+
+            // 4. Authored map region props (trees, grass clusters, decorations)
+            if (generatedPropsByCell.TryGetValue(location, out List<MapRegionGeneratedProp> propList))
+            {
+                for (int i = propList.Count - 1; i >= 0; i--)
+                {
+                    MapRegionGeneratedProp p = propList[i];
+                    if (p != null && p.gameObject.activeInHierarchy)
+                        return true;
+                }
+            }
+
+            // 5. Physical solid colliders in the scene (solid fence posts, tree trunks, boulders, level barriers)
+            Vector2 cellCenter = (Vector2)GetWorldLocation(location);
+            Vector2 boxSize = new Vector2(0.12f, 0.12f);
+            ContactFilter2D contactFilter = new ContactFilter2D();
+            contactFilter.useTriggers = false;
+            int hitCount = Physics2D.OverlapBox(cellCenter, boxSize, 0f, contactFilter, ObstacleCheckBuffer);
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D col = ObstacleCheckBuffer[i];
+                if (col == null || !col.enabled || !col.gameObject.activeInHierarchy)
+                    continue;
+
+                if (col.isTrigger)
+                    continue;
+
+                if (col.CompareTag("Player") ||
+                    col.GetComponentInParent<Entity_Components.Player.GridSelector>() != null ||
+                    col.GetComponentInParent<Entity_Components.Mover>() != null)
+                    continue;
+
+                if (col.GetComponentInParent<Crop>() != null)
+                    continue;
+
+                return true;
+            }
+
+            return false;
         }
 
         private void ReservePerennialFootprint(Vector3Int center)
@@ -564,7 +725,7 @@ namespace World
                 // Empty-plot instructions belong inside the soil cell. Centre the
                 // visible bounds instead of centring the sprite's custom pivot.
                 basePosition = GetWorldLocation(plot.location) - sprite.bounds.center * statusScale;
-                bobbingCropIndicators.Remove(plot.location);
+                bobbingCropIndicators.Add(plot.location);
             }
 
             farmPlotIndicatorBasePositions[plot.location] = basePosition;
@@ -1136,7 +1297,12 @@ namespace World
 
         public bool HasDirt(Vector3Int position)
         {
-            return dirtTileMap != null && dirtTileMap.GetTile(position) != null;
+            if (dirtTileMap != null && dirtTileMap.GetTile(position) != null)
+                return true;
+
+            // Soil within the farmable area is tillable dirt even if an individual tile
+            // contains small surface stones/pebbles or is missing from the dirtTileMap mask.
+            return CanHoeCell(position) && !HasWater(position);
         }
 
         public bool HasDirtHole(Vector3Int position)
@@ -1156,6 +1322,9 @@ namespace World
 
         public bool CanHoeCell(Vector3Int position)
         {
+            if (HasObstacleAtCell(position))
+                return false;
+
             return SpecialCropRuntime.CanHoe(position);
         }
 
@@ -1175,6 +1344,9 @@ namespace World
         /// </summary>
         public bool IsSoilCell(Vector3Int position)
         {
+            if (HasObstacleAtCell(position))
+                return false;
+
             if (HasDirtHole(position))
                 return true;
 

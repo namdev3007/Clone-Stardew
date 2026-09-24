@@ -1270,3 +1270,460 @@ Cơ chế (1).docx
 production/session-logs/session-log.md
 ---
 
+## Session End: 20260924_031920
+### Commits
+e34c69a1 feat: add audio system & sfx, settings UI, update farming mechanics and scene assets
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+---
+
+## Session End: 20260924_033013
+### Commits
+e34c69a1 feat: add audio system & sfx, settings UI, update farming mechanics and scene assets
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+
+## Session End: 20260924_085910
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cabbage.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Carrot.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Garlic.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Mango.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Onion.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Potato.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Tomato.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/Objects/CropDefinition.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Scripts/World/SpecialCropRuntimeConfig.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+
+## Session End: 20260924_090254
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cabbage.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Carrot.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Garlic.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Mango.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Onion.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Potato.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Tomato.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/Objects/CropDefinition.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Scripts/World/SpecialCropRuntimeConfig.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+
+## Session End: 20260924_090557
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cabbage.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Carrot.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Garlic.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Mango.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Onion.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Potato.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Tomato.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/Objects/CropDefinition.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Scripts/World/SpecialCropRuntimeConfig.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+
+## Session End: 20260924_090811
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cabbage.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Carrot.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Garlic.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Mango.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Onion.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Potato.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Tomato.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/Objects/CropDefinition.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Scripts/World/SpecialCropRuntimeConfig.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+
+## Session End: 20260924_101548
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cabbage.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Carrot.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Garlic.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Mango.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Onion.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Potato.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Tomato.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/Objects/CropDefinition.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Scripts/World/SpecialCropRuntimeConfig.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+
+## Session End: 20260924_200814
+### Uncommitted Changes
+Assets/Editor/AddTreesAboveMapProp814.cs
+Assets/Editor/BuildSpecialCropMapPreview.cs
+Assets/Editor/CropDefinitionEditor.cs
+Assets/Editor/FarmMapEditModeLoader.cs
+Assets/Editor/MapReferencePropImporter.cs
+Assets/Editor/SetupBagInventoryUI.cs
+Assets/Editor/SetupNewFarmMap.cs
+Assets/Editor/SetupQuitConfirmationUI.cs
+Assets/Editor/SetupTimedCropSystem.cs
+Assets/Editor/SyncBagAmountTextLayout.cs
+Assets/MainScenes/Core 1.unity
+Assets/MainScenes/StartMenu 1.unity
+Assets/Prefabs/User Interface/Core/Pauze Menu.prefab
+Assets/Prefabs/User Interface/Core/Shop UI.prefab
+Assets/Prefabs/World/Outdoors/Crop Timed.prefab
+Assets/Resources/Farming/Special Crop Runtime Config.asset
+Assets/Scenes/Levels/OutDoors/Level_Farm.unity
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Banana.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cabbage.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Carrot.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Cucumber.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Dragon Fruit.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Garlic.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Mango.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Onion.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Potato.asset
+Assets/ScriptableObjects/Farming/Crop Definitions/Crop Tomato.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Axe.asset
+Assets/ScriptableObjects/Items/Tools/Item_Tool_Shovel.asset
+Assets/Scripts/Entity Components/Player/GridSelector.cs
+Assets/Scripts/Item/Actions/ItemAction_PlantSeed.cs
+Assets/Scripts/Item/Actions/ItemAction_WaterCan.cs
+Assets/Scripts/Item/Inventory/BagInventoryUIBuilder.cs
+Assets/Scripts/Item/Inventory/Inventory.cs
+Assets/Scripts/User Interface/BagWindow.cs
+Assets/Scripts/User Interface/LocalizedSpriteButton.cs
+Assets/Scripts/User Interface/WalletDisplay.cs
+Assets/Scripts/World/FarmExpansionRuntime.cs
+Assets/Scripts/World/FarmingCheats.cs
+Assets/Scripts/World/GridManager.cs
+Assets/Scripts/World/MapPropPlacementManifest.cs
+Assets/Scripts/World/MapPropSorting.cs
+Assets/Scripts/World/NPC/ShopWindowController.cs
+Assets/Scripts/World/Objects/Crop.cs
+Assets/Scripts/World/Objects/CropDefinition.cs
+Assets/Scripts/World/SpecialCropRuntime.cs
+Assets/Scripts/World/SpecialCropRuntimeConfig.cs
+Assets/Settings/Map Decorations/Map Prop Placement Manifest.asset
+Assets/Settings/Map Regions/Map Region Collection.asset
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png
+Assets/Sprites/cây trồng/Cay đặc biệt/dưa leo/cucumber.png.meta
+Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset
+Assets/fonts/Dùng cho text khác/covien.asset
+Assets/fonts/Dùng cho text khác/for shop.asset
+production/session-logs/session-log.md
+---
+

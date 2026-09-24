@@ -219,8 +219,6 @@ namespace Item.Actions
     [DisallowMultipleComponent]
     public sealed class WaterCanWorldGauge : MonoBehaviour
     {
-        private const float BobAmplitude = 0.015f;
-        private const float BobCyclesPerSecond = 1.2f;
         private Vector2 baseOffset = new Vector2(0f, 0.385f);
         private RectTransform gaugeRoot;
         private Image trackImage;
@@ -250,17 +248,7 @@ namespace Item.Actions
         {
             EnsureInterface();
             gaugeRoot.gameObject.SetActive(visible);
-            if (!visible)
-                gaugeRoot.localPosition = new Vector3(baseOffset.x, baseOffset.y, 0f);
-        }
-
-        private void Update()
-        {
-            if (gaugeRoot == null || !gaugeRoot.gameObject.activeSelf)
-                return;
-
-            float bob = Mathf.Sin(UnityEngine.Time.time * Mathf.PI * 2f * BobCyclesPerSecond) * BobAmplitude;
-            gaugeRoot.localPosition = new Vector3(baseOffset.x, baseOffset.y + bob, 0f);
+            gaugeRoot.localPosition = new Vector3(baseOffset.x, baseOffset.y, 0f);
         }
 
         private void EnsureInterface()
@@ -279,6 +267,14 @@ namespace Item.Actions
             Canvas canvas = canvasObject.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             canvas.overrideSorting = true;
+
+            // Keep the gauge in the same display layer as the player. The high
+            // local order only places it above the player's own sprite parts;
+            // the parent SortingGroup still controls world-depth occlusion.
+            UnityEngine.Rendering.SortingGroup playerSortingGroup =
+                GetComponent<UnityEngine.Rendering.SortingGroup>();
+            if (playerSortingGroup != null)
+                canvas.sortingLayerID = playerSortingGroup.sortingLayerID;
             canvas.sortingOrder = 1000;
             CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
             scaler.dynamicPixelsPerUnit = 100f;

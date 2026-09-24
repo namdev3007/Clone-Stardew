@@ -48,30 +48,26 @@ namespace World
             if (definition == null)
                 return false;
 
-            // Vegetables and other ordinary crops are exclusive to the normal
-            // farm. Banana/Mango keep their progression gate and may use either
-            // the normal farm or the unlocked perennial orchard, inset by at least 1 tile from the border.
+            // Vegetables and other ordinary crops are exclusive to the normal farm.
             if (!definition.IsPerennialTree)
                 return initialFarm.Contains(cell);
 
-            return HomeOrchardUnlocked && CanPlantPerennialFootprint(cell);
+            // Perennial trees (banana, mango) can be planted on the normal farm directly,
+            // or on the unlocked home orchard.
+            return CanPlantPerennialFootprint(cell);
         }
 
         public static bool CanPlantPerennialFootprint(Vector3Int center)
         {
-            if (!HomeOrchardUnlocked)
-                return false;
             MapRegionDefinition owner = initialFarm != null && initialFarm.Contains(center)
                 ? initialFarm
-                : homeOrchard != null && homeOrchard.Contains(center) ? homeOrchard : null;
+                : (HomeOrchardUnlocked && homeOrchard != null && homeOrchard.Contains(center) ? homeOrchard : null);
             if (owner == null)
                 return false;
 
-            // Perennial trees (banana, mango) cannot be planted on the outer edge/border of the soil/region;
-            // they must be indented at least 1 tile deep inwards into the area.
-            // With a 1-tile inset/padding around the 3x3 footprint, radius 2 [-2..2] must stay inside the owner region.
-            for (int y = -2; y <= 2; y++)
-            for (int x = -2; x <= 2; x++)
+            // Perennial trees (banana, mango) require their 3x3 footprint to fit entirely within the owner region.
+            for (int y = -1; y <= 1; y++)
+            for (int x = -1; x <= 1; x++)
                 if (!owner.Contains(center + new Vector3Int(x, y, 0)))
                     return false;
             return true;

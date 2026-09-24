@@ -23,9 +23,20 @@ MonoBehaviour:
   - {fileID: -4085787973326048821, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
   - {fileID: -9029623659281127719, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
   - {fileID: 2274012154259825846, guid: 492ef7ed40689ce47a84002c6322afa8, type: 3}
+  stageAnchorModes:
+  - 1
+  - 3
+  - 3
+  - 3
+  stageAnchorPixels:
+  - {x: 0, y: 0}
+  - {x: 15, y: 3}
+  - {x: 12, y: 3}
+  - {x: 15, y: 3}
   stagePositionOffsets:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
+  groundInset: 0.05
   harvestedItem: {fileID: 11400000, guid: a055df8b130a0bd4f9e851798d19b744, type: 2}

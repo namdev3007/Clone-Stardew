@@ -23,7 +23,7 @@ public static class SetupQuitConfirmationUI
     private const string VersionKey = "Meadom.QuitConfirmationUI.Version";
     private const int Version = 10;
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background install so manual editor adjustments to Quit Confirmation UI are preserved.
     private static void InstallAfterCompile()
     {
         EditorApplication.delayCall += () =>

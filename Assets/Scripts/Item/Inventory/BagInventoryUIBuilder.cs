@@ -20,13 +20,8 @@ namespace Item.Inventory
 
         private void Awake()
         {
-            // The prefab is authored in Edit Mode. Never rebuild an existing bag
-            // at runtime, otherwise manual RectTransform/TMP adjustments are
-            // replaced as soon as Play Mode starts.
-            if (FindExistingLayoutMarker() != null)
-                return;
-
-            Build();
+            // The prefab is authored in Edit Mode. Never rebuild bag layout
+            // at runtime, preserving all manual RectTransform/TMP adjustments.
         }
 
         private Transform FindExistingLayoutMarker()

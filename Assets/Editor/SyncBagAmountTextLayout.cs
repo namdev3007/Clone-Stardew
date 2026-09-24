@@ -14,7 +14,7 @@ public static class SyncBagAmountTextLayout
     private const string InventoryBarPrefabPath = "Assets/Prefabs/User Interface/Core/Inventory Bar.prefab";
     private const string AmountFontPath = "Assets/fonts/Dùng cho text khác/binhthuong nhat'.asset";
 
-    [InitializeOnLoadMethod]
+    // [InitializeOnLoadMethod] - Disabled automatic background layout sync so manual editor adjustments to slot text, positions and energy sliders are preserved.
     private static void QueueSync()
     {
         EditorApplication.delayCall += SyncWhenReady;

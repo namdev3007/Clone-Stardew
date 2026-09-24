@@ -1,4 +1,5 @@
 using System.Globalization;
+using Audio;
 using Item;
 using Item.Inventory;
 using TMPro;
@@ -30,6 +31,7 @@ namespace User_Interface
 
         private Inventory playerInventory;
         private int shownAmount = -1;
+        private bool lastGodModeState;
         private float nextRefreshTime;
         private int cheatClickCount;
         private float lastCheatClickTime;
@@ -81,11 +83,32 @@ namespace User_Interface
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                ToggleGodModeShortcut();
+            }
+
             // Polled instead of event-driven: gold changes from shop, repairs,
             // passive income and save loading all go through Inventory.
             if (UnityEngine.Time.unscaledTime < nextRefreshTime)
                 return;
             nextRefreshTime = UnityEngine.Time.unscaledTime + RefreshInterval;
+            Refresh();
+        }
+
+        private void ToggleGodModeShortcut()
+        {
+            FarmingCheats.GodMode = !FarmingCheats.GodMode;
+            if (FarmingCheats.GodMode)
+            {
+                if (playerInventory == null)
+                {
+                    GameObject player = GameObject.FindGameObjectWithTag("Player");
+                    playerInventory = player != null ? player.GetComponent<Inventory>() : null;
+                }
+                FarmingCheats.GiveAllSeeds(playerInventory, 100);
+            }
+            GameAudioService.PlaySlotClick();
             Refresh();
         }
 
@@ -101,11 +124,13 @@ namespace User_Interface
             }
 
             int amount = playerInventory != null ? playerInventory.GetItemAmount(currencyItem) : 0;
-            if (amount == shownAmount)
+            bool godMode = FarmingCheats.GodMode;
+            if (amount == shownAmount && godMode == lastGodModeState)
                 return;
 
             shownAmount = amount;
-            amountText.text = FormatAmount(amount);
+            lastGodModeState = godMode;
+            amountText.text = FormatAmount(amount) + (godMode ? " <color=#55FF55>[GOD]</color>" : "");
         }
     }
 
@@ -121,6 +146,7 @@ namespace User_Interface
         private Inventory playerInventory;
         private TMP_FontAsset uiFont;
         private TextMeshProUGUI statusText;
+        private TextMeshProUGUI godModeButtonText;
         private TextMeshProUGUI infiniteWaterButtonText;
 
         public static bool AnyOpen => instance != null && instance.gameObject.activeInHierarchy;
@@ -176,7 +202,7 @@ namespace User_Interface
             RectTransform panelRect = panel.rectTransform;
             panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
             panelRect.pivot = new Vector2(0.5f, 0.5f);
-            panelRect.sizeDelta = new Vector2(760f, 690f);
+            panelRect.sizeDelta = new Vector2(760f, 660f);
             panelRect.anchoredPosition = Vector2.zero;
 
             TextMeshProUGUI title = CreateText("Title", panel.transform, "CHEAT TOOL", 40f,
@@ -184,24 +210,26 @@ namespace User_Interface
             SetRect(title.rectTransform, new Vector2(0f, -45f), new Vector2(700f, 60f));
             title.fontStyle = FontStyles.Bold;
 
-            AddButton(panel.transform, "+ 100 Đ", new Vector2(-185f, -125f), () => AddMoney(100));
-            AddButton(panel.transform, "+ 1.000 Đ", new Vector2(185f, -125f), () => AddMoney(1000));
-            AddButton(panel.transform, "Mở toàn bộ hạt giống", new Vector2(-185f, -200f), UnlockAllSeeds);
-            AddButton(panel.transform, "Mở toàn bộ ruộng", new Vector2(185f, -200f), UnlockAllFields);
-            AddButton(panel.transform, "Cuốc toàn bộ đất", new Vector2(-185f, -275f), HoeAllDirt);
-            AddButton(panel.transform, "Tưới toàn bộ ruộng", new Vector2(185f, -275f), WaterAllPlots);
-            AddButton(panel.transform, "Cho cây lớn ngay", new Vector2(-185f, -350f), GrowAllCrops);
-            AddButton(panel.transform, "Thu hoạch cây chín", new Vector2(185f, -350f), HarvestAllCrops);
-            infiniteWaterButtonText = AddButton(panel.transform, "", new Vector2(-185f, -425f), ToggleInfiniteWater);
-            AddButton(panel.transform, "Làm mới toàn bộ đất", new Vector2(185f, -425f), ResetFarmLand);
+            godModeButtonText = AddButton(panel.transform, "", new Vector2(-185f, -110f), ToggleGodMode);
+            AddButton(panel.transform, "Balo 100 hạt mỗi loại", new Vector2(185f, -110f), GiveAllSeedsCheat);
+            AddButton(panel.transform, "+ 100 Đ", new Vector2(-185f, -175f), () => AddMoney(100));
+            AddButton(panel.transform, "+ 1.000 Đ", new Vector2(185f, -175f), () => AddMoney(1000));
+            AddButton(panel.transform, "Mở toàn bộ hạt giống", new Vector2(-185f, -240f), UnlockAllSeeds);
+            AddButton(panel.transform, "Mở toàn bộ ruộng", new Vector2(185f, -240f), UnlockAllFields);
+            AddButton(panel.transform, "Cuốc toàn bộ đất", new Vector2(-185f, -305f), HoeAllDirt);
+            AddButton(panel.transform, "Tưới toàn bộ ruộng", new Vector2(185f, -305f), WaterAllPlots);
+            AddButton(panel.transform, "Cho cây lớn ngay", new Vector2(-185f, -370f), GrowAllCrops);
+            AddButton(panel.transform, "Thu hoạch cây chín", new Vector2(185f, -370f), HarvestAllCrops);
+            infiniteWaterButtonText = AddButton(panel.transform, "", new Vector2(-185f, -435f), ToggleInfiniteWater);
+            AddButton(panel.transform, "Làm mới toàn bộ đất", new Vector2(185f, -435f), ResetFarmLand);
 
             statusText = CreateText("Status", panel.transform, "", 23f, Color.white);
-            SetRect(statusText.rectTransform, new Vector2(0f, -515f), new Vector2(700f, 70f));
+            SetRect(statusText.rectTransform, new Vector2(0f, -515f), new Vector2(700f, 65f));
             statusText.enableAutoSizing = true;
             statusText.fontSizeMin = 16f;
             statusText.fontSizeMax = 23f;
 
-            AddButton(panel.transform, "ĐÓNG (ESC)", new Vector2(0f, -610f), Close, new Vector2(330f, 58f));
+            AddButton(panel.transform, "ĐÓNG (ESC)", new Vector2(0f, -600f), Close, new Vector2(330f, 54f));
         }
 
         private TextMeshProUGUI AddButton(Transform parent, string label, Vector2 position,
@@ -367,6 +395,34 @@ namespace User_Interface
                 : "Không tìm thấy Grid Manager.");
         }
 
+        private void ToggleGodMode()
+        {
+            FarmingCheats.GodMode = !FarmingCheats.GodMode;
+            if (FarmingCheats.GodMode)
+            {
+                ResolvePlayerInventory();
+                int items = FarmingCheats.GiveAllSeeds(playerInventory, 100);
+                SetStatus("Đã BẬT God Mode: Balo nhận 100 hạt giống mỗi loại, cây lớn 1s/giai đoạn.");
+            }
+            else
+            {
+                SetStatus("Đã TẮT God Mode: Cây phát triển tốc độ bình thường.");
+            }
+            RefreshToggleLabels();
+        }
+
+        private void GiveAllSeedsCheat()
+        {
+            ResolvePlayerInventory();
+            if (playerInventory == null)
+            {
+                SetStatus("Không tìm thấy túi đồ của người chơi.");
+                return;
+            }
+            int items = FarmingCheats.GiveAllSeeds(playerInventory, 100);
+            SetStatus($"Đã nạp 100 hạt giống mỗi loại vào balo ({items} món).");
+        }
+
         private void ToggleInfiniteWater()
         {
             FarmingCheats.InfiniteWater = !FarmingCheats.InfiniteWater;
@@ -376,6 +432,20 @@ namespace User_Interface
 
         private void RefreshToggleLabels()
         {
+            if (godModeButtonText != null)
+            {
+                godModeButtonText.text = FarmingCheats.GodMode
+                    ? "GOD MODE: BẬT (1s/GĐ)"
+                    : "GOD MODE: TẮT";
+                Image btnImg = godModeButtonText.GetComponentInParent<Image>();
+                if (btnImg != null)
+                {
+                    btnImg.color = FarmingCheats.GodMode
+                        ? new Color32(40, 140, 60, 255)
+                        : new Color32(169, 99, 48, 255);
+                }
+            }
+
             if (infiniteWaterButtonText != null)
                 infiniteWaterButtonText.text = FarmingCheats.InfiniteWater
                     ? "Nước vô hạn: BẬT"

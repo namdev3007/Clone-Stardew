@@ -44,8 +44,6 @@ namespace World.Objects
         private const float MissingWaterPenaltySeconds = 6f;
         private const float WaterWaitTimeoutSeconds = 30f;
         private const float RegrowthRestSeconds = 10f;
-        private const float CropVisualScale = 0.5f;
-        private const float CropVisualPositionY = 0f;
         private const string DepthSortingLayer = "Dynamic";
         private const float DepthSortingScale = -100f;
 
@@ -97,6 +95,20 @@ namespace World.Objects
             health?.AddListener((IKillable)this);
             health?.SetInvulnerable(true);
             SetupDepthSorting();
+            EnsureTreeSolidCollider();
+            UpdateTreeCollider(spriteRenderer != null ? spriteRenderer.sprite : null);
+        }
+
+        private void OnEnable()
+        {
+            FarmingCheats.OnGodModeChanged += HandleGodModeChanged;
+        }
+
+        private void OnDisable()
+        {
+            FarmingCheats.OnGodModeChanged -= HandleGodModeChanged;
+            if (treeSolidCollider != null)
+                treeSolidCollider.enabled = false;
         }
 
         /// <summary>
@@ -109,7 +121,14 @@ namespace World.Objects
             if (spriteRenderer == null)
                 return;
 
-            depthSortingGroup = spriteRenderer.GetComponent<SortingGroup>();
+            if (depthSortingGroup == null)
+            {
+                depthSortingGroup = spriteRenderer.GetComponent<SortingGroup>();
+                if (depthSortingGroup == null)
+                    depthSortingGroup = GetComponent<SortingGroup>();
+                if (depthSortingGroup == null)
+                    depthSortingGroup = GetComponentInChildren<SortingGroup>(true);
+            }
             // The prefab's HeightBasedSorting sits on the sprite child, which is
             // raised by each frame's pivot offset; sort from the crop root instead.
             HeightBasedSorting childSorting = spriteRenderer.GetComponent<HeightBasedSorting>();
@@ -132,9 +151,14 @@ namespace World.Objects
         {
             lastDepthSortY = transform.position.y;
             int order = Mathf.RoundToInt(lastDepthSortY * DepthSortingScale);
+            if (definition != null && definition.PlantingZone == PlantingZone.DragonFruitTrellis)
+            {
+                order = SpecialCropAreaController.GetDragonFruitSortingOrder(lastDepthSortY);
+            }
+
             if (depthSortingGroup != null)
                 depthSortingGroup.sortingOrder = order;
-            else if (spriteRenderer != null)
+            if (spriteRenderer != null)
                 spriteRenderer.sortingOrder = order;
         }
 
@@ -156,6 +180,41 @@ namespace World.Objects
         {
             if (definition == null || showcaseMode)
                 return;
+
+            if (FarmingCheats.GodMode)
+            {
+                if (phase == GrowthPhase.WaitingForFirstWater)
+                {
+                    StartFirstGrowth(watered: true);
+                    return;
+                }
+                if (phase == GrowthPhase.WaitingForRegrowthWater)
+                {
+                    StartRegrowth(watered: true);
+                    return;
+                }
+                if (phase == GrowthPhase.RestingAfterHarvest)
+                {
+                    remainingSeconds = 0f;
+                    BeginRegrowthCycle();
+                    return;
+                }
+
+                if (phase == GrowthPhase.Growing || phase == GrowthPhase.Regrowing)
+                {
+                    int totalSprites = definition.GrowthSprites != null ? definition.GrowthSprites.Length : 1;
+                    int stageCount = phase == GrowthPhase.Regrowing
+                        ? Mathf.Max(1, (totalSprites - definition.RegrowthStageStart) - 1)
+                        : Mathf.Max(1, totalSprites - 1);
+                    float targetDuration = stageCount * FarmingCheats.GodModeStageSeconds;
+                    if (activeDuration > targetDuration)
+                    {
+                        float progress = activeDuration > 0f ? (1f - Mathf.Clamp01(remainingSeconds / activeDuration)) : 0f;
+                        activeDuration = targetDuration;
+                        remainingSeconds = (1f - progress) * targetDuration;
+                    }
+                }
+            }
 
             switch (phase)
             {
@@ -231,20 +290,29 @@ namespace World.Objects
             health?.SetInvulnerable(true);
             ConfigureDrop();
             RegisterWithGrid();
+            UpdateDepthSorting();
 
-            if (IsGroundWet())
+            if (IsGroundWet() || FarmingCheats.GodMode)
             {
-                StartFirstGrowth(watered: true);
+                wateredThisCycle = true;
+                if (fertilized || FarmingCheats.GodMode)
+                    StartFirstGrowth(watered: true);
+                else
+                    WaitForFirstGrowthRequirements();
             }
             else
             {
-                phase = GrowthPhase.WaitingForFirstWater;
-                wateredThisCycle = false;
-                waterWaitTimer = definition != null && definition.IsPerennialTree ? WaterWaitTimeoutSeconds : 0f;
-                activeDuration = definition.FirstGrowthSeconds;
-                remainingSeconds = activeDuration;
-                RefreshVisuals();
+                WaitForFirstGrowthRequirements();
             }
+        }
+
+        private void WaitForFirstGrowthRequirements()
+        {
+            phase = GrowthPhase.WaitingForFirstWater;
+            waterWaitTimer = definition != null && definition.IsPerennialTree ? WaterWaitTimeoutSeconds : 0f;
+            activeDuration = definition != null ? definition.FirstGrowthSeconds : 0f;
+            remainingSeconds = activeDuration;
+            RefreshVisuals();
         }
 
         public void ConfigureShowcase(CropDefinition cropDefinition, int stageIndex, bool harvestableDemo)
@@ -258,6 +326,7 @@ namespace World.Objects
             health?.SetInvulnerable(true);
             ConfigureDrop();
             RegisterWithGrid();
+            UpdateDepthSorting();
 
             if (harvestableDemo)
             {
@@ -282,22 +351,37 @@ namespace World.Objects
 
         public bool TryWater()
         {
-            if (definition == null || !NeedsWater)
+            if (definition == null || phase != GrowthPhase.WaitingForFirstWater && phase != GrowthPhase.WaitingForRegrowthWater)
                 return false;
 
+            wateredThisCycle = true;
             if (phase == GrowthPhase.WaitingForFirstWater)
             {
+                // The first cycle needs both fertilizer and water. Remember the
+                // water if it is applied first, then fertilizer can start growth.
+                if (fertilized)
+                    StartFirstGrowth(watered: true);
+                else
+                    RefreshVisuals();
+                return true;
+            }
+
+            StartRegrowth(watered: true);
+            return true;
+        }
+
+        public bool TryFertilize()
+        {
+            if (definition == null || fertilized || harvestCount > 0 ||
+                phase != GrowthPhase.WaitingForFirstWater)
+                return false;
+
+            fertilized = true;
+            if (wateredThisCycle || IsGroundWet())
                 StartFirstGrowth(watered: true);
-                return true;
-            }
-
-            if (phase == GrowthPhase.WaitingForRegrowthWater)
-            {
-                StartRegrowth(watered: true);
-                return true;
-            }
-
-            return false;
+            else
+                RefreshVisuals();
+            return true;
         }
 
         private void StartFirstGrowth(bool watered)
@@ -305,22 +389,37 @@ namespace World.Objects
             if (definition == null)
                 return;
 
+            if (!fertilized && !FarmingCheats.GodMode)
+            {
+                WaitForFirstGrowthRequirements();
+                return;
+            }
+
             phase = GrowthPhase.Growing;
             wateredThisCycle = watered;
 
-            float penalty = 0f;
-            if (definition.IsPerennialTree && !watered)
-                penalty = MissingWaterPenaltySeconds;
+            if (FarmingCheats.GodMode)
+            {
+                int stageCount = Mathf.Max(1, (definition.GrowthSprites != null ? definition.GrowthSprites.Length : 1) - 1);
+                activeDuration = stageCount * FarmingCheats.GodModeStageSeconds;
+                remainingSeconds = activeDuration;
+            }
+            else
+            {
+                float penalty = 0f;
+                if (definition.IsPerennialTree && !watered)
+                    penalty = MissingWaterPenaltySeconds;
 
-            activeDuration = definition.FirstGrowthSeconds + penalty;
-            remainingSeconds = activeDuration;
+                activeDuration = definition.FirstGrowthSeconds + penalty;
+                remainingSeconds = activeDuration;
+            }
             health?.SetInvulnerable(true);
             RefreshVisuals();
         }
 
         private void BeginRegrowthCycle()
         {
-            if (IsGroundWet())
+            if (IsGroundWet() || FarmingCheats.GodMode)
             {
                 StartRegrowth(watered: true);
             }
@@ -343,14 +442,54 @@ namespace World.Objects
             phase = GrowthPhase.Regrowing;
             wateredThisCycle = watered;
 
-            float penalty = 0f;
-            if (definition.IsPerennialTree && !watered)
-                penalty = MissingWaterPenaltySeconds;
+            if (FarmingCheats.GodMode)
+            {
+                int totalSprites = definition.GrowthSprites != null ? definition.GrowthSprites.Length : 1;
+                int stageCount = Mathf.Max(1, (totalSprites - definition.RegrowthStageStart) - 1);
+                activeDuration = stageCount * FarmingCheats.GodModeStageSeconds;
+                remainingSeconds = activeDuration;
+            }
+            else
+            {
+                float penalty = 0f;
+                if (definition.IsPerennialTree && !watered)
+                    penalty = MissingWaterPenaltySeconds;
 
-            activeDuration = definition.RegrowthSeconds + penalty;
-            remainingSeconds = activeDuration;
+                activeDuration = definition.RegrowthSeconds + penalty;
+                remainingSeconds = activeDuration;
+            }
             health?.SetInvulnerable(true);
             RefreshVisuals();
+        }
+
+        private void HandleGodModeChanged(bool enabled)
+        {
+            if (!enabled || definition == null || showcaseMode)
+                return;
+
+            if (phase == GrowthPhase.WaitingForFirstWater)
+                StartFirstGrowth(watered: true);
+            else if (phase == GrowthPhase.WaitingForRegrowthWater)
+                StartRegrowth(watered: true);
+            else if (phase == GrowthPhase.RestingAfterHarvest)
+            {
+                remainingSeconds = 0f;
+                BeginRegrowthCycle();
+            }
+            else if (phase == GrowthPhase.Growing || phase == GrowthPhase.Regrowing)
+            {
+                int totalSprites = definition.GrowthSprites != null ? definition.GrowthSprites.Length : 1;
+                int stageCount = phase == GrowthPhase.Regrowing
+                    ? Mathf.Max(1, (totalSprites - definition.RegrowthStageStart) - 1)
+                    : Mathf.Max(1, totalSprites - 1);
+                float targetDuration = stageCount * FarmingCheats.GodModeStageSeconds;
+                if (activeDuration > targetDuration)
+                {
+                    float progress = activeDuration > 0f ? (1f - Mathf.Clamp01(remainingSeconds / activeDuration)) : 0f;
+                    activeDuration = targetDuration;
+                    remainingSeconds = (1f - progress) * targetDuration;
+                }
+            }
         }
 
         private void RegisterWithGrid()
@@ -374,6 +513,7 @@ namespace World.Objects
         {
             phase = GrowthPhase.ReadyToHarvest;
             remainingSeconds = 0f;
+            axeHitCount = 0;
             SetSprite(GetLastSprite());
             // Banana/mango trees are handled by the dedicated axe interaction;
             // generic crop attacks must never harvest or remove them.
@@ -463,37 +603,100 @@ namespace World.Objects
             if (spriteRenderer == null || sprite == null)
                 return;
 
+            UpdateDepthSorting();
+
             bool spriteChanged = spriteRenderer.sprite != sprite;
             spriteRenderer.sprite = sprite;
             // Crops are not part of the removed day/night lighting system. Keep
             // their source colours intact when the wet-ground tile is applied.
             spriteRenderer.color = Color.white;
 
-            // Imported crop frames are tightly trimmed and have different sizes.
-            // Offset each frame so its bottom-center remains fixed to the soil cell.
-            float pixelsPerUnit = sprite.pixelsPerUnit;
-            Vector2 pivot = sprite.pivot;
-            float scale = CropVisualScale;
-
+            float scale = CropSpriteAlignment.CropVisualScale;
             spriteRenderer.transform.localScale = Vector3.one * scale;
-            float x = ((pivot.x - sprite.rect.width * 0.5f) / pixelsPerUnit) * scale;
-            // Trellis crops and perennial trees stand upright from their ground anchor.
-            // Regular ground crops grow directly centered inside the hoed soil plot (ô đất) across all stages.
-            bool isAnchoredAtBottom = definition != null &&
-                                      (definition.IsPerennialTree ||
-                                       definition.PlantingZone != PlantingZone.Normal);
 
-            float y = isAnchoredAtBottom
-                ? (pivot.y / pixelsPerUnit) * scale
-                : ((pivot.y - sprite.rect.height * 0.5f) / pixelsPerUnit) * scale;
-            Vector2 stageOffset = definition != null ? definition.GetStagePositionOffset(sprite) : Vector2.zero;
-            spriteRenderer.transform.localPosition = new Vector3(
-                x + stageOffset.x,
-                CropVisualPositionY + y + stageOffset.y,
-                0f);
+            // Each growth stage carries its own anchor (see CropDefinition), so
+            // stages with different pivots or padding all land in this soil cell.
+            Vector2 localPosition = definition != null
+                ? definition.GetStageLocalPosition(sprite, scale, GetCellHeight())
+                : CropSpriteAlignment.GetCellCenteredOffset(sprite, scale, GetCellHeight());
+            spriteRenderer.transform.localPosition = new Vector3(localPosition.x, localPosition.y, 0f);
 
             if (spriteChanged)
                 gridManager?.RefreshCropStatusPosition(transform.position);
+
+            UpdateTreeCollider(sprite);
+        }
+
+        private float GetCellHeight()
+        {
+            if (gridManager != null && gridManager.Grid != null && gridManager.Grid.cellSize.y > 0f)
+                return gridManager.Grid.cellSize.y;
+            return CropSpriteAlignment.DefaultCellHeight;
+        }
+
+        private BoxCollider2D treeSolidCollider;
+
+        private void EnsureTreeSolidCollider()
+        {
+            if (treeSolidCollider != null)
+                return;
+
+            Transform oldChild = transform.Find("TreeSolidCollider");
+            if (oldChild != null)
+                Destroy(oldChild.gameObject);
+
+            BoxCollider2D[] colliders = GetComponents<BoxCollider2D>();
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (!colliders[i].isTrigger)
+                {
+                    treeSolidCollider = colliders[i];
+                    break;
+                }
+            }
+
+            if (treeSolidCollider == null)
+            {
+                treeSolidCollider = gameObject.AddComponent<BoxCollider2D>();
+                treeSolidCollider.isTrigger = false;
+                treeSolidCollider.size = new Vector2(0.18f, 0.10f);
+                treeSolidCollider.offset = new Vector2(0f, 0.05f);
+                treeSolidCollider.enabled = false;
+            }
+        }
+
+        private void UpdateTreeCollider(Sprite currentSprite)
+        {
+            EnsureTreeSolidCollider();
+
+            bool isPerennial = definition != null && definition.IsPerennialTree;
+            if (!isPerennial)
+            {
+                if (treeSolidCollider != null)
+                    treeSolidCollider.enabled = false;
+                return;
+            }
+
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb != null && rb.bodyType != RigidbodyType2D.Static)
+                rb.bodyType = RigidbodyType2D.Static;
+
+            treeSolidCollider.isTrigger = false;
+            treeSolidCollider.enabled = true;
+
+            bool isSprout = currentSprite != null && currentSprite == GetGrowthSprite(0);
+            if (isSprout)
+            {
+                treeSolidCollider.size = new Vector2(0.14f, 0.08f);
+                treeSolidCollider.offset = new Vector2(0f, -0.01f);
+            }
+            else
+            {
+                // The trunk foot sits near the bottom of the root cell (see
+                // GetCellCenteredOffset), so the solid base stays inside that cell.
+                treeSolidCollider.size = new Vector2(0.18f, 0.10f);
+                treeSolidCollider.offset = new Vector2(0f, -0.01f);
+            }
         }
 
         public void OnDeath(Health killedHealth)
@@ -517,7 +720,7 @@ namespace World.Objects
                 if (gridManager != null)
                     gridManager.UnSubscribeToGridChanges(this, transform.position);
                 registered = false;
-                gameObject.SetActive(false);
+                Destroy(gameObject);
                 return true;
             }
 
@@ -539,15 +742,33 @@ namespace World.Objects
             if (definition == null || !definition.IsPerennialTree || showcaseMode)
                 return false;
 
+            bool isBanana = definition.DisplayName.IndexOf("Banana", System.StringComparison.OrdinalIgnoreCase) >= 0;
+
             if (phase == GrowthPhase.ReadyToHarvest)
+            {
+                if (isBanana)
+                {
+                    axeHitCount++;
+                    if (axeHitCount < 3)
+                    {
+                        StartCoroutine(AxeHitFeedback());
+                        return true;
+                    }
+                    axeHitCount = 0;
+                    return Harvest();
+                }
                 return Harvest();
+            }
 
             axeHitCount++;
             int requiredHits = definition.DisplayName.IndexOf("Mango", System.StringComparison.OrdinalIgnoreCase) >= 0
                 ? 6
                 : 3;
             if (axeHitCount < requiredHits)
+            {
+                StartCoroutine(AxeHitFeedback());
                 return true;
+            }
 
             gridManager?.ReleaseFarmPlot(transform.position);
             if (gridManager != null)
@@ -555,6 +776,19 @@ namespace World.Objects
             registered = false;
             Destroy(gameObject);
             return true;
+        }
+
+        private IEnumerator AxeHitFeedback()
+        {
+            if (spriteRenderer == null) yield break;
+            Vector3 originalLocalPos = spriteRenderer.transform.localPosition;
+            spriteRenderer.transform.localPosition = originalLocalPos + new Vector3(0.02f, 0f, 0f);
+            yield return new WaitForSeconds(0.05f);
+            if (spriteRenderer != null)
+                spriteRenderer.transform.localPosition = originalLocalPos - new Vector3(0.02f, 0f, 0f);
+            yield return new WaitForSeconds(0.05f);
+            if (spriteRenderer != null)
+                spriteRenderer.transform.localPosition = originalLocalPos;
         }
 
         public void CheatGrowNow()
@@ -697,6 +931,7 @@ namespace World.Objects
             harvestCount = Mathf.Max(0, saveData.harvestCount);
             axeHitCount = Mathf.Max(0, saveData.axeHitCount);
             waterWaitTimer = Mathf.Max(0f, saveData.waterWaitTimer);
+            UpdateDepthSorting();
 
             if (definition != null)
             {

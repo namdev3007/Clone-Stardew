@@ -157,7 +157,10 @@ namespace Main_Menu
 
             playerName.Value = enteredName;
             worldName.Value = enteredName;
-            newGameAction.Execute(enteredName);
+
+            void StartNewGame() => newGameAction.Execute(enteredName);
+            if (!NewGameIntroPlayer.TryPlay(StartNewGame))
+                StartNewGame();
         }
     }
 }

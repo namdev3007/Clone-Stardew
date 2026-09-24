@@ -12,6 +12,11 @@ namespace World
         public Sprite[] dragonFruitStages;
         public Sprite[] cucumberBrokenSprites;
         public Sprite[] dragonFruitBrokenSprites;
+        [Header("Empty planting post anchor (stages[0]); match the crop's first stage so nothing jumps when planted")]
+        public World.Objects.CropStageAnchor cucumberEmptyPostAnchor = World.Objects.CropStageAnchor.Auto;
+        public Vector2 cucumberEmptyPostAnchorPixel;
+        public World.Objects.CropStageAnchor dragonFruitEmptyPostAnchor = World.Objects.CropStageAnchor.Auto;
+        public Vector2 dragonFruitEmptyPostAnchorPixel;
         /// <summary>
         /// Intact cucumber trellis row shown once the area is repaired (one per
         /// post row). The dragon fruit field has no trellis, only posts.

@@ -1,9 +1,12 @@
 using Entity_Components.Interfaces;
 using Event.Events;
+using Item.Actions;
+using Item.Inventory;
 using Referencing.Scriptable_Reference;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using World;
+using World.Objects;
 
 namespace Entity_Components.Player
 {
@@ -14,6 +17,7 @@ namespace Entity_Components.Player
         private ScriptableReference gridManagerReference;
 
         private GridManager gridManager;
+        private Inventory inventory;
 
         [SerializeField]
         private BoolEvent onGamePauzed;
@@ -49,6 +53,10 @@ namespace Entity_Components.Player
         private bool isPaused;
         private Vector2 lastMoveDirection;
         private UnityEngine.Camera mainCamera;
+        private bool selectionIsValid = true;
+
+        private static readonly Color ValidCursorColor = new Color(1f, 1f, 0.92f, 1f);
+        private static readonly Color InvalidCursorColor = new Color(1f, 0.18f, 0.12f, 1f);
 
         private const float PulseSpeed = 5.5f;
         private const float MinAlpha = 0.80f;
@@ -138,7 +146,8 @@ namespace Entity_Components.Player
             {
                 float t = 0.5f + 0.5f * Mathf.Sin(UnityEngine.Time.unscaledTime * PulseSpeed);
                 float alpha = Mathf.Lerp(MinAlpha, MaxAlpha, t);
-                selectionSpriteRenderer.color = new Color(1f, 1f, 0.92f, alpha);
+                Color baseColor = selectionIsValid ? ValidCursorColor : InvalidCursorColor;
+                selectionSpriteRenderer.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);
             }
         }
 
@@ -199,13 +208,20 @@ namespace Entity_Components.Player
                 return;
             }
 
-            bool isSoil = gridManager.IsSoilCell(mouseGridLocation);
-            if (isSoil)
+            CropDefinition heldPerennial = GetHeldPerennialCrop();
+            Vector3Int targetCell = currentSelectionGridPosition;
+            bool isValid = heldPerennial != null
+                ? gridManager.CanPlant(targetCell, heldPerennial)
+                : gridManager.IsSoilCell(targetCell);
+            bool showInvalidPerennial = heldPerennial != null && !isValid;
+
+            if (isValid || showInvalidPerennial)
             {
                 if (!selectionGameObject.activeSelf)
                     selectionGameObject.SetActive(true);
 
-                Vector2 cellCenter = (Vector2)gridManager.Grid.CellToWorld(mouseGridLocation) + gridOffset;
+                selectionIsValid = isValid;
+                Vector2 cellCenter = (Vector2)gridManager.Grid.CellToWorld(targetCell) + gridOffset;
                 Vector3 targetWorldPos = new Vector3(cellCenter.x, cellCenter.y, 0f);
                 selectionGameObject.transform.position = targetWorldPos;
 
@@ -214,9 +230,40 @@ namespace Entity_Components.Player
             }
             else
             {
+                selectionIsValid = false;
                 if (selectionGameObject.activeSelf)
                     selectionGameObject.SetActive(false);
             }
+        }
+
+        private CropDefinition GetHeldPerennialCrop()
+        {
+            if (inventory == null)
+            {
+                inventory = GetComponent<Inventory>();
+                if (inventory == null)
+                    inventory = GetComponentInParent<Inventory>();
+            }
+
+            if (inventory == null)
+                return null;
+
+            int selectedSlot = inventory.SelectedSlotIndex;
+            if (selectedSlot < 0)
+                return null;
+
+            InventoryItem heldItem = inventory.GetItem(selectedSlot);
+            if (heldItem == null || heldItem.Amount <= 0 || heldItem.Data == null)
+                return null;
+
+            if (heldItem.Data.Action is ItemAction_PlantSeed plantSeedAction)
+            {
+                CropDefinition def = plantSeedAction.CropDefinition;
+                if (def != null && def.IsPerennialTree)
+                    return def;
+            }
+
+            return null;
         }
 
         public void OnMove(Vector2 direction, float velocity)

@@ -166,14 +166,19 @@ public static class FarmMapEditModeLoader
             QueueEnsureVisible();
         else if (state == PlayModeStateChange.ExitingEditMode)
         {
-            Scene farmScene = SceneManager.GetSceneByPath(FarmScenePath);
-            if (farmScene.IsValid() && farmScene.isLoaded)
+            for (int i = 0; i < SceneManager.sceneCount; i++)
             {
-                ConfigureMapPropSorting(farmScene);
-                if (farmScene.isDirty)
+                Scene openScene = SceneManager.GetSceneAt(i);
+                if (openScene.IsValid() && openScene.isLoaded)
                 {
-                    EditorSceneManager.SaveScene(farmScene);
-                    Debug.Log("[FarmMapEditModeLoader] Auto-saved modified Level_Farm before entering Play Mode.");
+                    if (string.Equals(openScene.path, FarmScenePath, StringComparison.OrdinalIgnoreCase))
+                        ConfigureMapPropSorting(openScene);
+
+                    if (openScene.isDirty)
+                    {
+                        EditorSceneManager.SaveScene(openScene);
+                        Debug.Log($"[FarmMapEditModeLoader] Auto-saved modified {openScene.name} before entering Play Mode.");
+                    }
                 }
             }
         }
@@ -386,11 +391,12 @@ public static class FarmMapEditModeLoader
             if (objectName.IndexOf("layer thấp hơn cây", StringComparison.OrdinalIgnoreCase) >= 0)
                 continue;
 
-            // The upright post has an authored renderer order that controls how
-            // it overlaps the neighbouring fence pieces. Never replace that
-            // value with a Y-derived order. A SortingGroup supplies a separate
-            // external order for player-vs-post occlusion at runtime.
-            if (string.Equals(objectName, PreserveAuthoredFenceOrderName, StringComparison.Ordinal))
+            // Upright posts and boundary fences (like hàng rào_3 (1)) use a SortingGroup
+            // with HeightBasedSorting to sort dynamically by Y with the player while
+            // preserving authored overlapping orders.
+            bool isDynamicDepthFence = string.Equals(objectName, PreserveAuthoredFenceOrderName, StringComparison.Ordinal) ||
+                                       World.AuthoredFenceDepthInstaller.IsTargetFence(renderer.gameObject);
+            if (isDynamicDepthFence)
             {
                 if (renderer.sortingLayerName != World.MapPropSorting.SortingLayer)
                 {

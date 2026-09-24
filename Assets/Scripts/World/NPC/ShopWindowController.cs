@@ -207,8 +207,7 @@ namespace World.NPC
             selectedBagIndex = -1;
             quantity = 1;
 
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            playerInventory = player != null ? player.GetComponent<Inventory>() : null;
+            EnsurePlayerInventory();
 
             gameObject.SetActive(true);
             SubscribeToInventorySize();
@@ -257,6 +256,17 @@ namespace World.NPC
             RefreshSelection();
         }
 
+        private void EnsurePlayerInventory()
+        {
+            if (playerInventory != null)
+                return;
+
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            playerInventory = player != null ? player.GetComponent<Inventory>() : null;
+            if (playerInventory == null)
+                playerInventory = FindFirstObjectByType<Inventory>();
+        }
+
         private void BindButtons()
         {
             if (buttonsBound)
@@ -290,10 +300,11 @@ namespace World.NPC
         private static void AddHoverSound(Button button)
         {
             if (button == null) return;
-            EventTrigger trigger = button.gameObject.GetComponent<EventTrigger>() ?? button.gameObject.AddComponent<EventTrigger>();
-            EventTrigger.Entry entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
-            entry.callback.AddListener((_) => GameAudioService.PlaySlotHover());
-            trigger.triggers.Add(entry);
+            EventTrigger trigger = button.gameObject.GetComponent<EventTrigger>();
+            if (trigger != null)
+                Destroy(trigger);
+            if (button.gameObject.GetComponent<ShopSlotHoverHandler>() == null)
+                button.gameObject.AddComponent<ShopSlotHoverHandler>();
         }
 
         private void SubscribeToInventorySize()
@@ -420,6 +431,7 @@ namespace World.NPC
         {
             int source = draggedBagIndex;
             ClearDraggedBagIcon();
+            EnsurePlayerInventory();
             if (source < 0 || playerInventory == null || EventSystem.current == null)
                 return;
 
@@ -427,28 +439,60 @@ namespace World.NPC
             EventSystem.current.RaycastAll(data, hits);
             foreach (RaycastResult hit in hits)
             {
-                Button target = hit.gameObject.GetComponentInParent<Button>();
-                if (target == null)
-                    continue;
-                for (int destination = 0; destination < bagSlots.Length; destination++)
+                GameObject hitObj = hit.gameObject;
+
+                // 1. Dropped directly onto sell button -> sell immediately!
+                if (sellButton != null && (hitObj == sellButton.gameObject || hitObj.transform.IsChildOf(sellButton.transform)))
                 {
-                    if (bagSlots[destination]?.button != target || destination == source)
-                        continue;
-                    InventoryItem sourceItem = playerInventory.GetItem(FirstVisibleInventoryIndex + source);
-                    InventoryItem targetItem = playerInventory.GetItem(FirstVisibleInventoryIndex + destination);
-                    bool mergesStack = sourceItem != null && targetItem != null &&
-                        sourceItem.Data == targetItem.Data && sourceItem.Data.CanStack;
-                    playerInventory.MoveItem(FirstVisibleInventoryIndex + source,
-                        FirstVisibleInventoryIndex + destination);
-                    if (selectedBagIndex == source)
-                        selectedBagIndex = destination;
-                    else if (selectedBagIndex == destination && !mergesStack)
-                        selectedBagIndex = source;
+                    selectedBagIndex = source;
+                    selectedShopIndex = -1;
                     RefreshBagSlots();
                     RefreshSelection();
+                    SellSelectedItem();
+                    return;
+                }
+
+                // 2. Dropped on another bag slot (or same slot)
+                Button target = hitObj.GetComponentInParent<Button>();
+                if (target != null)
+                {
+                    for (int destination = 0; destination < bagSlots.Length; destination++)
+                    {
+                        if (bagSlots[destination]?.button != target)
+                            continue;
+
+                        if (destination == source)
+                        {
+                            SelectBagSlot(source);
+                            return;
+                        }
+
+                        InventoryItem sourceItem = playerInventory.GetItem(FirstVisibleInventoryIndex + source);
+                        InventoryItem targetItem = playerInventory.GetItem(FirstVisibleInventoryIndex + destination);
+                        bool mergesStack = sourceItem != null && targetItem != null &&
+                            sourceItem.Data == targetItem.Data && sourceItem.Data.CanStack;
+                        playerInventory.MoveItem(FirstVisibleInventoryIndex + source,
+                            FirstVisibleInventoryIndex + destination);
+                        if (selectedBagIndex == source)
+                            selectedBagIndex = destination;
+                        else if (selectedBagIndex == destination && !mergesStack)
+                            selectedBagIndex = source;
+                        RefreshBagSlots();
+                        RefreshSelection();
+                        return;
+                    }
+                }
+
+                // 3. Dropped on transaction area, selected item panel, or shop catalog -> select for selling
+                if (hitObj.name.Contains("Transaction") || hitObj.name.Contains("Selected Item") || hitObj.name.Contains("Shop Stock") || hitObj.name.Contains("Window_Shop"))
+                {
+                    SelectBagSlot(source);
                     return;
                 }
             }
+
+            // If released anywhere in the shop window, select the slot so intent is never lost
+            SelectBagSlot(source);
         }
 
         private void ClearDraggedBagIcon()
@@ -583,6 +627,25 @@ namespace World.NPC
             sellButton = sellButton != null ? sellButton : FindButton("Button_SELL");
             backButton = backButton != null ? backButton : FindButton("Button_Back");
 
+            if (previewIcon == null)
+            {
+                Transform iconTr = transform.Find("Window_Shop/Selected Item Panel/Selected Item Icon");
+                if (iconTr != null)
+                    previewIcon = iconTr.GetComponent<Image>();
+            }
+            if (itemNameText == null)
+            {
+                Transform textTr = transform.Find("Window_Shop/Selected Item Panel/Text_ItemName");
+                if (textTr != null)
+                    itemNameText = textTr.GetComponent<TextMeshProUGUI>();
+            }
+            if (itemPriceText == null)
+            {
+                Transform textTr = transform.Find("Window_Shop/Selected Item Panel/Text_Price");
+                if (textTr != null)
+                    itemPriceText = textTr.GetComponent<TextMeshProUGUI>();
+            }
+
             // Preserve the authored layout and create only the missing arrow.
             if (Application.isPlaying && nextPageButton == null && previousPageButton != null)
             {
@@ -667,13 +730,35 @@ namespace World.NPC
 
         private void SellSelectedItem()
         {
-            if (playerInventory == null || currencyItem == null || selectedBagIndex < 0)
+            EnsurePlayerInventory();
+            if (playerInventory == null || currencyItem == null)
                 return;
 
-            int slotIndex = FirstVisibleInventoryIndex + selectedBagIndex;
-            InventoryItem item = playerInventory.GetItem(slotIndex);
-            int unitPrice = GetSellPrice(item?.Data);
-            if (item == null || unitPrice <= 0)
+            int slotIndex = -1;
+            InventoryItem item = null;
+
+            if (selectedBagIndex >= 0)
+            {
+                slotIndex = FirstVisibleInventoryIndex + selectedBagIndex;
+                item = playerInventory.GetItem(slotIndex);
+            }
+            else if (selectedShopIndex >= 0 && selectedShopIndex < visibleEntries.Count)
+            {
+                ItemData shopItem = visibleEntries[selectedShopIndex]?.item;
+                if (shopItem != null)
+                {
+                    item = playerInventory.GetItem(shopItem, out slotIndex);
+                }
+            }
+
+            if (item == null || slotIndex < 0)
+            {
+                ShowTransactionMessage("NO ITEM TO SELL");
+                return;
+            }
+
+            int unitPrice = GetSellPrice(item.Data);
+            if (unitPrice <= 0)
             {
                 ShowTransactionMessage("ITEM CANNOT BE SOLD");
                 return;
@@ -681,7 +766,7 @@ namespace World.NPC
 
             int soldQuantity = item.Data.CanStack ? Mathf.Min(quantity, item.Amount) : 1;
             int totalPrice = unitPrice * soldQuantity;
-            if (!playerInventory.TryRemoveItemAmount(slotIndex, soldQuantity))
+            if (!playerInventory.TryRemoveItemAmount(slotIndex, soldQuantity, force: true))
             {
                 ShowTransactionMessage("SALE FAILED");
                 return;
@@ -697,7 +782,7 @@ namespace World.NPC
             }
 
             InventoryItem remaining = playerInventory.GetItem(slotIndex);
-            if (remaining == null)
+            if (remaining == null && selectedBagIndex >= 0)
                 selectedBagIndex = -1;
             GameAudioService.PlayCoin();
             quantity = 1;
@@ -842,43 +927,53 @@ namespace World.NPC
 
         private int GetMaximumQuantity()
         {
+            EnsurePlayerInventory();
             if (selectedBagIndex >= 0)
             {
                 InventoryItem item = playerInventory?.GetItem(FirstVisibleInventoryIndex + selectedBagIndex);
-                return item != null && item.Data.CanStack ? Mathf.Clamp(item.Amount, 1, 99) : 1;
+                return item != null && item.Data != null && item.Data.CanStack ? Mathf.Clamp(item.Amount, 1, 99) : 1;
             }
 
-            if (selectedShopIndex < 0 || selectedShopIndex >= visibleEntries.Count)
-                return 1;
+            if (selectedShopIndex >= 0 && selectedShopIndex < visibleEntries.Count)
+            {
+                NpcShopCatalog.Entry entry = visibleEntries[selectedShopIndex];
+                if (entry.item == null)
+                    return 1;
 
-            NpcShopCatalog.Entry entry = visibleEntries[selectedShopIndex];
-            if (entry.item == null || !entry.item.CanStack)
-                return 1;
+                int price = GetBuyPrice(entry);
+                int wallet = playerInventory != null && currencyItem != null
+                    ? playerInventory.GetItemAmount(currencyItem)
+                    : 0;
+                int maxBuy = price > 0 ? wallet / price : 1;
+                return Mathf.Clamp(maxBuy, 1, 99);
+            }
 
-            int price = GetBuyPrice(entry);
-            int wallet = playerInventory != null && currencyItem != null
-                ? playerInventory.GetItemAmount(currencyItem)
-                : 0;
-            return Mathf.Clamp(price > 0 ? wallet / price : 1, 1, 99);
+            return 1;
         }
 
         private void RefreshSelection()
         {
+            EnsurePlayerInventory();
             ItemData item = null;
-            int unitPrice = 0;
+            int buyUnitPrice = 0;
+            int sellUnitPrice = 0;
             bool buying = selectedShopIndex >= 0 && selectedShopIndex < visibleEntries.Count;
 
+            int ownedAmount = 0;
             if (buying)
             {
                 NpcShopCatalog.Entry entry = visibleEntries[selectedShopIndex];
-                item = entry.item;
-                unitPrice = GetBuyPrice(entry);
+                item = entry?.item;
+                buyUnitPrice = GetBuyPrice(entry);
+                sellUnitPrice = GetSellPrice(item);
+                ownedAmount = playerInventory != null && item != null ? playerInventory.GetItemAmount(item) : 0;
             }
             else if (selectedBagIndex >= 0)
             {
                 InventoryItem inventoryItem = playerInventory?.GetItem(FirstVisibleInventoryIndex + selectedBagIndex);
                 item = inventoryItem?.Data;
-                unitPrice = GetSellPrice(item);
+                sellUnitPrice = GetSellPrice(item);
+                ownedAmount = inventoryItem != null ? (item != null && item.CanStack ? inventoryItem.Amount : 1) : 0;
             }
 
             if (previewIcon != null)
@@ -889,17 +984,33 @@ namespace World.NPC
             if (itemNameText != null)
                 itemNameText.text = item != null ? item.ItemName : "SELECT ITEM";
             if (itemPriceText != null)
-                itemPriceText.text = item != null ? unitPrice + " Đ  x " + quantity + " = " + unitPrice * quantity + " Đ" : string.Empty;
+            {
+                if (item != null)
+                {
+                    int displayPrice = (!buying || ownedAmount == 0) ? buyUnitPrice : (buyUnitPrice > 0 ? buyUnitPrice : sellUnitPrice);
+                    if (!buying && sellUnitPrice > 0)
+                        displayPrice = sellUnitPrice;
+                    itemPriceText.text = displayPrice + " Đ  x " + quantity + " = " + displayPrice * quantity + " Đ";
+                }
+                else
+                {
+                    itemPriceText.text = string.Empty;
+                }
+            }
+
             int maximum = GetMaximumQuantity();
             quantity = Mathf.Clamp(quantity, 1, maximum);
             if (quantityText != null)
                 quantityText.text = quantity.ToString();
-            bool canAfford = !buying || (playerInventory != null && currencyItem != null &&
-                playerInventory.GetItemAmount(currencyItem) >= unitPrice * quantity);
-            bool hasCapacity = !buying || (playerInventory != null && item != null &&
-                playerInventory.CanAddItem(item, quantity));
-            SetTransactionButtonState(buyButton, buying && unitPrice > 0 && canAfford && hasCapacity);
-            SetTransactionButtonState(sellButton, !buying && item != null && unitPrice > 0);
+
+            bool canAfford = buying && playerInventory != null && currencyItem != null &&
+                playerInventory.GetItemAmount(currencyItem) >= buyUnitPrice * quantity;
+            bool hasCapacity = buying && playerInventory != null && item != null &&
+                playerInventory.CanAddItem(item, quantity);
+
+            SetTransactionButtonState(buyButton, buying && buyUnitPrice > 0 && canAfford && hasCapacity);
+            SetTransactionButtonState(sellButton, sellUnitPrice > 0 && ownedAmount > 0 && (!buying || ownedAmount >= quantity));
+
             if (minusButton != null)
                 minusButton.interactable = quantity > 1;
             if (plusButton != null)
@@ -924,43 +1035,103 @@ namespace World.NPC
             if (entry.futurePrice > 0)
                 return entry.futurePrice;
 
-            switch (entry.item.ItemName)
-            {
-                case "Axe": return 6;
-                case "Hoe": return 3;
-                case "Fertilizer": return 6;
-                case "Carrot Seed": return 1;
-                case "Onion Seed": return 2;
-                case "Garlic Seed": return 3;
-                case "Cabbage Seed": return 4;
-                case "Potato Seed": return 4;
-                case "Tomato Seed": return 7;
-                case "Banana Seed": return 10;
-                case "Mango Seed": return 18;
-                case "Cucumber Seed": return 6;
-                case "Dragon Fruit Seed": return 20;
-                default: return 0;
-            }
+            return GetBuyPriceByItem(entry.item);
         }
 
-        private static int GetSellPrice(ItemData item)
+        private static int GetBuyPriceByItem(ItemData item)
         {
             if (item == null)
                 return 0;
-            switch (item.ItemName)
-            {
-                case "Carrot": return 3;
-                case "Onion": return 5;
-                case "Garlic": return 7;
-                case "Cabbage": return 8;
-                case "Potato": return 9;
-                case "Tomato": return 4;
-                case "Banana": return 4;
-                case "Mango": return 9;
-                case "Cucumber": return 3;
-                case "Dragon Fruit": return 10;
-                default: return 0;
-            }
+
+            string itemName = item.ItemName != null ? item.ItemName.Trim() : string.Empty;
+            string assetName = item.name != null ? item.name.Trim() : string.Empty;
+
+            if (itemName.Equals("Axe", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Tool_Axe", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (itemName.Equals("Hoe", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Tool_Shovel", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (itemName.Equals("Fertilizer", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Fertilizer", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (itemName.Equals("Carrot Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Carrot", StringComparison.OrdinalIgnoreCase)) return 1;
+            if (itemName.Equals("Onion Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Onion", StringComparison.OrdinalIgnoreCase)) return 2;
+            if (itemName.Equals("Garlic Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Garlic", StringComparison.OrdinalIgnoreCase)) return 3;
+            if (itemName.Equals("Cabbage Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Cabbage", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (itemName.Equals("Potato Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Potato", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (itemName.Equals("Tomato Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Tomato", StringComparison.OrdinalIgnoreCase)) return 7;
+            if (itemName.Equals("Banana Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Banana", StringComparison.OrdinalIgnoreCase)) return 10;
+            if (itemName.Equals("Mango Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Mango", StringComparison.OrdinalIgnoreCase)) return 18;
+            if (itemName.Equals("Cucumber Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Cucumber", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (itemName.Equals("Dragon Fruit Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_DragonFruit", StringComparison.OrdinalIgnoreCase)) return 20;
+
+            return 0;
         }
+
+        public static int GetSellPrice(ItemData item)
+        {
+            if (item == null)
+                return 0;
+
+            string itemName = item.ItemName != null ? item.ItemName.Trim() : string.Empty;
+            string assetName = item.name != null ? item.name.Trim() : string.Empty;
+
+            // 1. Hoe: 6 Đ
+            if (itemName.Equals("Hoe", StringComparison.OrdinalIgnoreCase) ||
+                assetName.Equals("Item_Tool_Shovel", StringComparison.OrdinalIgnoreCase) ||
+                itemName.Equals("Shovel", StringComparison.OrdinalIgnoreCase) ||
+                (item.Action != null && item.Action.GetType().Name.Contains("DigHole")))
+            {
+                return 6;
+            }
+
+            // 2. Axe: 6 Đ
+            if (itemName.Equals("Axe", StringComparison.OrdinalIgnoreCase) ||
+                assetName.Equals("Item_Tool_Axe", StringComparison.OrdinalIgnoreCase) ||
+                (item.Action != null && item.Action.GetType().Name.Contains("Axe")))
+            {
+                return 6;
+            }
+
+            // 3. Seeds: buy price = sell price
+            if (itemName.Equals("Carrot Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Carrot", StringComparison.OrdinalIgnoreCase)) return 1;
+            if (itemName.Equals("Onion Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Onion", StringComparison.OrdinalIgnoreCase)) return 2;
+            if (itemName.Equals("Garlic Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Garlic", StringComparison.OrdinalIgnoreCase)) return 3;
+            if (itemName.Equals("Cabbage Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Cabbage", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (itemName.Equals("Potato Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Potato", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (itemName.Equals("Cucumber Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Cucumber", StringComparison.OrdinalIgnoreCase)) return 6;
+            if (itemName.Equals("Tomato Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Tomato", StringComparison.OrdinalIgnoreCase)) return 7;
+            if (itemName.Equals("Banana Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Banana", StringComparison.OrdinalIgnoreCase)) return 10;
+            if (itemName.Equals("Mango Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Mango", StringComparison.OrdinalIgnoreCase)) return 18;
+            if (itemName.Equals("Dragon Fruit Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_DragonFruit", StringComparison.OrdinalIgnoreCase)) return 20;
+            if (itemName.Equals("Kale Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Kale", StringComparison.OrdinalIgnoreCase)) return 1;
+
+            // Fallback for ANY seed
+            if (itemName.EndsWith(" Seed", StringComparison.OrdinalIgnoreCase) ||
+                assetName.StartsWith("Item_Seed_", StringComparison.OrdinalIgnoreCase) ||
+                assetName.Contains("Seed") ||
+                (item.Action != null && item.Action.GetType().Name.Contains("PlantSeed")))
+            {
+                int buyPrice = GetBuyPriceByItem(item);
+                if (buyPrice > 0)
+                    return buyPrice;
+                return 1;
+            }
+
+            // 4. Crops (harvested produce):
+            if (itemName.Equals("Carrot", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Carrot", StringComparison.OrdinalIgnoreCase)) return 3;
+            if (itemName.Equals("Onion", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Onion", StringComparison.OrdinalIgnoreCase)) return 5;
+            if (itemName.Equals("Garlic", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Garlic", StringComparison.OrdinalIgnoreCase)) return 7;
+            if (itemName.Equals("Cabbage", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Cabbage", StringComparison.OrdinalIgnoreCase)) return 8;
+            if (itemName.Equals("Potato", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Potato", StringComparison.OrdinalIgnoreCase)) return 9;
+            if (itemName.Equals("Tomato", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Tomato", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (itemName.Equals("Banana", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Banana", StringComparison.OrdinalIgnoreCase)) return 4;
+            if (itemName.Equals("Mango", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Mango", StringComparison.OrdinalIgnoreCase)) return 9;
+            if (itemName.Equals("Cucumber", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Cucumber", StringComparison.OrdinalIgnoreCase)) return 3;
+            if (itemName.Equals("Dragon Fruit", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_DragonFruit", StringComparison.OrdinalIgnoreCase)) return 10;
+
+            return 0;
+        }
+    }
+
+    [DisallowMultipleComponent]
+    public sealed class ShopSlotHoverHandler : MonoBehaviour, IPointerEnterHandler
+    {
+        public void OnPointerEnter(PointerEventData eventData) => GameAudioService.PlaySlotHover();
     }
 }

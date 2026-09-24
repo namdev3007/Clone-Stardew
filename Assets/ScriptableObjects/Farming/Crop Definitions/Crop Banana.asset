@@ -15,10 +15,10 @@ MonoBehaviour:
   guid: a4f8623f-dc14-4ae9-86c4-b3dde9822c0a
   displayName: Banana
   firstGrowthSeconds: 180
-  regrowthSeconds: 60
-  maximumHarvests: 2147483647
+  regrowthSeconds: 0
+  maximumHarvests: 1
   harvestYield: 3
-  regrowthStageStart: 4
+  regrowthStageStart: 0
   perennialTree: 1
   growthSprites:
   - {fileID: 2114168569335544942, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
@@ -29,6 +29,24 @@ MonoBehaviour:
   - {fileID: -6550827849559121272, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
   - {fileID: 1243337951010794613, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
   - {fileID: 2282996643972149970, guid: bd83b43fe775b4f47b2a5dcdbfb760eb, type: 3}
+  stageAnchorModes:
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  stageAnchorPixels:
+  - {x: 7, y: 3}
+  - {x: 25, y: 3}
+  - {x: 32, y: 3}
+  - {x: 40, y: 3}
+  - {x: 40, y: 3}
+  - {x: 40, y: 3}
+  - {x: 40, y: 3}
+  - {x: 40, y: 3}
   stagePositionOffsets:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
@@ -38,4 +56,5 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
+  groundInset: 0.05
   harvestedItem: {fileID: 11400000, guid: 91deccdc849a67944b54120ffd505e98, type: 2}

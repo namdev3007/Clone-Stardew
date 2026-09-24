@@ -27,8 +27,8 @@ public static class SetupNewFarmMap
     private const string WetSpriteGuid = "2105b1b2aa988db4ab9ea2383a5109dc";
     private const string MarkerName = "Map Layout Base";
     private const int CurrentMapVersion = 5;
-    private const int AuthoredMapOriginX = -56;
-    private const int AuthoredMapOriginY = -38;
+    public const int AuthoredMapOriginX = -56;
+    public const int AuthoredMapOriginY = -38;
 
     [InitializeOnLoadMethod]
     private static void InstallOnceAfterCompile()
@@ -278,7 +278,7 @@ public static class SetupNewFarmMap
                 bool pondPaletteTile = tilePath.Replace('\\', '/').Contains("/Pond Tiles/");
                 if (pondPaletteTile || IsWater(center))
                     water.SetTile(cell, waterTile);
-                else if (IsFarmSoil(center))
+                else if (IsFarmSoilSprite(sprite))
                     farmable.SetTile(cell, farmableTile);
             }
         }
@@ -294,6 +294,37 @@ public static class SetupNewFarmMap
                 }
             }
         }
+    }
+
+    private static bool IsFarmSoilSprite(Sprite sprite)
+    {
+        if (sprite == null || sprite.texture == null)
+            return false;
+
+        if (IsFarmSoil(ReadSpriteCenter(sprite)))
+            return true;
+
+        Rect rect = sprite.rect;
+        int minX = Mathf.FloorToInt(rect.x);
+        int minY = Mathf.FloorToInt(rect.y);
+        int w = Mathf.FloorToInt(rect.width);
+        int h = Mathf.FloorToInt(rect.height);
+
+        // Check quadrant points in case center contains small pebbles or cracks
+        int[] offsetsX = { w / 4, (3 * w) / 4 };
+        int[] offsetsY = { h / 4, (3 * h) / 4 };
+        for (int i = 0; i < 2; i++)
+        {
+            for (int j = 0; j < 2; j++)
+            {
+                int px = Mathf.Clamp(minX + offsetsX[i], 0, sprite.texture.width - 1);
+                int py = Mathf.Clamp(minY + offsetsY[j], 0, sprite.texture.height - 1);
+                if (IsFarmSoil(sprite.texture.GetPixel(px, py)))
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private static Color32 ReadSpriteCenter(Sprite sprite)

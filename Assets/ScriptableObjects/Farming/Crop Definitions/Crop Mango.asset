@@ -30,6 +30,26 @@ MonoBehaviour:
   - {fileID: -3967545777354590727, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
   - {fileID: -9141870520966081075, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
   - {fileID: -5520059437331813550, guid: 199eecaf0e7f928488838e87e9259b4a, type: 3}
+  stageAnchorModes:
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  stageAnchorPixels:
+  - {x: 12, y: 5}
+  - {x: 15, y: 5}
+  - {x: 22, y: 5}
+  - {x: 34.5, y: 5}
+  - {x: 37.5, y: 7}
+  - {x: 37.5, y: 7}
+  - {x: 37.5, y: 7}
+  - {x: 37.5, y: 7}
+  - {x: 37.5, y: 7}
   stagePositionOffsets:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
@@ -40,4 +60,5 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
+  groundInset: 0.05
   harvestedItem: {fileID: 11400000, guid: 82a9b5369f61ec94a989d2cc113068c1, type: 2}

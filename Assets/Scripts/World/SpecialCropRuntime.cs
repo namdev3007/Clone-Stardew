@@ -252,9 +252,17 @@ namespace World
         private bool useAuthoredRepairedVisuals;
         private static ConfirmationWindow spawnedWindow;
         private float nextVisualRefresh;
+        private GameObject editorPreviewRoot;
 
         public bool IsRepaired => progress != null && progress.IsRepaired(areaId);
         public PlantingZone PlantingZone => plantingZone;
+
+        public static int GetDragonFruitSortingOrder(float worldY)
+        {
+            // Use the same base-Y rule as trees, normal crops and the player:
+            // lower on screen renders in front, higher on screen renders behind.
+            return Mathf.RoundToInt(-worldY * 100f);
+        }
 
         public void Configure(
             SpecialCropAreaId id,
@@ -263,7 +271,8 @@ namespace World
             MapRegionDefinition lockRegionDefinition,
             GridManager grid,
             SpecialCropProgressService progressService,
-            SpecialCropRuntimeConfig runtimeConfig)
+            SpecialCropRuntimeConfig runtimeConfig,
+            GameObject previewRoot = null)
         {
             areaId = id;
             plantingZone = zone;
@@ -272,6 +281,7 @@ namespace World
             gridManager = grid;
             progress = progressService;
             config = runtimeConfig;
+            editorPreviewRoot = previewRoot;
             BuildEightSlots();
             EnsurePlantingSlotGround();
             FindAuthoredStateVisuals();
@@ -347,17 +357,25 @@ namespace World
             Sprite emptyPost = !useAuthoredRepairedVisuals && stages != null && stages.Length > 0
                 ? stages[0]
                 : null;
+            CropStageAnchor postAnchor = GetEmptyPostAnchor(out Vector2 postAnchorPixel);
             for (int i = 0; i < slots.Count; i++)
             {
                 GameObject post = new GameObject($"Planting Post {i + 1} [{slots[i].x},{slots[i].y}]");
                 post.transform.SetParent(repairedRoot.transform, false);
                 post.transform.position = gridManager.GetWorldLocation(slots[i]);
-                SpriteRenderer renderer = CreateAnchoredSprite(post.transform, "Empty Post Visual", emptyPost, 0.5f);
+                SpriteRenderer renderer = CreateAnchoredSprite(post.transform, "Empty Post Visual", emptyPost, 0.5f,
+                    alignToCell: true, anchor: postAnchor, anchorPixel: postAnchorPixel);
+                if (areaId == SpecialCropAreaId.DragonFruitTrellis)
+                {
+                    renderer.sortingOrder = GetDragonFruitSortingOrder(post.transform.position.y);
+                }
                 emptyPostRenderers.Add(renderer);
 
                 BoxCollider2D collider = post.AddComponent<BoxCollider2D>();
                 collider.size = new Vector2(0.055f, 0.07f);
                 collider.offset = new Vector2(0f, 0.035f);
+                CopyAuthoredCollider(editorPreviewRoot, post.name, collider);
+                ShiftColliderWithCellAlignedArt(collider, emptyPost, 0.5f, postAnchor, postAnchorPixel);
             }
 
             BuildRepairedFenceRows();
@@ -416,6 +434,19 @@ namespace World
                 renderer.color = Color.white;
                 renderer.sortingLayerName = MapPropSorting.SortingLayer;
                 renderer.sortingOrder = MapPropSorting.TrellisBackgroundOrder;
+
+                // Block the player along the upper rail of both cucumber trellises.
+                // Convert the desired world-space thickness back into local space,
+                // because the authored fence is scaled to match the planting row.
+                BoxCollider2D fenceCollider = fenceObject.AddComponent<BoxCollider2D>();
+                Bounds spriteBounds = fence.bounds;
+                float worldColliderHeight = Mathf.Max(0.055f, cellSize * 0.16f);
+                float localColliderHeight = worldColliderHeight / Mathf.Max(Mathf.Abs(fenceScale.y), 0.0001f);
+                fenceCollider.size = new Vector2(spriteBounds.size.x, localColliderHeight);
+                fenceCollider.offset = new Vector2(
+                    spriteBounds.center.x,
+                    spriteBounds.max.y - localColliderHeight * 0.5f);
+                fenceCollider.isTrigger = false;
             }
         }
 
@@ -453,16 +484,29 @@ namespace World
         }
 
         /// <summary>
-        /// The authored trellis frame is a backdrop: crops planted on its posts
-        /// and the player walking past must always be drawn in front of it.
+        /// Trellis backdrops stay behind crops and characters. Boundary fences
+        /// with height sorting or fence names sort dynamically by Y with the player.
         /// </summary>
         private static void PushTrellisToBackground(GameObject authoredRoot)
         {
             SpriteRenderer[] renderers = authoredRoot.GetComponentsInChildren<SpriteRenderer>(true);
             for (int i = 0; i < renderers.Length; i++)
             {
-                renderers[i].sortingLayerName = MapPropSorting.SortingLayer;
-                renderers[i].sortingOrder = MapPropSorting.TrellisBackgroundOrder;
+                SpriteRenderer renderer = renderers[i];
+                if (renderer == null) continue;
+
+                // Fences and depth-sorted props keep their Y-based sorting so they
+                // properly occlude the player when standing behind them.
+                if (renderer.GetComponent<Utility.HeightBasedSorting>() != null ||
+                    renderer.GetComponent<UnityEngine.Rendering.SortingGroup>() != null ||
+                    renderer.gameObject.name.IndexOf("hàng rào", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    renderer.gameObject.name.IndexOf("fence", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    continue;
+                }
+
+                renderer.sortingLayerName = MapPropSorting.SortingLayer;
+                renderer.sortingOrder = MapPropSorting.TrellisBackgroundOrder;
             }
         }
 
@@ -495,10 +539,16 @@ namespace World
                 GameObject piece = new GameObject($"Broken Post {i + 1} [{cell.x},{cell.y}]");
                 piece.transform.SetParent(brokenRoot.transform, false);
                 piece.transform.position = gridManager.GetWorldLocation(cell);
-                CreateAnchoredSprite(piece.transform, "Visual", sprite, 0.5f);
+                SpriteRenderer renderer = CreateAnchoredSprite(piece.transform, "Visual", sprite, 0.5f, alignToCell: true);
+                if (areaId == SpecialCropAreaId.DragonFruitTrellis)
+                {
+                    renderer.sortingOrder = GetDragonFruitSortingOrder(piece.transform.position.y);
+                }
                 BoxCollider2D collider = piece.AddComponent<BoxCollider2D>();
                 collider.size = new Vector2(0.14f, 0.10f);
                 collider.offset = new Vector2(0f, 0.05f);
+                CopyAuthoredCollider(editorPreviewRoot, piece.name, collider);
+                ShiftColliderWithCellAlignedArt(collider, sprite, 0.5f);
             }
         }
 
@@ -545,6 +595,7 @@ namespace World
             trigger.isTrigger = true;
             trigger.size = new Vector2(0.24f, 0.42f);
             trigger.offset = new Vector2(0f, 0.12f);
+            CopyAuthoredCollider(editorPreviewRoot, $"Repair Lock [{bottomCenter.x},{bottomCenter.y}]", trigger);
             InteractionField field = lockRoot.AddComponent<InteractionField>();
             field.Configure(0.7f, config.mouseInteractionEvent, TryRepair);
 
@@ -555,13 +606,62 @@ namespace World
             BoxCollider2D solid = blocker.AddComponent<BoxCollider2D>();
             solid.size = LockSignColliderSize;
             solid.offset = LockSignColliderOffset;
+            CopyAuthoredCollider(editorPreviewRoot, "Sign Collider", solid, $"Repair Lock [{bottomCenter.x},{bottomCenter.y}]");
+        }
+
+        private static void CopyAuthoredCollider(GameObject previewRoot, string objectName, BoxCollider2D target, string parentContext = null)
+        {
+            if (previewRoot == null || target == null)
+                return;
+
+            Transform match = null;
+            if (!string.IsNullOrEmpty(parentContext))
+            {
+                Transform parent = FindDeepChild(previewRoot.transform, parentContext);
+                if (parent != null)
+                    match = FindDeepChild(parent, objectName);
+            }
+
+            if (match == null)
+                match = FindDeepChild(previewRoot.transform, objectName);
+
+            if (match != null)
+            {
+                BoxCollider2D source = match.GetComponent<BoxCollider2D>();
+                if (source != null)
+                {
+                    target.size = source.size;
+                    target.offset = source.offset;
+                }
+            }
+        }
+
+        private static Transform FindDeepChild(Transform parent, string name)
+        {
+            if (parent == null)
+                return null;
+            if (string.Equals(parent.name, name, StringComparison.OrdinalIgnoreCase))
+                return parent;
+
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                Transform found = FindDeepChild(parent.GetChild(i), name);
+                if (found != null)
+                    return found;
+            }
+            return null;
         }
 
         /// <summary>Footprint of the 23x32 px repair sign post, shared with the Edit Mode preview.</summary>
         public static readonly Vector2 LockSignColliderSize = new Vector2(0.14f, 0.06f);
         public static readonly Vector2 LockSignColliderOffset = new Vector2(0f, 0.03f);
 
-        private static SpriteRenderer CreateAnchoredSprite(Transform parent, string name, Sprite sprite, float scale)
+        /// <param name="alignToCell">
+        /// True for planting posts: they use the same cell alignment as the crop
+        /// that replaces them, so nothing jumps when a slot is planted.
+        /// </param>
+        private SpriteRenderer CreateAnchoredSprite(Transform parent, string name, Sprite sprite, float scale,
+            bool alignToCell = false, CropStageAnchor anchor = CropStageAnchor.Auto, Vector2 anchorPixel = default)
         {
             GameObject visual = new GameObject(name);
             visual.transform.SetParent(parent, false);
@@ -572,12 +672,41 @@ namespace World
             renderer.sortingOrder = Mathf.RoundToInt(-parent.position.y * 100f);
             if (sprite != null)
             {
-                float x = ((sprite.pivot.x - sprite.rect.width * 0.5f) / sprite.pixelsPerUnit) * scale;
-                float y = (sprite.pivot.y / sprite.pixelsPerUnit) * scale;
-                visual.transform.localPosition = new Vector3(x, y, 0f);
+                Vector2 offset = alignToCell
+                    ? CropSpriteAlignment.GetAnchoredOffset(sprite, scale, gridManager.Grid.cellSize.y, anchor, anchorPixel)
+                    : CropSpriteAlignment.GetLegacyBottomCenterOffset(sprite, scale);
+                visual.transform.localPosition = new Vector3(offset.x, offset.y, 0f);
             }
             visual.transform.localScale = Vector3.one * scale;
             return renderer;
+        }
+
+        private CropStageAnchor GetEmptyPostAnchor(out Vector2 anchorPixel)
+        {
+            if (config == null)
+            {
+                anchorPixel = Vector2.zero;
+                return CropStageAnchor.Auto;
+            }
+
+            bool cucumber = areaId == SpecialCropAreaId.CucumberTrellis;
+            anchorPixel = cucumber ? config.cucumberEmptyPostAnchorPixel : config.dragonFruitEmptyPostAnchorPixel;
+            return cucumber ? config.cucumberEmptyPostAnchor : config.dragonFruitEmptyPostAnchor;
+        }
+
+        /// <summary>
+        /// Post colliders (default or copied from the authored preview) were
+        /// tuned for the legacy anchor; move them by the same amount as the art.
+        /// </summary>
+        private void ShiftColliderWithCellAlignedArt(BoxCollider2D collider, Sprite sprite, float scale,
+            CropStageAnchor anchor = CropStageAnchor.Auto, Vector2 anchorPixel = default)
+        {
+            if (collider == null || sprite == null)
+                return;
+
+            Vector2 shift = CropSpriteAlignment.GetAnchoredOffset(sprite, scale, gridManager.Grid.cellSize.y, anchor, anchorPixel)
+                            - CropSpriteAlignment.GetLegacyBottomCenterOffset(sprite, scale);
+            collider.offset += shift;
         }
 
         private void TryRepair()
@@ -794,9 +923,9 @@ namespace World
             GameObject root = new GameObject("Special Crop Areas Runtime");
             SceneManager.MoveGameObjectToScene(root, grid.gameObject.scene);
             CreateArea(root.transform, "Cucumber Trellis", SpecialCropAreaId.CucumberTrellis,
-                PlantingZone.CucumberTrellis, cucumber, cucumberLock, grid, progress, config);
+                PlantingZone.CucumberTrellis, cucumber, cucumberLock, grid, progress, config, editorPreview);
             CreateArea(root.transform, "Dragon Fruit Field", SpecialCropAreaId.DragonFruitTrellis,
-                PlantingZone.DragonFruitTrellis, dragon, dragonLock, grid, progress, config);
+                PlantingZone.DragonFruitTrellis, dragon, dragonLock, grid, progress, config, editorPreview);
             CreateNamedWellSources(root.transform, config.regions, grid);
         }
 
@@ -835,12 +964,13 @@ namespace World
             MapRegionDefinition lockRegion,
             GridManager grid,
             SpecialCropProgressService progress,
-            SpecialCropRuntimeConfig config)
+            SpecialCropRuntimeConfig config,
+            GameObject previewRoot = null)
         {
             GameObject areaObject = new GameObject(name);
             areaObject.transform.SetParent(parent, false);
             SpecialCropAreaController controller = areaObject.AddComponent<SpecialCropAreaController>();
-            controller.Configure(id, zone, region, lockRegion, grid, progress, config);
+            controller.Configure(id, zone, region, lockRegion, grid, progress, config, previewRoot);
         }
 
         private static void CreateNamedWellSources(Transform parent, MapRegionCollection collection, GridManager grid)

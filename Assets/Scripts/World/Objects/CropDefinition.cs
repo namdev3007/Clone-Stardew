@@ -24,8 +24,14 @@ namespace World.Objects
         private bool perennialTree;
         [SerializeField] private PlantingZone plantingZone;
         [SerializeField] private Sprite[] growthSprites;
-        [SerializeField, Tooltip("Local X/Y correction for each growth sprite, using the same array index.")]
+        [SerializeField, Tooltip("How each growth sprite is anchored in its soil cell, using the same array index.")]
+        private CropStageAnchor[] stageAnchorModes;
+        [SerializeField, Tooltip("Anchor pixel of each growth sprite (from the sprite rect's bottom-left), used by the Pixel anchor modes.")]
+        private Vector2[] stageAnchorPixels;
+        [SerializeField, Tooltip("Local X/Y correction for each growth sprite, applied after its anchor.")]
         private Vector2[] stagePositionOffsets;
+        [SerializeField, Min(0f), Tooltip("Height of the ground line above the soil cell bottom, in world units.")]
+        private float groundInset = CropSpriteAlignment.DefaultGroundInset;
         [SerializeField] private ItemData harvestedItem;
 
         public string DisplayName => displayName;
@@ -38,20 +44,60 @@ namespace World.Objects
         public PlantingZone PlantingZone => plantingZone;
         public Sprite[] GrowthSprites => growthSprites;
         public ItemData HarvestedItem => harvestedItem;
+        public float GroundInset => groundInset;
+
+        /// <summary>Index of <paramref name="sprite"/> in the growth sprites, or -1.</summary>
+        public int GetStageIndex(Sprite sprite)
+        {
+            if (sprite == null || growthSprites == null)
+                return -1;
+
+            for (int i = 0; i < growthSprites.Length; i++)
+            {
+                if (growthSprites[i] == sprite)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public CropStageAnchor GetStageAnchorMode(int stageIndex)
+        {
+            return stageAnchorModes != null && stageIndex >= 0 && stageIndex < stageAnchorModes.Length
+                ? stageAnchorModes[stageIndex]
+                : CropStageAnchor.Auto;
+        }
+
+        public Vector2 GetStageAnchorPixel(int stageIndex)
+        {
+            return stageAnchorPixels != null && stageIndex >= 0 && stageIndex < stageAnchorPixels.Length
+                ? stageAnchorPixels[stageIndex]
+                : Vector2.zero;
+        }
+
+        public Vector2 GetStagePositionOffset(int stageIndex)
+        {
+            return stagePositionOffsets != null && stageIndex >= 0 && stageIndex < stagePositionOffsets.Length
+                ? stagePositionOffsets[stageIndex]
+                : Vector2.zero;
+        }
 
         public Vector2 GetStagePositionOffset(Sprite sprite)
         {
-            if (sprite == null || growthSprites == null || stagePositionOffsets == null)
-                return Vector2.zero;
+            return GetStagePositionOffset(GetStageIndex(sprite));
+        }
 
-            int count = Mathf.Min(growthSprites.Length, stagePositionOffsets.Length);
-            for (int i = 0; i < count; i++)
-            {
-                if (growthSprites[i] == sprite)
-                    return stagePositionOffsets[i];
-            }
-
-            return Vector2.zero;
+        /// <summary>
+        /// Local position of a growth sprite's renderer (scaled by <paramref name="scale"/>)
+        /// under a crop root placed at the centre of its soil cell: the stage's
+        /// anchor followed by its position offset.
+        /// </summary>
+        public Vector2 GetStageLocalPosition(Sprite sprite, float scale, float cellHeight)
+        {
+            int index = GetStageIndex(sprite);
+            Vector2 anchored = CropSpriteAlignment.GetAnchoredOffset(
+                sprite, scale, cellHeight, GetStageAnchorMode(index), GetStageAnchorPixel(index), groundInset);
+            return anchored + GetStagePositionOffset(index);
         }
     }
 }

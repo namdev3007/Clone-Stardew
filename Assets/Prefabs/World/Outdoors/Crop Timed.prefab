@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1394899081489842967}
   - component: {fileID: 4798521517272763073}
   - component: {fileID: 4243385003041227869}
-  - component: {fileID: 8879481886391436958}
+  - component: {fileID: 8674218774557423776}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Crop
@@ -120,7 +120,7 @@ MonoBehaviour:
   flip: 0
   groundAnchorRenderer: {fileID: 0}
   useRendererBottom: 0
---- !u!50 &8879481886391436958
+--- !u!50 &8674218774557423776
 Rigidbody2D:
   serializedVersion: 5
   m_ObjectHideFlags: 0

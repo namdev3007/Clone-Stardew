@@ -18,7 +18,7 @@ MonoBehaviour:
   regrowthSeconds: 180
   maximumHarvests: 2147483647
   harvestYield: 3
-  regrowthStageStart: 2
+  regrowthStageStart: 3
   perennialTree: 0
   plantingZone: 2
   growthSprites:
@@ -29,12 +29,29 @@ MonoBehaviour:
   - {fileID: 7474634605538559278, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
   - {fileID: -4773143002421663189, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
   - {fileID: -9059674702905948968, guid: 6f5466deaef4dff4d901c09d551ba8f5, type: 3}
+  stageAnchorModes:
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  - 3
+  stageAnchorPixels:
+  - {x: 9, y: 3}
+  - {x: 21, y: 3}
+  - {x: 33, y: 7}
+  - {x: 41, y: 7}
+  - {x: 49, y: 7}
+  - {x: 49, y: 7}
+  - {x: 49, y: 7}
   stagePositionOffsets:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
+  - {x: 0, y: 0.01}
+  - {x: 0, y: 0.01}
+  - {x: 0, y: 0.01}
+  - {x: 0, y: 0.01}
+  - {x: 0, y: 0.01}
+  groundInset: 0.02
   harvestedItem: {fileID: 11400000, guid: a1000000000000000000000000000006, type: 2}

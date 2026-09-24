@@ -22,6 +22,6 @@ MonoBehaviour:
     min: 0
     max: 12
     current: 12
-  isRemoveable: 0
+  isRemoveable: 1
   action: {fileID: 11400000, guid: 1dd4fc782c9c62544bfd2a3d9944d3ee, type: 2}
   worldDropScale: 1

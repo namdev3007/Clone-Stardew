@@ -67,7 +67,7 @@ namespace User_Interface
         // window still get their own Awake during scene load and register themselves.
         private void Start()
         {
-            ApplyScale();
+            // Preserve whatever scale/transform was authored in Edit Mode.
             SetOpen(false, false);
         }
 

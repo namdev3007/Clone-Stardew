@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 namespace User_Interface
 {
+    [ExecuteAlways]
     [DisallowMultipleComponent]
     public sealed class LocalizedSpriteButton : MonoBehaviour
     {
@@ -113,11 +114,8 @@ namespace User_Interface
                 targetImage.rectTransform.sizeDelta = languageSize;
             }
 
-            Vector2 languagePos = vietnamese ? vietnamesePosition : englishPosition;
-            if ((languagePos.x != 0f || languagePos.y != 0f) && targetImage.rectTransform != null)
-            {
-                targetImage.rectTransform.anchoredPosition = languagePos;
-            }
+            // Preserving authored layout: do not override anchoredPosition with absolute coordinates
+            // at runtime, so manual adjustments made in Edit Mode remain intact.
 
             if (useNativeSize && normal != null && targetImage.rectTransform != null)
             {

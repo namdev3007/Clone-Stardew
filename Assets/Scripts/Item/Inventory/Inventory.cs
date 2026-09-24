@@ -393,13 +393,17 @@ namespace Item.Inventory
             if (data.CanStack && GetItem(data, out existingIndex) != null)
                 return true;
 
-            // A dynamic player bag can always create another row when needed.
+            // A dynamic player bag can always create the rows required for the
+            // requested quantity. Fixed inventories must have one free slot per
+            // non-stackable item (stackable items only need a single slot).
             if (automaticallyExpand)
                 return true;
 
+            int requiredSlots = data.CanStack ? 1 : amount;
+            int freeSlots = 0;
             for (int i = 0; i < inventorySize; i++)
             {
-                if (!items.ContainsKey(i))
+                if (!items.ContainsKey(i) && ++freeSlots >= requiredSlots)
                     return true;
             }
 
@@ -411,7 +415,7 @@ namespace Item.Inventory
         /// invisible resources such as Gold, which intentionally cannot be
         /// dropped by the player but can still be spent by systems.
         /// </summary>
-        public bool TryRemoveItemAmount(ItemData data, int amount)
+        public bool TryRemoveItemAmount(ItemData data, int amount, bool force = false)
         {
             if (data == null || amount <= 0)
                 return false;
@@ -422,7 +426,7 @@ namespace Item.Inventory
                 return false;
 
             if (data.HasSlot)
-                return TryRemoveItemAmount(index, amount);
+                return TryRemoveItemAmount(index, amount, force);
 
             if (!data.CanStack || item.Amount < amount)
                 return false;
@@ -436,13 +440,13 @@ namespace Item.Inventory
 
         /// <summary>
         /// Removes a quantity from a visible inventory slot and refreshes every
-        /// registered inventory UI. Non-removable tools cannot be sold/consumed
-        /// through this method.
+        /// registered inventory UI. Non-removable tools cannot be dropped/consumed
+        /// through this method unless force is explicitly set to true (e.g. shop sales).
         /// </summary>
-        public bool TryRemoveItemAmount(int slotIndex, int amount)
+        public bool TryRemoveItemAmount(int slotIndex, int amount, bool force = false)
         {
             InventoryItem item = GetItem(slotIndex);
-            if (item == null || amount <= 0 || !item.Data.IsRemoveable)
+            if (item == null || amount <= 0 || (!force && !item.Data.IsRemoveable))
                 return false;
 
             if (!item.Data.CanStack)
@@ -450,7 +454,7 @@ namespace Item.Inventory
                 if (amount != 1)
                     return false;
 
-                RemoveItem(slotIndex);
+                RemoveItem(slotIndex, false, force);
                 return true;
             }
 
@@ -458,7 +462,7 @@ namespace Item.Inventory
                 return false;
 
             if (item.Amount == amount)
-                RemoveItem(slotIndex);
+                RemoveItem(slotIndex, false, force);
             else
             {
                 item.Amount -= amount;
@@ -732,6 +736,23 @@ namespace Item.Inventory
             if (data == null || amount <= 0)
                 return false;
 
+            // A quantity of non-stackable items represents separate inventory
+            // instances (for example several hoes, axes, or fertilizer bags).
+            // Validate the whole operation first, then insert one item per slot.
+            if (data.HasSlot && !data.CanStack && amount > 1)
+            {
+                if (slotIndex >= 0 || !CanAddItem(data, amount))
+                    return false;
+
+                for (int i = 0; i < amount; i++)
+                {
+                    if (!AddItem(data, 1, -1, false))
+                        return false;
+                }
+
+                return true;
+            }
+
             // Is item stackable? Then lets search the inventory first.
             if (scanForStack && data.CanStack)
             {
@@ -861,9 +882,9 @@ namespace Item.Inventory
             InventorySizeChanged?.Invoke(inventorySize);
         }
 
-        public void RemoveItem(int slotIndex, bool swapItem = false)
+        public void RemoveItem(int slotIndex, bool swapItem = false, bool force = false)
         {
-            if (!GetItem(slotIndex).Data.IsRemoveable && !swapItem)
+            if (!force && !GetItem(slotIndex).Data.IsRemoveable && !swapItem)
                 return;
 
             GetItem(slotIndex)?.Data?.Action?.ItemRemoveAction(this, slotIndex);
