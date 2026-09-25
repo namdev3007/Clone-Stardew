@@ -124,11 +124,16 @@ public static class SetupTimedCropSystem
 
     private static GameObject CreateCropPrefab()
     {
-        const string sourcePath = "Assets/Prefabs/World/Outdoors/Crop Kale.prefab";
-        GameObject source = AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath);
-        if (source == null) throw new InvalidOperationException("Crop Kale prefab was not found.");
+        // Crop Timed is the production prefab. It must never depend on the deleted
+        // RPG Farming Kit Kale sample, otherwise every editor reload throws.
+        GameObject existingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+        if (existingPrefab == null)
+        {
+            Debug.LogError($"Timed crop setup: production prefab was not found at {PrefabPath}.");
+            return null;
+        }
 
-        GameObject root = PrefabUtility.LoadPrefabContents(sourcePath);
+        GameObject root = PrefabUtility.LoadPrefabContents(PrefabPath);
         try
         {
             root.name = "Crop Timed";
@@ -142,7 +147,10 @@ public static class SetupTimedCropSystem
             ItemDropper dropper = root.GetComponent<ItemDropper>();
             SpriteRenderer renderer = root.GetComponentInChildren<SpriteRenderer>();
             if (crop == null || health == null || dropper == null || renderer == null)
-                throw new InvalidOperationException("Crop Kale prefab is missing a required component.");
+            {
+                Debug.LogError("Timed crop setup: Crop Timed prefab is missing a required component.");
+                return existingPrefab;
+            }
 
             SerializedObject cropData = new SerializedObject(crop);
             cropData.FindProperty("health").objectReferenceValue = health;

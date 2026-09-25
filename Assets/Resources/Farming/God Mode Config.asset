@@ -23,6 +23,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e0ccef7595396844697f781e7377637a, type: 2}
   - {fileID: 11400000, guid: a1000000000000000000000000000004, type: 2}
   - {fileID: 11400000, guid: a1000000000000000000000000000008, type: 2}
-  - {fileID: 11400000, guid: 38547a62d61ad1a4fbb02efa9b7728de, type: 2}
   fertilizerItem: {fileID: 11400000, guid: b74c8d1802b30034db61818663596c37, type: 2}
   stageSeconds: 1

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,11 +13,15 @@ namespace Main_Menu
     {
         private const string IntroResourcePath = "Videos/Intro_0924";
         private const float MusicFadeDuration = 6f;
+        private const float LoadingCoverSeconds = 2f;
         private VideoPlayer videoPlayer;
         private AudioSource backgroundMusic;
         private System.Action completed;
         private bool finishing;
         private float targetMusicVolume;
+        private RawImage cinematicScreen;
+        private GameObject skipButtonObject;
+        private Image loadingCover;
 
         public static bool TryPlay(System.Action onCompleted)
         {
@@ -43,11 +48,13 @@ namespace Main_Menu
             scaler.matchWidthOrHeight = 0.5f;
             gameObject.AddComponent<GraphicRaycaster>();
 
-            RawImage screen = CreateRawImage("Cinematic", transform);
-            Stretch(screen.rectTransform);
-            screen.color = Color.white;
+            cinematicScreen = CreateRawImage("Cinematic", transform);
+            Stretch(cinematicScreen.rectTransform);
+            cinematicScreen.color = Color.white;
             RenderTexture texture = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32) { name = "New Game Intro Render Texture" };
-            screen.texture = texture;
+            cinematicScreen.texture = texture;
+
+            loadingCover = CreateLoadingCover(canvas.transform);
 
             AudioSource videoAudio = gameObject.AddComponent<AudioSource>();
             videoAudio.playOnAwake = false;
@@ -89,6 +96,7 @@ namespace Main_Menu
             image.color = new Color(0.08f, 0.055f, 0.035f, 0.82f);
             Button button = go.GetComponent<Button>();
             button.targetGraphic = image;
+            skipButtonObject = go;
             button.onClick.AddListener(Finish);
 
             GameObject labelObject = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -100,6 +108,17 @@ namespace Main_Menu
             label.alignment = TextAlignmentOptions.Center;
             label.color = new Color(1f, 0.9f, 0.68f, 1f);
             Stretch(label.rectTransform);
+        }
+
+        private static Image CreateLoadingCover(Transform parent)
+        {
+            GameObject child = new GameObject("Loading Cover", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            child.transform.SetParent(parent, false);
+            Image image = child.GetComponent<Image>();
+            image.color = Color.black;
+            Stretch(image.rectTransform);
+            child.SetActive(false);
+            return image;
         }
 
         private static RawImage CreateRawImage(string name, Transform parent)
@@ -132,9 +151,29 @@ namespace Main_Menu
             finishing = true;
             if (backgroundMusic != null) backgroundMusic.volume = targetMusicVolume;
             if (videoPlayer != null) videoPlayer.Stop();
+
+            // Cover the old menu before loading the game scene. This persistent
+            // canvas survives the synchronous scene switch, preventing the name /
+            // character UI from flashing while Core and the farm initialize.
+            if (cinematicScreen != null)
+                cinematicScreen.gameObject.SetActive(false);
+            if (skipButtonObject != null)
+                skipButtonObject.SetActive(false);
+            if (loadingCover != null)
+            {
+                loadingCover.gameObject.SetActive(true);
+                loadingCover.transform.SetAsLastSibling();
+            }
+
             System.Action callback = completed;
             completed = null;
             callback?.Invoke();
+            StartCoroutine(RemoveLoadingCoverAfterDelay());
+        }
+
+        private IEnumerator RemoveLoadingCoverAfterDelay()
+        {
+            yield return new WaitForSecondsRealtime(LoadingCoverSeconds);
             Destroy(gameObject);
         }
 

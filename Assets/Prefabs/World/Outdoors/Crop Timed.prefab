@@ -341,7 +341,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lootableItemPool: {fileID: 11400000, guid: c7e52e72615fa604397231914ea135b4, type: 2}
   itemsToDrop:
-  - itemData: {fileID: 11400000, guid: b8841627b3eb5404ea89282b98927788, type: 2}
+  - itemData: {fileID: 0}
     itemAmount: {x: 1, y: 1}
     dropCount: {x: 1, y: 1}
   dropRadius: 0.1

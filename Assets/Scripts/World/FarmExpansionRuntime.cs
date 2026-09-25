@@ -31,14 +31,16 @@ namespace World
             IsRevealActive = false;
         }
 
+        public static bool IsInitialFarmCell(Vector3Int cell)
+        {
+            return initialFarm != null && initialFarm.Contains(cell);
+        }
+
         public static bool CanHoe(Vector3Int cell)
         {
-            if (initialFarm == null)
-                return false;
-
             // Only the named normal farm accepts ordinary hoeing. Special crop
             // areas are handled before this method by SpecialCropRuntime.
-            return initialFarm.Contains(cell);
+            return IsInitialFarmCell(cell);
         }
 
         public static bool CanPlant(Vector3Int cell, CropDefinition definition)
@@ -59,18 +61,10 @@ namespace World
 
         public static bool CanPlantPerennialFootprint(Vector3Int center)
         {
-            MapRegionDefinition owner = initialFarm != null && initialFarm.Contains(center)
-                ? initialFarm
-                : (HomeOrchardUnlocked && homeOrchard != null && homeOrchard.Contains(center) ? homeOrchard : null);
-            if (owner == null)
-                return false;
-
-            // Perennial trees (banana, mango) require their 3x3 footprint to fit entirely within the owner region.
-            for (int y = -1; y <= 1; y++)
-            for (int x = -1; x <= 1; x++)
-                if (!owner.Contains(center + new Vector3Int(x, y, 0)))
-                    return false;
-            return true;
+            // Perennial trees now occupy only their selected cell. Keep this API
+            // name for compatibility, but no longer require a surrounding 3x3 area.
+            return initialFarm != null && initialFarm.Contains(center) ||
+                   HomeOrchardUnlocked && homeOrchard != null && homeOrchard.Contains(center);
         }
 
         public static void BeginReveal(MonoBehaviour host, System.Action completed = null)

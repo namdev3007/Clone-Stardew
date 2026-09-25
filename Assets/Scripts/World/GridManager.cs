@@ -305,7 +305,11 @@ namespace World
                 if (applied && farmPlots.TryGetValue(GetGridLocation(plantedCrop.transform.position), out FarmPlotData cropPlot))
                 {
                     cropPlot.fertilized = true;
-                    cropPlot.status = FarmPlotStatus.None;
+                    // Fertilizing satisfies only the fertilizer requirement. If the
+                    // planted crop is still dry, keep the water reminder visible.
+                    cropPlot.status = plantedCrop.NeedsWater
+                        ? FarmPlotStatus.Water
+                        : FarmPlotStatus.None;
                     RefreshFarmPlotIndicator(cropPlot);
                 }
                 return applied;
@@ -347,22 +351,36 @@ namespace World
                 perennialPlot.occupied = true;
                 perennialPlot.fertilized = false;
                 perennialPlot.status = FarmPlotStatus.None;
-                ReservePerennialFootprint(location);
                 RefreshFarmPlotIndicator(perennialPlot);
                 fertilized = false;
                 return true;
             }
 
+            bool isSpecialPlantingSlot = SpecialCropRuntime.IsRepairedPlantingSlot(location);
+            bool isNormalFarmCell = FarmExpansionRuntime.IsInitialFarmCell(location);
+
             if (reservedPlantingCells.ContainsKey(location))
                 return false;
 
-            if (HasObstacleAtCell(location))
+            // Fence/post colliders still block movement, but cannot invalidate a
+            // prepared planting cell inside the normal farm or repaired trellises.
+            if (!isSpecialPlantingSlot && !isNormalFarmCell && HasObstacleAtCell(location))
                 return false;
 
-            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location))
+            // Recreate missing plot metadata for old saves that still have a dirt hole.
+            if (!farmPlots.ContainsKey(location) && HasDirtHole(location))
+                RegisterFarmPlot(location);
+
+            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied ||
+                !HasDirtHole(location))
                 return false;
 
-            fertilized = plot.fertilized;
+            // Every crop, including dragon fruit and cucumber, must be fertilized
+            // before sowing. Special slots only bypass their post/fence collider.
+            if (!plot.fertilized)
+                return false;
+
+            fertilized = true;
             plot.occupied = true;
             plot.status = FarmPlotStatus.None;
             RefreshFarmPlotIndicator(plot);
@@ -382,13 +400,23 @@ namespace World
             if (definition.IsPerennialTree)
                 return CanPlantPerennialTree(location);
 
+            bool isSpecialPlantingSlot = SpecialCropRuntime.IsRepairedPlantingSlot(location);
+            bool isNormalFarmCell = FarmExpansionRuntime.IsInitialFarmCell(location);
+
             if (reservedPlantingCells.ContainsKey(location))
                 return false;
 
-            if (HasObstacleAtCell(location))
+            if (!isSpecialPlantingSlot && !isNormalFarmCell && HasObstacleAtCell(location))
                 return false;
 
-            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied || !HasDirtHole(location))
+            if (!farmPlots.ContainsKey(location) && HasDirtHole(location))
+                RegisterFarmPlot(location);
+
+            if (!farmPlots.TryGetValue(location, out FarmPlotData plot) || plot.occupied ||
+                !HasDirtHole(location))
+                return false;
+
+            if (!plot.fertilized)
                 return false;
 
             return true;
@@ -405,8 +433,6 @@ namespace World
             plot.occupied = true;
             plot.fertilized = true;
             plot.status = FarmPlotStatus.None;
-            if (definition.IsPerennialTree)
-                ReservePerennialFootprint(location);
             RefreshFarmPlotIndicator(plot);
             return true;
         }
@@ -436,19 +462,13 @@ namespace World
             RegisterFarmPlot(location);
             farmPlots[location].occupied = true;
             crops[location] = crop;
-            if (crop != null && crop.UsesPerennialFootprint)
-                ReservePerennialFootprint(location);
         }
 
         public void UnregisterCrop(Crop crop, Vector3 worldPosition)
         {
             Vector3Int location = GetGridLocation(worldPosition);
             if (crops.TryGetValue(location, out Crop current) && current == crop)
-            {
                 crops.Remove(location);
-                if (crop != null && crop.UsesPerennialFootprint)
-                    ReleasePerennialFootprint(location);
-            }
         }
 
         public Crop GetCrop(Vector3Int location)
@@ -539,41 +559,116 @@ namespace World
         public bool CanPlantPerennialTree(Vector3Int center)
         {
             Initialize();
-            bool canPlantOnGrass = FarmExpansionRuntime.CanPlantPerennialFootprint(center);
-            if (!canPlantOnGrass)
+
+            // Reservations created by the former 3x3 rule can survive a Unity hot
+            // reload in the current play session. They are obsolete now and must
+            // not make cells beside an existing perennial appear occupied.
+            reservedPlantingCells.Clear();
+
+            if (!FarmExpansionRuntime.CanPlantPerennialFootprint(center))
                 return false;
 
-            bool isPlantingOnDirt = HasDirt(center);
-            if (isPlantingOnDirt)
+            // Perennial trees no longer reserve or scan a 3x3 footprint. Only the
+            // selected center cell is checked; water, crops, uncleared grass and
+            // large natural trees still block it.
+            if (HasWater(center) || crops.ContainsKey(center))
+                return false;
+
+            if (farmPlots.TryGetValue(center, out FarmPlotData plot) && plot.occupied)
+                return false;
+
+            // Fence overlap is allowed, but visible grass/weed clumps must be
+            // cleared before a mango or banana can occupy the selected cell.
+            if (HasGrassAtCell(center))
+                return false;
+
+            return !HasLargeTreeAtCell(center);
+        }
+
+        private bool HasGrassAtCell(Vector3Int location)
+        {
+            ClearableOrchardProp clearable = ClearableOrchardProp.FindAtCell(location);
+            if (clearable != null && clearable.gameObject.activeInHierarchy)
             {
-                // Ensure all cells of the 3x3 footprint are on valid dirt.
-                for (int dy = -1; dy <= 1; dy++)
-                for (int dx = -1; dx <= 1; dx++)
+                SpriteRenderer renderer = clearable.GetComponentInChildren<SpriteRenderer>(true);
+                if (renderer != null && MapPropSorting.IsGrass(renderer.sprite))
+                    return true;
+            }
+
+            if (generatedPropsByCell.TryGetValue(location, out List<MapRegionGeneratedProp> props))
+            {
+                for (int i = props.Count - 1; i >= 0; i--)
                 {
-                    Vector3Int checkCell = center + new Vector3Int(dx, dy, 0);
-                    if (!HasDirt(checkCell))
-                        return false;
+                    MapRegionGeneratedProp prop = props[i];
+                    if (prop == null || !prop.gameObject.activeInHierarchy)
+                        continue;
+
+                    SpriteRenderer renderer = prop.GetComponentInChildren<SpriteRenderer>(true);
+                    if (renderer != null && MapPropSorting.IsGrass(renderer.sprite))
+                        return true;
                 }
             }
 
-            for (int y = -1; y <= 1; y++)
+            return false;
+        }
+
+        private bool HasLargeTreeAtCell(Vector3Int location)
+        {
+            Crop crop = GetCrop(location);
+            if (crop != null && crop.UsesPerennialFootprint)
+                return true;
+
+            ClearableOrchardProp clearable = ClearableOrchardProp.FindAtCell(location);
+            if (clearable != null && clearable.gameObject.activeInHierarchy && IsLargeTreeObject(clearable.gameObject))
+                return true;
+
+            if (generatedPropsByCell.TryGetValue(location, out List<MapRegionGeneratedProp> props))
             {
-                for (int x = -1; x <= 1; x++)
+                for (int i = props.Count - 1; i >= 0; i--)
                 {
-                    Vector3Int location = center + new Vector3Int(x, y, 0);
-                    if ((!canPlantOnGrass && !HasDirt(location)) || HasDirtHole(location) || HasWater(location) ||
-                        reservedPlantingCells.ContainsKey(location) || crops.ContainsKey(location))
-                        return false;
-
-                    if (farmPlots.TryGetValue(location, out FarmPlotData plot) && plot.occupied)
-                        return false;
-
-                    if (HasObstacleAtCell(location))
-                        return false;
+                    MapRegionGeneratedProp prop = props[i];
+                    if (prop != null && prop.gameObject.activeInHierarchy && IsLargeTreeObject(prop.gameObject))
+                        return true;
                 }
             }
 
-            return true;
+            return false;
+        }
+
+        private static bool IsLargeTreeObject(GameObject root)
+        {
+            if (root == null)
+                return false;
+
+            if (root.GetComponentInParent<Crop>() is Crop crop)
+                return crop.UsesPerennialFootprint;
+
+            // Some authored fences share generic prop/occlusion components with
+            // trees. Their hierarchy name is authoritative: fences never block
+            // planting, even when their sprite or collider overlaps this cell.
+            if (AuthoredFenceDepthInstaller.IsTargetFence(root))
+                return false;
+
+            if (root.GetComponentInChildren<TreePlayerOcclusion>(true) != null)
+                return true;
+
+            SpriteRenderer renderer = root.GetComponentInChildren<SpriteRenderer>(true);
+            string sourceName = ((renderer != null && renderer.sprite != null ? renderer.sprite.name : root.name) ??
+                                 string.Empty).ToLowerInvariant();
+
+            bool isSmallVegetation = sourceName.Contains("grass") || sourceName.Contains("weed") ||
+                                     sourceName.Contains("cỏ") || sourceName.Contains("co-") ||
+                                     sourceName.Contains("flower") || sourceName.Contains("hoa") ||
+                                     sourceName.Contains("bush") || sourceName.Contains("bụi") ||
+                                     sourceName.Contains("bui-");
+            if (isSmallVegetation)
+                return false;
+
+            return sourceName.Contains("tree") || sourceName.Contains("cây") ||
+                   sourceName.Contains("cay-") || sourceName.Contains("banana") ||
+                   sourceName.Contains("chuối") || sourceName.Contains("chuoi") ||
+                   sourceName.Contains("mango") || sourceName.Contains("xoài") ||
+                   sourceName.Contains("xoai");
         }
 
         public bool HasObstacleAtCell(Vector3Int location)
@@ -601,7 +696,13 @@ namespace World
             // 3. Clearable orchard vegetation props (trees, bushes, grass, flowers, logs, pre-existing bananas)
             ClearableOrchardProp prop = ClearableOrchardProp.FindAtCell(location);
             if (prop != null && prop.gameObject.activeInHierarchy)
-                return true;
+            {
+                SpriteRenderer clearableRenderer = prop.GetComponentInChildren<SpriteRenderer>(true);
+                // Small ground-cover grass remains visible, but cannot block an
+                // already hoed/fertilized plot from accepting ordinary seeds.
+                if (clearableRenderer == null || !MapPropSorting.IsGrass(clearableRenderer.sprite))
+                    return true;
+            }
 
             // 4. Authored map region props (trees, grass clusters, decorations)
             if (generatedPropsByCell.TryGetValue(location, out List<MapRegionGeneratedProp> propList))
@@ -609,8 +710,16 @@ namespace World
                 for (int i = propList.Count - 1; i >= 0; i--)
                 {
                     MapRegionGeneratedProp p = propList[i];
-                    if (p != null && p.gameObject.activeInHierarchy)
-                        return true;
+                    if (p == null || !p.gameObject.activeInHierarchy)
+                        continue;
+
+                    // Ground-cover grass such as "Map Prop 269 - co-nho-1"
+                    // is visual decoration, not a physical obstacle to hoeing.
+                    SpriteRenderer propRenderer = p.GetComponentInChildren<SpriteRenderer>(true);
+                    if (propRenderer != null && MapPropSorting.IsGrass(propRenderer.sprite))
+                        continue;
+
+                    return true;
                 }
             }
 
@@ -629,6 +738,12 @@ namespace World
                 if (col.isTrigger)
                     continue;
 
+                SpriteRenderer colliderRenderer = col.GetComponentInChildren<SpriteRenderer>(true);
+                if (colliderRenderer == null)
+                    colliderRenderer = col.GetComponentInParent<SpriteRenderer>();
+                if (colliderRenderer != null && MapPropSorting.IsGrass(colliderRenderer.sprite))
+                    continue;
+
                 if (col.CompareTag("Player") ||
                     col.GetComponentInParent<Entity_Components.Player.GridSelector>() != null ||
                     col.GetComponentInParent<Entity_Components.Mover>() != null)
@@ -637,7 +752,30 @@ namespace World
                 if (col.GetComponentInParent<Crop>() != null)
                     continue;
 
+                // Fence colliders still block player movement, but a rail that
+                // visually overlaps the normal farm must not invalidate hoeing
+                // or the 3x3 footprint check for perennial trees.
+                if (FarmExpansionRuntime.IsInitialFarmCell(location) && IsFenceCollider(col))
+                    continue;
+
                 return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsFenceCollider(Collider2D collider)
+        {
+            if (collider == null)
+                return false;
+
+            for (Transform current = collider.transform; current != null; current = current.parent)
+            {
+                string objectName = current.name;
+                if (objectName.IndexOf("hàng rào", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    objectName.IndexOf("rào", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    objectName.IndexOf("fence", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
             }
 
             return false;
@@ -1322,6 +1460,18 @@ namespace World
 
         public bool CanHoeCell(Vector3Int position)
         {
+            // Every cell inside the authored normal farm region is farm soil.
+            // Decorative/fence colliders may still block character movement, but
+            // they must never prevent hoeing or planting on this region's cells.
+            if (FarmExpansionRuntime.IsInitialFarmCell(position))
+                return true;
+
+            // Repaired trellis slots contain their own post/fence colliders. Those
+            // colliders must block player movement, but must not block hoeing the
+            // designated planting cell itself.
+            if (SpecialCropRuntime.IsRepairedPlantingSlot(position))
+                return true;
+
             if (HasObstacleAtCell(position))
                 return false;
 
@@ -1344,6 +1494,12 @@ namespace World
         /// </summary>
         public bool IsSoilCell(Vector3Int position)
         {
+            // Match CanHoeCell: fence/post colliders can overlap these authored
+            // planting cells without making their preview invalid.
+            if (FarmExpansionRuntime.IsInitialFarmCell(position) ||
+                SpecialCropRuntime.IsRepairedPlantingSlot(position))
+                return true;
+
             if (HasObstacleAtCell(position))
                 return false;
 
@@ -1354,9 +1510,6 @@ namespace World
                 return true;
 
             if (crops.ContainsKey(position) && crops[position] != null)
-                return true;
-
-            if (SpecialCropRuntime.IsRepairedPlantingSlot(position))
                 return true;
 
             if (CanHoeCell(position) && HasDirt(position) && !HasWater(position))

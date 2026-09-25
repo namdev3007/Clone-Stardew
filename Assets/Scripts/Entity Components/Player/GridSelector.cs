@@ -226,7 +226,9 @@ namespace Entity_Components.Player
                 selectionGameObject.transform.position = targetWorldPos;
 
                 selectionSpriteRenderer.sortingLayerName = "Dynamic";
-                selectionSpriteRenderer.sortingOrder = Mathf.RoundToInt(targetWorldPos.y * -100f) + 5;
+                // The cursor is gameplay feedback, not a world prop. Keep it above
+                // trees and trellises so valid/invalid previews never disappear.
+                selectionSpriteRenderer.sortingOrder = short.MaxValue;
             }
             else
             {

@@ -367,7 +367,13 @@ namespace World
                     alignToCell: true, anchor: postAnchor, anchorPixel: postAnchorPixel);
                 if (areaId == SpecialCropAreaId.DragonFruitTrellis)
                 {
-                    renderer.sortingOrder = GetDragonFruitSortingOrder(post.transform.position.y);
+                    // Repaired dragon-fruit posts share the player's Y-depth rule.
+                    // Anchor at the visible foot of the post so the player appears
+                    // behind it when above and in front when below.
+                    UnityEngine.Rendering.SortingGroup sortingGroup = post.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                    sortingGroup.sortingLayerName = MapPropSorting.SortingLayer;
+                    Utility.HeightBasedSorting heightSorting = post.AddComponent<Utility.HeightBasedSorting>();
+                    heightSorting.ConfigureGroundAnchor(renderer);
                 }
                 emptyPostRenderers.Add(renderer);
 
@@ -433,20 +439,38 @@ namespace World
                 renderer.sprite = fence;
                 renderer.color = Color.white;
                 renderer.sortingLayerName = MapPropSorting.SortingLayer;
-                renderer.sortingOrder = MapPropSorting.TrellisBackgroundOrder;
+                // Start from the authored depth. HeightBasedSorting then updates
+                // the whole row from its ground contact point so the player can
+                // walk behind or in front of it exactly like a tree.
+                renderer.sortingOrder = row == 0 ? -357 : -290;
+                UnityEngine.Rendering.SortingGroup sortingGroup =
+                    fenceObject.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                sortingGroup.sortingLayerName = MapPropSorting.SortingLayer;
+                Utility.HeightBasedSorting heightSorting =
+                    fenceObject.AddComponent<Utility.HeightBasedSorting>();
+                heightSorting.ConfigureGroundAnchor(renderer);
 
                 // Block the player along the upper rail of both cucumber trellises.
                 // Convert the desired world-space thickness back into local space,
                 // because the authored fence is scaled to match the planting row.
                 BoxCollider2D fenceCollider = fenceObject.AddComponent<BoxCollider2D>();
-                Bounds spriteBounds = fence.bounds;
-                float worldColliderHeight = Mathf.Max(0.055f, cellSize * 0.16f);
-                float localColliderHeight = worldColliderHeight / Mathf.Max(Mathf.Abs(fenceScale.y), 0.0001f);
-                fenceCollider.size = new Vector2(spriteBounds.size.x, localColliderHeight);
-                fenceCollider.offset = new Vector2(
-                    spriteBounds.center.x,
-                    spriteBounds.max.y - localColliderHeight * 0.5f);
+                fenceCollider.edgeRadius = 0f;
                 fenceCollider.isTrigger = false;
+
+                if (row == 1)
+                {
+                    // Repaired Trellis Row 2: match the thin upper-rail collider
+                    // authored in the Inspector reference.
+                    fenceCollider.offset = new Vector2(0f, -0.1969778f);
+                    fenceCollider.size = new Vector2(2.02f, 0.07208824f);
+                }
+                else
+                {
+                    // Repaired Trellis Row 1: exact Box Collider 2D values from
+                    // the authored Inspector reference.
+                    fenceCollider.offset = new Vector2(0f, -0.195f);
+                    fenceCollider.size = new Vector2(2.02f, 0.1097f);
+                }
             }
         }
 
@@ -468,19 +492,96 @@ namespace World
 
             PushTrellisToBackground(authoredRoot);
 
-            if (areaId != SpecialCropAreaId.CucumberTrellis)
+            if (areaId == SpecialCropAreaId.DragonFruitTrellis)
+            {
+                // The eight unrepaired authored posts are separate standing props.
+                // Give each one the same front/back Y-depth behavior as a tree.
+                ConfigureStandingPropsDepth(authoredRoot);
                 return;
+            }
 
             foreach (Transform child in authoredRoot.transform)
             {
                 string childName = child.name;
                 if (childName.IndexOf("brokenfence_200", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
                     authoredBrokenVisual = child.gameObject;
+                    ConfigureAuthoredBrokenFenceDepth(authoredBrokenVisual);
+                }
                 else
                     authoredRepairedVisuals.Add(child.gameObject);
             }
 
             useAuthoredRepairedVisuals = authoredRepairedVisuals.Count > 0;
+        }
+
+        private static void ConfigureStandingPropsDepth(GameObject root)
+        {
+            if (root == null)
+                return;
+
+            SpriteRenderer[] renderers = root.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                SpriteRenderer renderer = renderers[i];
+                if (renderer == null)
+                    continue;
+
+                renderer.sortingLayerName = MapPropSorting.SortingLayer;
+
+                UnityEngine.Rendering.SortingGroup group =
+                    renderer.GetComponent<UnityEngine.Rendering.SortingGroup>();
+                if (group == null)
+                    group = renderer.gameObject.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                group.sortingLayerName = MapPropSorting.SortingLayer;
+
+                Utility.HeightBasedSorting sorting =
+                    renderer.GetComponent<Utility.HeightBasedSorting>();
+                if (sorting == null)
+                    sorting = renderer.gameObject.AddComponent<Utility.HeightBasedSorting>();
+                sorting.ConfigureGroundAnchor(renderer);
+            }
+        }
+
+        private static void ConfigureAuthoredBrokenFenceDepth(GameObject fence)
+        {
+            if (fence == null)
+                return;
+
+            SpriteRenderer[] renderers = fence.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                SpriteRenderer renderer = renderers[i];
+                if (renderer == null)
+                    continue;
+
+                renderer.sortingLayerName = MapPropSorting.SortingLayer;
+
+                UnityEngine.Rendering.SortingGroup group =
+                    renderer.GetComponent<UnityEngine.Rendering.SortingGroup>();
+                if (group == null)
+                    group = renderer.gameObject.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                group.sortingLayerName = MapPropSorting.SortingLayer;
+
+                Utility.HeightBasedSorting sorting =
+                    renderer.GetComponent<Utility.HeightBasedSorting>();
+                if (sorting == null)
+                    sorting = renderer.gameObject.AddComponent<Utility.HeightBasedSorting>();
+                sorting.ConfigureGroundAnchor(renderer);
+            }
+        }
+
+        private static void SetCollidersEnabled(GameObject root, bool enabled)
+        {
+            if (root == null)
+                return;
+
+            Collider2D[] colliders = root.GetComponentsInChildren<Collider2D>(true);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i] != null)
+                    colliders[i].enabled = enabled;
+            }
         }
 
         /// <summary>
@@ -542,7 +643,21 @@ namespace World
                 SpriteRenderer renderer = CreateAnchoredSprite(piece.transform, "Visual", sprite, 0.5f, alignToCell: true);
                 if (areaId == SpecialCropAreaId.DragonFruitTrellis)
                 {
-                    renderer.sortingOrder = GetDragonFruitSortingOrder(piece.transform.position.y);
+                    // Every unrepaired dragon-fruit post sorts independently by
+                    // its visible ground contact point, exactly like the player.
+                    renderer.sortingLayerName = MapPropSorting.SortingLayer;
+
+                    UnityEngine.Rendering.SortingGroup group =
+                        renderer.GetComponent<UnityEngine.Rendering.SortingGroup>();
+                    if (group == null)
+                        group = renderer.gameObject.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                    group.sortingLayerName = MapPropSorting.SortingLayer;
+
+                    Utility.HeightBasedSorting sorting =
+                        renderer.GetComponent<Utility.HeightBasedSorting>();
+                    if (sorting == null)
+                        sorting = renderer.gameObject.AddComponent<Utility.HeightBasedSorting>();
+                    sorting.ConfigureGroundAnchor(renderer);
                 }
                 BoxCollider2D collider = piece.AddComponent<BoxCollider2D>();
                 collider.size = new Vector2(0.14f, 0.10f);
@@ -808,7 +923,12 @@ namespace World
         {
             bool repaired = IsRepaired;
             if (authoredBrokenVisual != null)
+            {
+                // The repaired visual replaces this object. Disable its physics
+                // explicitly before hiding it so no stale collider blocks the player.
+                SetCollidersEnabled(authoredBrokenVisual, !repaired);
                 authoredBrokenVisual.SetActive(!repaired);
+            }
             if (brokenRoot != null)
                 brokenRoot.SetActive(!repaired);
             for (int i = 0; i < authoredRepairedVisuals.Count; i++)

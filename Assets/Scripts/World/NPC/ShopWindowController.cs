@@ -805,7 +805,7 @@ namespace World.NPC
                 foreach (NpcShopCatalog.Entry entry in activeCatalog.Entries)
                 {
                     if (entry != null && entry.visible && entry.item != null &&
-                        entry.item.ItemName != "Kale Seed" && entry.item.ItemName != "Water Can" &&
+                        entry.item.ItemName != "Water Can" &&
                         entry.IsUnlocked(highestUnlockedCropOrder) &&
                         GetBuyPrice(entry) > 0)
                         visibleEntries.Add(entry);
@@ -1099,7 +1099,6 @@ namespace World.NPC
             if (itemName.Equals("Banana Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Banana", StringComparison.OrdinalIgnoreCase)) return 10;
             if (itemName.Equals("Mango Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Mango", StringComparison.OrdinalIgnoreCase)) return 18;
             if (itemName.Equals("Dragon Fruit Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_DragonFruit", StringComparison.OrdinalIgnoreCase)) return 20;
-            if (itemName.Equals("Kale Seed", StringComparison.OrdinalIgnoreCase) || assetName.Equals("Item_Seed_Kale", StringComparison.OrdinalIgnoreCase)) return 1;
 
             // Fallback for ANY seed
             if (itemName.EndsWith(" Seed", StringComparison.OrdinalIgnoreCase) ||

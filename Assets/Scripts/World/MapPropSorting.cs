@@ -47,19 +47,19 @@ namespace World
     {
         public static bool IsTargetFence(GameObject go)
         {
-            if (go == null) return false;
-            string name = go.name;
-            if (string.Equals(name, "hàng rào_0 (1)", StringComparison.Ordinal) ||
-                string.Equals(name, "hàng rào_3 (1)", StringComparison.Ordinal))
-            {
-                return true;
-            }
+            if (go == null)
+                return false;
 
-            if (go.transform.parent != null &&
-                string.Equals(go.transform.parent.name, "ruộng dưa chuột", StringComparison.OrdinalIgnoreCase) &&
-                name.IndexOf("hàng rào", StringComparison.OrdinalIgnoreCase) >= 0)
+            // A renderer may live on a child named "Visual". Walk the complete
+            // hierarchy so every authored fence (hàng rào_1, _2, _3, _4, _5,
+            // broken fences and future duplicates) depth-sorts with the player.
+            for (Transform current = go.transform; current != null; current = current.parent)
             {
-                return true;
+                string currentName = current.name;
+                if (currentName.IndexOf("hàng rào", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    currentName.IndexOf("rào", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    currentName.IndexOf("fence", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return true;
             }
 
             return false;
@@ -71,13 +71,30 @@ namespace World
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneLoaded += OnSceneLoaded;
 
+            EnsureRuntimeWatcher();
             for (int i = 0; i < SceneManager.sceneCount; i++)
                 ConfigureScene(SceneManager.GetSceneAt(i));
+        }
+
+        private static void EnsureRuntimeWatcher()
+        {
+            if (UnityEngine.Object.FindFirstObjectByType<FenceDepthRuntimeWatcher>() != null)
+                return;
+
+            GameObject watcherObject = new GameObject("Fence Depth Runtime Watcher");
+            UnityEngine.Object.DontDestroyOnLoad(watcherObject);
+            watcherObject.AddComponent<FenceDepthRuntimeWatcher>();
         }
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             ConfigureScene(scene);
+        }
+
+        public static void ConfigureLoadedScenes()
+        {
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+                ConfigureScene(SceneManager.GetSceneAt(i));
         }
 
         public static void ConfigureScene(Scene scene)
@@ -105,6 +122,20 @@ namespace World
                         sorting = renderer.gameObject.AddComponent<HeightBasedSorting>();
                     sorting.ConfigureGroundAnchor(renderer);
                 }
+            }
+        }
+
+        private sealed class FenceDepthRuntimeWatcher : MonoBehaviour
+        {
+            private float nextRefreshTime;
+
+            private void Update()
+            {
+                if (UnityEngine.Time.unscaledTime < nextRefreshTime)
+                    return;
+
+                nextRefreshTime = UnityEngine.Time.unscaledTime + 0.5f;
+                ConfigureLoadedScenes();
             }
         }
     }

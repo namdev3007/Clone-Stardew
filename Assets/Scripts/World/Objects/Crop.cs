@@ -155,6 +155,12 @@ namespace World.Objects
             {
                 order = SpecialCropAreaController.GetDragonFruitSortingOrder(lastDepthSortY);
             }
+            else if (definition != null && definition.PlantingZone == PlantingZone.CucumberTrellis)
+            {
+                // The vine occupies the same ground row as its support. Keep its
+                // Y-depth behavior, but always draw it above that post/trellis.
+                order += 10;
+            }
 
             if (depthSortingGroup != null)
                 depthSortingGroup.sortingOrder = order;
@@ -221,6 +227,15 @@ namespace World.Objects
                 case GrowthPhase.WaitingForFirstWater:
                     if (definition.IsPerennialTree)
                     {
+                        // Repair trees created/saved by the old logic: watering was
+                        // recorded, but the phase remained waiting, leaving a stale
+                        // water icon and making TryWater reject every later attempt.
+                        if (wateredThisCycle || IsGroundWet())
+                        {
+                            StartFirstGrowth(watered: true);
+                            break;
+                        }
+
                         waterWaitTimer = Mathf.Max(0f, waterWaitTimer - UnityEngine.Time.deltaTime);
                         if (waterWaitTimer <= 0f)
                         {
@@ -230,14 +245,9 @@ namespace World.Objects
                     break;
 
                 case GrowthPhase.WaitingForRegrowthWater:
-                    if (definition.IsPerennialTree)
-                    {
-                        waterWaitTimer = Mathf.Max(0f, waterWaitTimer - UnityEngine.Time.deltaTime);
-                        if (waterWaitTimer <= 0f)
-                        {
-                            StartRegrowth(watered: false);
-                        }
-                    }
+                    // Regrowing crops must remain here until the player explicitly
+                    // waters them for the new harvest cycle. Old wet soil and elapsed
+                    // time from the previous cycle cannot start regrowth automatically.
                     break;
 
                 case GrowthPhase.Growing:
@@ -295,7 +305,7 @@ namespace World.Objects
             if (IsGroundWet() || FarmingCheats.GodMode)
             {
                 wateredThisCycle = true;
-                if (fertilized || FarmingCheats.GodMode)
+                if (fertilized || definition != null && definition.IsPerennialTree || FarmingCheats.GodMode)
                     StartFirstGrowth(watered: true);
                 else
                     WaitForFirstGrowthRequirements();
@@ -357,9 +367,9 @@ namespace World.Objects
             wateredThisCycle = true;
             if (phase == GrowthPhase.WaitingForFirstWater)
             {
-                // The first cycle needs both fertilizer and water. Remember the
-                // water if it is applied first, then fertilizer can start growth.
-                if (fertilized)
+                // Trees do not use fertilizer, so watering must immediately leave
+                // the waiting state; otherwise the water icon becomes permanently stale.
+                if (fertilized || definition.IsPerennialTree)
                     StartFirstGrowth(watered: true);
                 else
                     RefreshVisuals();
@@ -389,7 +399,10 @@ namespace World.Objects
             if (definition == null)
                 return;
 
-            if (!fertilized && !FarmingCheats.GodMode)
+            // Ordinary crops still require fertilizer before their first growth.
+            // Perennial trees (banana/mango) are planted directly on grass and
+            // must begin growing as soon as their first watering succeeds.
+            if (!fertilized && !definition.IsPerennialTree && !FarmingCheats.GodMode)
             {
                 WaitForFirstGrowthRequirements();
                 return;
@@ -419,19 +432,15 @@ namespace World.Objects
 
         private void BeginRegrowthCycle()
         {
-            if (IsGroundWet() || FarmingCheats.GodMode)
-            {
-                StartRegrowth(watered: true);
-            }
-            else
-            {
-                phase = GrowthPhase.WaitingForRegrowthWater;
-                wateredThisCycle = false;
-                waterWaitTimer = definition != null && definition.IsPerennialTree ? WaterWaitTimeoutSeconds : 0f;
-                activeDuration = definition.RegrowthSeconds;
-                remainingSeconds = activeDuration;
-                RefreshVisuals();
-            }
+            // Every repeat-harvest crop starts a fresh dry cycle after harvest.
+            // Requiring TryWater here prevents stale wet ground from immediately
+            // regrowing tomato, cucumber, dragon fruit, mango, and similar crops.
+            phase = GrowthPhase.WaitingForRegrowthWater;
+            wateredThisCycle = false;
+            waterWaitTimer = 0f;
+            activeDuration = definition != null ? definition.RegrowthSeconds : 0f;
+            remainingSeconds = activeDuration;
+            RefreshVisuals();
         }
 
         private void StartRegrowth(bool watered)
@@ -724,10 +733,10 @@ namespace World.Objects
                 return true;
             }
 
-            phase = GrowthPhase.RestingAfterHarvest;
-            remainingSeconds = RegrowthRestSeconds;
+            // Repeat-harvest crops immediately return to their configured regrowth
+            // sprite and wait for a fresh watering before the timer can run again.
+            BeginRegrowthCycle();
             health?.SetInvulnerable(true);
-            RefreshVisuals();
             StartCoroutine(ReviveAfterDamageCompletes());
             return true;
         }
@@ -832,24 +841,8 @@ namespace World.Objects
                         break;
 
                     case GrowthPhase.WaitingForRegrowthWater:
-                        if (definition.IsPerennialTree)
-                        {
-                            if (timeLeftToSkip < waterWaitTimer)
-                            {
-                                waterWaitTimer -= timeLeftToSkip;
-                                timeLeftToSkip = 0f;
-                            }
-                            else
-                            {
-                                timeLeftToSkip -= waterWaitTimer;
-                                waterWaitTimer = 0f;
-                                StartRegrowth(watered: false);
-                            }
-                        }
-                        else
-                        {
-                            StartRegrowth(watered: true);
-                        }
+                        // Skipping time must not bypass the required watering action.
+                        timeLeftToSkip = 0f;
                         break;
 
                     case GrowthPhase.Growing:
